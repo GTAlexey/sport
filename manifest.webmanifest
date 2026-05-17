@@ -1,14 +1,14 @@
 {
   "name": "🏆 Спорт",
   "short_name": "🏆 Спорт",
-  "description": "Автономные спортивные недели, кнопки-подходы и сводка прогресса.",
+  "description": "Автономные спортивные недели, кнопки-подходы и статистика прогресса.",
   "lang": "ru",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#090908",
+  "background_color": "#080607",
   "theme_color": "#0f0f0e",
   "categories": ["health", "fitness", "productivity"],
   "icons": [

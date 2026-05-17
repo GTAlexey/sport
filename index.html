@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
-  <meta name="description" content="Спортивные недели, кнопки-подходы и сводка прогресса.">
+  <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
@@ -18,23 +18,23 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #090908;
-      --bg-2: #11100e;
-      --card: #181715;
-      --card-strong: #201f1c;
-      --field: #24231f;
-      --ink: #f7f1e8;
-      --muted: #aba49a;
-      --line: #35322c;
-      --soft: #24221e;
-      --accent: #f3c969;
-      --accent-2: #ff9f43;
-      --accent-ink: #15110a;
-      --done: #4dd982;
-      --danger: #ff6b62;
-      --shadow: rgba(0, 0, 0, 0.42);
-      --glow: rgba(243, 201, 105, 0.18);
-      --overlay: rgba(0, 0, 0, 0.68);
+      --bg: #080607;
+      --bg-2: #13090b;
+      --card: #181113;
+      --card-strong: #241316;
+      --field: #26191c;
+      --ink: #fff4ee;
+      --muted: #b9a5a1;
+      --line: #3d272b;
+      --soft: #241518;
+      --accent: #ff2d35;
+      --accent-2: #ff6a1f;
+      --accent-ink: #fff7f3;
+      --done: #38d978;
+      --danger: #ff574f;
+      --shadow: rgba(0, 0, 0, 0.46);
+      --glow: rgba(255, 45, 53, 0.24);
+      --overlay: rgba(0, 0, 0, 0.72);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
@@ -53,8 +53,8 @@
       margin: 0;
       min-height: 100%;
       background:
-        radial-gradient(circle at 18% -10%, rgba(243, 201, 105, 0.14), transparent 32rem),
-        radial-gradient(circle at 100% 6%, rgba(255, 159, 67, 0.09), transparent 24rem),
+        radial-gradient(circle at 18% -10%, rgba(255, 45, 53, 0.2), transparent 32rem),
+        radial-gradient(circle at 100% 6%, rgba(255, 106, 31, 0.12), transparent 24rem),
         linear-gradient(180deg, var(--bg-2), var(--bg));
       color: var(--ink);
       -webkit-text-size-adjust: 100%;
@@ -182,9 +182,30 @@
     .top-actions { justify-content: flex-end; }
 
     h1, h2, h3, p { margin: 0; }
-    h1 { font-size: 1.45rem; letter-spacing: -0.04em; }
+    h1 {
+      color: var(--muted);
+      font-size: 1.02rem;
+      letter-spacing: -0.02em;
+      font-weight: 860;
+    }
     h2 { font-size: 1.05rem; letter-spacing: -0.02em; }
     h3 { font-size: 1rem; letter-spacing: -0.02em; }
+
+    .top-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .top-subtitle {
+      color: var(--accent-ink);
+      font-size: clamp(1.85rem, 9vw, 3.05rem);
+      line-height: 0.92;
+      letter-spacing: -0.075em;
+      font-weight: 940;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 28px var(--glow);
+    }
 
     .muted { color: var(--muted); }
     .tiny { font-size: 0.82rem; line-height: 1.35; }
@@ -250,29 +271,54 @@
 
     .day-toggle {
       width: 100%;
-      min-height: 60px;
+      min-height: 64px;
       padding: 14px;
       border: 0;
       border-radius: 0;
-      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background:
+        radial-gradient(circle at 0 0, color-mix(in srgb, var(--accent) 12%, transparent), transparent 12rem),
+        transparent;
       text-align: left;
     }
 
     .day-toggle:active { transform: none; }
-    .day-toggle h2 { flex: 1 1 auto; }
+
+    .day-title {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .day-toggle h2 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .day-meta {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 820;
+    }
+
     .day-toggle .chevron {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: var(--soft);
-      color: var(--muted);
-      font-size: 0.92rem;
-      transition: transform 0.16s ease;
+      background: color-mix(in srgb, var(--accent) 12%, var(--soft));
+      color: var(--accent-ink);
+      font-size: 0.95rem;
+      transition: transform 0.16s ease, background 0.16s ease;
     }
-    .day.open .chevron { transform: rotate(180deg); }
+    .day.open .chevron { transform: rotate(180deg); background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
 
     .day-body {
       display: grid;
@@ -346,7 +392,7 @@
 
     .set-item {
       display: inline-grid;
-      grid-template-columns: auto 64px;
+      grid-template-columns: auto;
       gap: 5px;
       align-items: center;
       padding: 4px;
@@ -357,7 +403,7 @@
     }
 
     .set-item.timed {
-      grid-template-columns: auto auto 64px auto;
+      grid-template-columns: auto auto auto;
     }
 
     .set {
@@ -381,16 +427,6 @@
       color: #fff;
       border-color: var(--done);
       box-shadow: 0 5px 16px color-mix(in srgb, var(--done) 38%, transparent);
-    }
-
-    .set-input {
-      width: 64px;
-      min-height: 40px;
-      border-radius: 999px;
-      text-align: center;
-      padding: 0 6px;
-      font-weight: 850;
-      font-variant-numeric: tabular-nums;
     }
 
     .empty {
@@ -439,7 +475,7 @@
 
     .bottom-inner {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
 
@@ -448,91 +484,268 @@
       font-size: 1rem;
     }
 
-    .new-week-button {
-      width: min(100%, 760px);
-      margin: 0 auto;
-    }
-
     .summary {
       display: grid;
-      gap: 12px;
+      gap: 14px;
+    }
+
+    .summary-hero,
+    .metric-card,
+    .chart-card,
+    .empty-hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, var(--accent));
+      background:
+        radial-gradient(circle at 12% 0, color-mix(in srgb, var(--accent) 20%, transparent), transparent 13rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--card-strong) 88%, white), var(--card));
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    }
+
+    .summary-hero {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      min-height: 186px;
+      padding: 16px;
+      border-radius: 28px;
+    }
+
+    .activity-ring {
+      --value: 0;
+      width: 138px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      background:
+        conic-gradient(var(--done) calc(var(--value) * 1%), color-mix(in srgb, var(--line) 68%, black) 0),
+        radial-gradient(circle, color-mix(in srgb, var(--accent) 24%, transparent), transparent 64%);
+      box-shadow: 0 0 34px color-mix(in srgb, var(--done) 20%, transparent);
+    }
+
+    .ring-core {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 2px;
+      background: linear-gradient(180deg, var(--card), var(--bg));
+      border: 1px solid color-mix(in srgb, var(--line) 70%, white);
+    }
+
+    .ring-core strong {
+      font-size: 2rem;
+      letter-spacing: -0.06em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ring-core span,
+    .chart-label,
+    .bar-note {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .summary-hero-copy {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .impact-number {
+      display: block;
+      color: var(--accent-ink);
+      font-size: clamp(2.25rem, 13vw, 4.6rem);
+      line-height: 0.92;
+      letter-spacing: -0.08em;
+      font-weight: 920;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 28px var(--glow);
+    }
+
+    .hero-caption {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
     }
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
 
-    .mini-card {
-      display: grid;
-      gap: 3px;
-      padding: 12px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
-      border: 1px solid color-mix(in srgb, var(--line) 92%, white);
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
-    }
-
-    .mini-card strong {
-      font-size: 1.45rem;
-      letter-spacing: -0.04em;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .stat-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .stat-card {
+    .metric-card {
       display: grid;
       gap: 10px;
-      padding: 12px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
-      border: 1px solid color-mix(in srgb, var(--line) 92%, white);
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+      min-height: 118px;
+      padding: 13px;
+      border-radius: 22px;
     }
 
-    .stat-head strong {
-      font-size: 1.28rem;
-      letter-spacing: -0.035em;
+    .metric-card strong {
+      font-size: 1.85rem;
+      letter-spacing: -0.06em;
+      line-height: 0.98;
       font-variant-numeric: tabular-nums;
-      white-space: nowrap;
     }
 
-    .stat-meta { justify-content: flex-start; color: var(--muted); }
+    .metric-meter,
+    .rank-meter,
+    .unit-meter {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--line) 70%, black);
+    }
 
-    .week-chips {
+    .metric-meter i,
+    .rank-meter i,
+    .unit-meter i {
+      display: block;
+      width: var(--value, 0%);
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--done));
+      box-shadow: 0 0 18px var(--glow);
+    }
+
+    .chart-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .chart-card,
+    .empty-hero {
+      display: grid;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 24px;
+    }
+
+    .chart-card.wide { min-height: 220px; }
+
+    .chart-title {
       display: flex;
-      gap: 6px;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .month-bars {
+      min-height: 156px;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      padding: 8px 2px 0;
       overflow-x: auto;
-      padding-bottom: 2px;
       -webkit-overflow-scrolling: touch;
     }
 
-    .week-chip {
-      flex: 0 0 auto;
-      min-width: 74px;
+    .month-bar {
+      flex: 1 0 42px;
+      min-width: 42px;
+      height: 148px;
       display: grid;
-      gap: 2px;
-      padding: 7px 9px;
-      border-radius: 13px;
-      background: color-mix(in srgb, var(--done) 14%, var(--card));
-      color: var(--done);
-      font-size: 0.76rem;
-      font-weight: 800;
+      grid-template-rows: 1fr auto;
+      gap: 7px;
+      align-items: end;
+    }
+
+    .month-bar i {
+      width: 100%;
+      min-height: 8px;
+      height: var(--value, 0%);
+      border-radius: 999px 999px 7px 7px;
+      background: linear-gradient(180deg, var(--accent-2), var(--accent));
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    .month-bar b,
+    .weekday-bar b {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 850;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .rank-list,
+    .unit-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .rank-row,
+    .unit-row {
+      display: grid;
+      gap: 7px;
+    }
+
+    .rank-top,
+    .unit-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .rank-top strong,
+    .unit-top strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rank-top span,
+    .unit-top span {
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 0.86rem;
+      white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
 
-    .week-chip.empty {
-      background: var(--soft);
-      color: var(--muted);
-      opacity: 0.75;
+    .weekday-bars {
+      min-height: 136px;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 7px;
+      align-items: end;
     }
 
-    .week-chip b { color: inherit; font-size: 0.72rem; }
+    .weekday-bar {
+      height: 128px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 7px;
+      align-items: end;
+    }
+
+    .weekday-bar i {
+      width: 100%;
+      min-height: 8px;
+      height: var(--value, 0%);
+      border-radius: 999px 999px 7px 7px;
+      background: linear-gradient(180deg, var(--done), color-mix(in srgb, var(--done) 48%, var(--accent)));
+      opacity: var(--alpha, 1);
+    }
+
+    .empty-hero {
+      min-height: 220px;
+      place-items: center;
+      text-align: center;
+    }
 
     .sheet {
       display: none;
@@ -600,11 +813,12 @@
       .exercise-head { display: grid; grid-template-columns: 1fr auto; }
       .exercise-name { grid-column: 1 / -1; width: 100%; }
       .set-row { display: grid; grid-template-columns: 1fr; }
-      .set-item,
-      .set-item.timed { display: grid; grid-template-columns: 1fr 64px; width: 100%; border-radius: 20px; }
-      .set-item.timed { grid-template-columns: auto 1fr 64px auto; }
+      .set-item { display: grid; grid-template-columns: 1fr; width: 100%; border-radius: 20px; }
+      .set-item.timed { grid-template-columns: auto 1fr auto; }
       .set { width: 100%; }
-      .summary-grid { grid-template-columns: 1fr; }
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .summary-hero { grid-template-columns: 116px minmax(0, 1fr); gap: 12px; }
+      .activity-ring { width: 116px; }
     }
 
     @media (min-width: 720px) {
@@ -612,7 +826,9 @@
       .day-body { padding: 0 16px 16px; }
       .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .day.open { grid-column: 1 / -1; }
-      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-card.wide { grid-column: 1 / -1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -638,25 +854,19 @@
       const OLD_KEYS = ['sport-notes.state.v4', 'sport-notes.state.v3', 'sport-notes.state.v2'];
       const OLD_KEY = 'sport-week-planner.state.v1';
       const SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-      const SAMPLE = [
-        'Подтягивания прямым +5 кг — 4-4-4-4-4\nБрусья +5 кг — 8-8-8-8\nШея статика — 30-30-30-30 сек\nПланка — 90 сек',
-        '',
-        'Отжимания в стойке — 4-4-4-4-4\nВис на турнике — 70+ сек\nСведения лопаток — 20-20\nПриседания с отягощением — 20-20-20\nГолени — 30-30-30',
-        '',
-        'Подтягивания обратным — 6-6-6-6-6\nОтжимания на кулаках — 12-12-12-12\nПриседания — 35-35\nПланка — 90 сек',
-        '',
-        ''
-      ];
-
       let state;
       let view = 'week';
       let weekOffset = 0;
-      let monthOffset = 0;
       let openDateKey = todayKey();
       let saveTimer = null;
       let toastTimer = null;
       let timerStartedAt = null;
       let timerInterval = null;
+      let longPressTimer = null;
+      let longPressTarget = null;
+      let longPressStartX = 0;
+      let longPressStartY = 0;
+      let ignoreNextClick = false;
 
       function uid() {
         return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -711,6 +921,16 @@
         return new Intl.DateTimeFormat('ru-RU', long ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'short' }).format(parseDateKey(dateKey));
       }
 
+      function formatCompactDate(dateKey) {
+        const date = parseDateKey(dateKey);
+        return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      function formatWeekRange(startKey) {
+        const dates = weekDates(startKey);
+        return `${formatCompactDate(dates[0])}-${formatCompactDate(dates[6])}`;
+      }
+
       function formatMonth(date) {
         return new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(date);
       }
@@ -722,6 +942,39 @@
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
+      }
+
+      function clamp(value, min, max) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return min;
+        return Math.min(max, Math.max(min, number));
+      }
+
+      function plural(value, forms) {
+        const number = Math.abs(Math.trunc(Number(value) || 0));
+        const mod10 = number % 10;
+        const mod100 = number % 100;
+        if (mod10 === 1 && mod100 !== 11) return forms[0];
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms[1];
+        return forms[2];
+      }
+
+      function formatCount(value, forms) {
+        return `${formatNumber(value)} ${plural(value, forms)}`;
+      }
+
+      function formatDurationShort(value) {
+        const total = Math.max(0, Math.round(Number(value) || 0));
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        const seconds = total % 60;
+        if (hours) {
+          return `${formatCount(hours, ['час', 'часа', 'часов'])}${minutes ? ` ${formatCount(minutes, ['минута', 'минуты', 'минут'])}` : ''}`;
+        }
+        if (minutes) {
+          return `${formatCount(minutes, ['минута', 'минуты', 'минут'])}${seconds ? ` ${formatCount(seconds, ['секунда', 'секунды', 'секунд'])}` : ''}`;
+        }
+        return formatCount(seconds, ['секунда', 'секунды', 'секунд']);
       }
 
       function emptyDay() {
@@ -738,7 +991,7 @@
           version: 5,
           id: uid(),
           theme: 'dark',
-          weeks: { [startKey]: makeWeek(SAMPLE) },
+          weeks: { [startKey]: makeWeek(emptyWeekDays()) },
           sessions: {},
           updatedAt: new Date().toISOString()
         };
@@ -770,7 +1023,7 @@
         const weeks = cleanWeeks(next.weeks);
 
         if (!Object.keys(weeks).length) {
-          weeks[currentWeek] = makeWeek(next.days || SAMPLE);
+          weeks[currentWeek] = makeWeek(next.days || emptyWeekDays());
         }
 
         return {
@@ -788,7 +1041,7 @@
         if (!rawWeeks || typeof rawWeeks !== 'object' || Array.isArray(rawWeeks)) return weeks;
         Object.entries(rawWeeks).forEach(([startKey, week]) => {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(startKey)) return;
-          weeks[startKey] = makeWeek(week?.days || SAMPLE);
+          weeks[startKey] = makeWeek(week?.days || emptyWeekDays());
           weeks[startKey].createdAt = week?.createdAt || weeks[startKey].createdAt;
           weeks[startKey].updatedAt = week?.updatedAt || weeks[startKey].updatedAt;
         });
@@ -1062,14 +1315,9 @@
         return `
           <header class="top">
             <div class="top-inner">
-              <div class="title-row">
-                <div>
-                  <h1>${escapeHtml(title)}</h1>
-                  <p class="muted tiny">${escapeHtml(subtitle)}</p>
-                </div>
-                <div class="top-actions">
-                  <button data-action="data" type="button">JSON</button>
-                </div>
+              <div class="top-title">
+                <h1>${escapeHtml(title)}</h1>
+                <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
               </div>
               <div class="timer-bar" aria-live="polite">
                 <span>Секундомер</span>
@@ -1081,13 +1329,18 @@
       }
 
       function renderBottomNav() {
+        const tabs = `
+          <div class="bottom-inner">
+            <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button">Неделя</button>
+            <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button">Статистика</button>
+            <button data-action="data" type="button">Настройки</button>
+          </div>
+        `;
+
         if (view === 'summary') {
           return `
             <nav class="bottom-tabs" aria-label="Разделы">
-              <div class="bottom-inner">
-                <button data-action="view-week" type="button">Неделя</button>
-                <button class="dark" data-action="view-summary" type="button">Сводка</button>
-              </div>
+              ${tabs}
             </nav>
           `;
         }
@@ -1096,14 +1349,10 @@
           <nav class="bottom-tabs" aria-label="Неделя и разделы">
             <div class="bottom-week">
               <button data-action="prev" type="button">←</button>
-              <span class="pill">${weekOffset === 0 ? 'текущая неделя' : weekOffset > 0 ? `+${weekOffset} нед.` : `${weekOffset} нед.`}</span>
+              <span class="pill">${escapeHtml(formatWeekRange(weekStartKeyForOffset(weekOffset)))}</span>
               <button data-action="next" type="button">→</button>
             </div>
-            <button class="new-week-button" data-action="new-empty-week" type="button">Новая пустая неделя</button>
-            <div class="bottom-inner">
-              <button class="dark" data-action="view-week" type="button">Неделя</button>
-              <button data-action="view-summary" type="button">Сводка</button>
-            </div>
+            ${tabs}
           </nav>
         `;
       }
@@ -1139,7 +1388,10 @@
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
             <button class="day-toggle" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
-              <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
+              <span class="day-title">
+                <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
+                <span class="day-meta">${progress.checked}/${progress.total || 0} подходов${complete ? ' · готово' : ''}</span>
+              </span>
               <span class="chevron" aria-hidden="true">⌄</span>
             </button>
             ${isOpen ? `
@@ -1174,8 +1426,8 @@
             <div class="exercise-head">
               <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
               <select class="unit-select" data-field="exercise-unit" data-date="${dateKey}" data-ex="${exIndex}" aria-label="Единица">
-                <option value="reps" ${exercise.unit === 'reps' ? 'selected' : ''}>повт</option>
-                <option value="seconds" ${exercise.unit === 'seconds' ? 'selected' : ''}>сек</option>
+                <option value="reps" ${exercise.unit === 'reps' ? 'selected' : ''}>повторения</option>
+                <option value="seconds" ${exercise.unit === 'seconds' ? 'selected' : ''}>секунды</option>
               </select>
               <button class="small danger" data-action="remove-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button">Удалить</button>
             </div>
@@ -1183,9 +1435,10 @@
               ${exercise.sets.map((label, setIndex) => renderSet(dateKey, exercise, label, exIndex, setIndex)).join('')}
             </div>
             <div class="toolbar">
-              ${oneSet ? '<span class="muted tiny">1 подход</span>' : `
+              ${oneSet ? '<span class="muted tiny">1 подход · удержи число для правки</span>' : `
                 <button class="small" data-action="add-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">+ подход</button>
                 <button class="small danger" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">− подход</button>
+                <span class="muted tiny">Удержи подход для правки</span>
               `}
             </div>
           </div>
@@ -1195,133 +1448,340 @@
       function renderSet(dateKey, exercise, label, exIndex, setIndex) {
         const done = Boolean(readSession(dateKey).done[`${exIndex}:${setIndex}`]);
         const display = formatSetLabel(exercise, label);
-        const input = `<input class="set-input" data-field="set-label" data-unit="${exercise.unit}" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" value="${escapeHtml(label)}" placeholder="${exercise.unit === 'seconds' ? 'сек' : 'повт'}" inputmode="numeric" aria-label="${exercise.unit === 'seconds' ? 'Секунды' : 'Повторы'}">`;
+        const aria = `Подход ${setIndex + 1}: ${display}. Короткий тап — отметить, удержание — изменить число.`;
         if (exercise.unit === 'seconds') {
           return `
             <span class="set-item timed">
               <button class="small ghost" data-action="adjust-set" data-delta="-10" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">−10</button>
-              <button class="set ${done ? 'done' : ''}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
-              ${input}
+              <button class="set ${done ? 'done' : ''}" aria-label="${escapeHtml(aria)}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
               <button class="small ghost" data-action="adjust-set" data-delta="10" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">+10</button>
             </span>
           `;
         }
         return `
           <span class="set-item">
-            <button class="set ${done ? 'done' : ''}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
-            ${input}
+            <button class="set ${done ? 'done' : ''}" aria-label="${escapeHtml(aria)}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
           </span>
         `;
       }
 
       function formatSetLabel(exercise, label) {
         const text = String(label || defaultSetValue(exercise.unit, exercise.name));
-        return exercise.unit === 'seconds' ? `${text}с` : text;
-      }
-
-      function monthDate(offset = 0) {
-        const date = new Date();
-        date.setDate(1);
-        date.setHours(0, 0, 0, 0);
-        date.setMonth(date.getMonth() + offset);
-        return date;
-      }
-
-      function sameMonth(dateKey, month) {
-        const date = parseDateKey(dateKey);
-        return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
+        return exercise.unit === 'seconds' ? `${text} секунд` : text;
       }
 
       function renderSummary() {
-        const month = monthDate(monthOffset);
-        const stats = buildMonthStats(month);
+        const stats = buildSummaryStats();
         document.getElementById('app').innerHTML = `
-          ${renderTop('Сводка', formatMonth(month))}
-          <section class="week-row">
-            <button data-action="prev-month" type="button">←</button>
-            <span class="pill">${escapeHtml(formatMonth(month))}</span>
-            <button data-action="next-month" type="button">→</button>
-          </section>
+          ${renderTop('Статистика', 'весь период')}
           <section class="summary">
-            <div class="summary-grid">
-              <div class="mini-card"><span class="muted tiny">Тренировки</span><strong>${stats.workouts}</strong></div>
-              <div class="mini-card"><span class="muted tiny">Подходы</span><strong>${stats.sets}</strong></div>
-              <div class="mini-card"><span class="muted tiny">Повторы</span><strong>${formatNumber(stats.reps)}</strong></div>
-            </div>
-            ${stats.rows.length ? `<div class="stat-list">${stats.rows.map(row => renderStatRow(row, stats.weekKeys)).join('')}</div>` : '<article class="card day"><div class="day-body" style="border-top:0;padding-top:14px"><h2>Пока пусто</h2><p class="muted">Нажми цифры подходов в неделе — здесь появится объём.</p></div></article>'}
+            ${stats.sets ? renderStatsDashboard(stats) : renderEmptyStats()}
           </section>
           ${renderBottomNav()}
         `;
       }
 
-      function buildMonthStats(month) {
+      function renderStatsDashboard(stats) {
+        const topExercise = stats.rows[0]?.name || 'пока нет лидера';
+        return `
+          <article class="summary-hero">
+            <div class="activity-ring" style="--value:${clamp(stats.completionPercent, 0, 100)}">
+              <div class="ring-core">
+                <strong>${stats.completionPercent}%</strong>
+                <span>выполнено</span>
+              </div>
+            </div>
+            <div class="summary-hero-copy">
+              <span class="chart-label">${escapeHtml(stats.periodLabel)}</span>
+              <strong class="impact-number">${formatNumber(stats.sets)}</strong>
+              <h2>${formatCount(stats.sets, ['выполненный подход', 'выполненных подхода', 'выполненных подходов'])}</h2>
+              <div class="hero-caption">
+                <span class="pill">${formatCount(stats.workouts, ['тренировка', 'тренировки', 'тренировок'])}</span>
+                <span class="pill">лидер: ${escapeHtml(topExercise)}</span>
+              </div>
+            </div>
+          </article>
+
+          <div class="summary-grid">
+            ${renderMetricCard('Тренировки', formatNumber(stats.workouts), `${formatCount(stats.activeDays, ['активный день', 'активных дня', 'активных дней'])} в плане`, stats.activeDays ? stats.workouts / stats.activeDays * 100 : 100)}
+            ${renderMetricCard('Подходы', formatNumber(stats.sets), `${formatNumber(stats.plannedSets)} в плане`, stats.completionPercent)}
+            ${renderMetricCard('Повторения', formatNumber(stats.reps), 'только выполненный объём', stats.maxUnitValue ? stats.reps / stats.maxUnitValue * 100 : 0)}
+            ${renderMetricCard('Секунды', formatDurationShort(stats.seconds), 'планка и статические упражнения', stats.maxUnitValue ? stats.seconds / stats.maxUnitValue * 100 : 0)}
+          </div>
+
+          <div class="chart-grid">
+            ${renderMonthBars(stats.months)}
+            ${renderRankList(stats.rows)}
+            ${renderUnitList(stats.unitRows)}
+            ${renderWeekdayBars(stats.weekdays)}
+          </div>
+        `;
+      }
+
+      function renderEmptyStats() {
+        return `
+          <article class="empty-hero">
+            <div>
+              <h2>Статистика пока пустая</h2>
+              <p class="muted">Отмечай выполненные подходы в неделе — здесь появятся графики, объём и лидеры.</p>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderMetricCard(label, value, note, percent) {
+        return `
+          <article class="metric-card">
+            <span class="chart-label">${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+            <p class="muted tiny">${escapeHtml(note)}</p>
+            <div class="metric-meter"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
+          </article>
+        `;
+      }
+
+      function renderMonthBars(months) {
+        if (!months.length) return '';
+        return `
+          <article class="chart-card wide">
+            <div class="chart-title">
+              <div>
+                <span class="chart-label">Динамика</span>
+                <h2>Подходы по месяцам</h2>
+              </div>
+              <span class="bar-note">скролл вправо</span>
+            </div>
+            <div class="month-bars">
+              ${months.map(month => `
+                <div class="month-bar" title="${escapeHtml(month.title)}: ${formatCount(month.sets, ['подход', 'подхода', 'подходов'])}">
+                  <i style="--value:${clamp(month.percent, 0, 100)}%"></i>
+                  <b>${escapeHtml(month.shortLabel)}</b>
+                </div>
+              `).join('')}
+            </div>
+          </article>
+        `;
+      }
+
+      function renderRankList(rows) {
+        const topRows = rows.slice(0, 7);
+        if (!topRows.length) return '';
+        const max = Math.max(...topRows.map(primaryVolume), 1);
+        return `
+          <article class="chart-card">
+            <div class="chart-title">
+              <div>
+                <span class="chart-label">Рейтинг</span>
+                <h2>Топ упражнений</h2>
+              </div>
+            </div>
+            <div class="rank-list">
+              ${topRows.map(row => {
+                const percent = primaryVolume(row) / max * 100;
+                return `
+                  <div class="rank-row">
+                    <div class="rank-top">
+                      <strong>${escapeHtml(row.name)}</strong>
+                      <span>${escapeHtml(formatUnits(row.units, row.sets))}</span>
+                    </div>
+                    <div class="rank-meter"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
+                    <p class="muted tiny">${formatCount(row.sets, ['подход', 'подхода', 'подходов'])}</p>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </article>
+        `;
+      }
+
+      function renderUnitList(unitRows) {
+        if (!unitRows.length) return '';
+        const max = Math.max(...unitRows.map(row => row.value), 1);
+        return `
+          <article class="chart-card">
+            <div class="chart-title">
+              <div>
+                <span class="chart-label">Объём</span>
+                <h2>По типам нагрузки</h2>
+              </div>
+            </div>
+            <div class="unit-list">
+              ${unitRows.map(row => `
+                <div class="unit-row">
+                  <div class="unit-top">
+                    <strong>${escapeHtml(row.label)}</strong>
+                    <span>${escapeHtml(row.text)}</span>
+                  </div>
+                  <div class="unit-meter"><i style="--value:${clamp(row.value / max * 100, 0, 100)}%"></i></div>
+                </div>
+              `).join('')}
+            </div>
+          </article>
+        `;
+      }
+
+      function renderWeekdayBars(weekdays) {
+        const max = Math.max(...weekdays.map(day => day.sets), 1);
+        return `
+          <article class="chart-card">
+            <div class="chart-title">
+              <div>
+                <span class="chart-label">Ритм</span>
+                <h2>Нагрузка по дням</h2>
+              </div>
+            </div>
+            <div class="weekday-bars">
+              ${weekdays.map(day => `
+                <div class="weekday-bar" title="${escapeHtml(day.label)}: ${formatCount(day.sets, ['подход', 'подхода', 'подходов'])}">
+                  <i style="--value:${clamp(day.sets / max * 100, 0, 100)}%; --alpha:${day.sets ? 1 : 0.28}"></i>
+                  <b>${escapeHtml(day.short)}</b>
+                </div>
+              `).join('')}
+            </div>
+          </article>
+        `;
+      }
+
+      function buildSummaryStats() {
         const rows = new Map();
         const workouts = new Set();
-        const weekKeys = weeksInMonth(month);
+        const months = new Map();
+        const weekdays = SHORT.map(short => ({ short, label: short, sets: 0 }));
         let sets = 0;
         let reps = 0;
+        let seconds = 0;
+        let plannedSets = 0;
+        let activeDays = 0;
+        let firstDate = null;
+        let lastDate = null;
 
-        Object.entries(state.sessions).forEach(([dateKey, session]) => {
-          if (!sameMonth(dateKey, month)) return;
-          const weekKey = weekStartKeyForDate(dateKey);
-          const week = getExistingWeek(weekKey);
-          if (!week) return;
-          const day = week.days[slotForDate(dateKey)] || emptyDay();
+        Object.entries(state.weeks || {}).forEach(([, week]) => {
+          (week?.days || []).forEach(day => {
+            if (!day?.active) return;
+            activeDays += 1;
+            (day.exercises || []).forEach(exercise => { plannedSets += exercise.sets?.length || 0; });
+          });
+        });
+
+        Object.entries(state.sessions || {}).forEach(([dateKey, session]) => {
+          const week = getExistingWeek(weekStartKeyForDate(dateKey));
+          const day = week?.days?.[slotForDate(dateKey)] || emptyDay();
           const exercises = day.exercises || [];
           let dayDone = false;
 
-          Object.entries(session.done || {}).forEach(([key, value]) => {
+          Object.entries(session?.done || {}).forEach(([key, value]) => {
             if (!value) return;
             const [exIndex, setIndex] = key.split(':').map(Number);
             const fallbackExercise = exercises[exIndex];
-            const fallbackLabel = fallbackExercise?.sets?.[setIndex] || '';
             const payload = typeof value === 'object' ? value : null;
             const exerciseName = payload?.exercise || fallbackExercise?.name || 'Упражнение';
-            const label = payload?.label || fallbackLabel || '10';
-            const metric = normalizeMetric(payload?.metric || setMetric(label, fallbackExercise?.unit));
+            const fallbackUnit = fallbackExercise?.unit || (payload?.metric?.unit === 'сек' ? 'seconds' : 'reps');
+            const fallbackLabel = fallbackExercise?.sets?.[setIndex] || defaultSetValue(fallbackUnit, exerciseName);
+            const label = payload?.label || fallbackLabel;
+            const metric = normalizeMetric(payload?.metric || setMetric(label, fallbackUnit));
             const groupName = payload?.group || groupExerciseName(exerciseName);
             const rowKey = groupName.toLowerCase();
-            const row = rows.get(rowKey) || makeStatRow(groupName);
+            const row = rows.get(rowKey) || makeSummaryRow(groupName);
+            const monthKey = dateKey.slice(0, 7);
+            const month = months.get(monthKey) || makeMonthRow(monthKey);
+            const weekday = weekdays[slotForDate(dateKey)];
 
             row.sets += 1;
             row.variants.add(exerciseName);
             addMetric(row.units, metric);
-            if (!row.weeks[weekKey]) row.weeks[weekKey] = { sets: 0, units: {} };
-            row.weeks[weekKey].sets += 1;
-            addMetric(row.weeks[weekKey].units, metric);
             rows.set(rowKey, row);
 
+            month.sets += 1;
+            addMetric(month.units, metric);
+            months.set(monthKey, month);
+
+            weekday.sets += 1;
             sets += 1;
             if (metric.unit === 'повт') reps += metric.value;
+            if (metric.unit === 'сек') seconds += metric.value;
             dayDone = true;
           });
 
-          if (dayDone) workouts.add(dateKey);
+          if (dayDone) {
+            workouts.add(dateKey);
+            if (!firstDate || dateKey < firstDate) firstDate = dateKey;
+            if (!lastDate || dateKey > lastDate) lastDate = dateKey;
+          }
         });
 
+        const sortedRows = Array.from(rows.values()).sort((a, b) => primaryVolume(b) - primaryVolume(a) || b.sets - a.sets || a.name.localeCompare(b.name, 'ru'));
+        const monthRows = buildMonthSeries(months, firstDate, lastDate);
+        const maxMonthSets = Math.max(...monthRows.map(month => month.sets), 1);
+        monthRows.forEach(month => { month.percent = month.sets / maxMonthSets * 100; });
+        const maxUnitValue = Math.max(reps, seconds, sets, 1);
+
         return {
-          workouts: workouts.size,
           sets,
           reps,
-          weekKeys,
-          rows: Array.from(rows.values()).sort((a, b) => primaryVolume(b) - primaryVolume(a) || b.sets - a.sets || a.name.localeCompare(b.name, 'ru'))
+          seconds,
+          workouts: workouts.size,
+          plannedSets,
+          activeDays,
+          completionPercent: plannedSets ? Math.min(100, Math.round(sets / plannedSets * 100)) : (sets ? 100 : 0),
+          periodLabel: firstDate && lastDate ? `с ${formatDate(firstDate)} по ${formatDate(lastDate)}` : 'нет выполненных подходов',
+          rows: sortedRows,
+          months: monthRows,
+          weekdays,
+          maxUnitValue,
+          unitRows: buildUnitRows({ sets, reps, seconds })
         };
       }
 
-      function weeksInMonth(month) {
-        const start = new Date(month.getFullYear(), month.getMonth(), 1);
-        const end = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-        const keys = [];
-        let cursor = startOfWeek(start);
-        while (cursor <= end) {
-          keys.push(toDateKey(cursor));
-          cursor = addDays(cursor, 7);
-        }
-        return keys;
+      function makeSummaryRow(name) {
+        return { name, sets: 0, units: {}, variants: new Set() };
       }
 
-      function makeStatRow(name) {
-        return { name, sets: 0, units: {}, variants: new Set(), weeks: {} };
+      function makeMonthRow(monthKey) {
+        return {
+          key: monthKey,
+          title: monthTitle(monthKey),
+          shortLabel: monthShortLabel(monthKey),
+          sets: 0,
+          units: {},
+          percent: 0
+        };
+      }
+
+      function buildMonthSeries(months, firstDate, lastDate) {
+        if (!firstDate || !lastDate) return [];
+        const rows = [];
+        let cursor = firstDate.slice(0, 7);
+        const end = lastDate.slice(0, 7);
+        while (cursor <= end) {
+          rows.push(months.get(cursor) || makeMonthRow(cursor));
+          cursor = nextMonthKey(cursor);
+        }
+        return rows;
+      }
+
+      function nextMonthKey(monthKey) {
+        const [year, month] = monthKey.split('-').map(Number);
+        const date = new Date(year, month, 1);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      function monthTitle(monthKey) {
+        const [year, month] = monthKey.split('-').map(Number);
+        return formatMonth(new Date(year, month - 1, 1));
+      }
+
+      function monthShortLabel(monthKey) {
+        const [year, month] = monthKey.split('-').map(Number);
+        const label = new Intl.DateTimeFormat('ru-RU', { month: 'short' }).format(new Date(year, month - 1, 1)).replace('.', '');
+        return `${label} ${String(year).slice(2)}`;
+      }
+
+      function buildUnitRows(stats) {
+        const rows = [];
+        if (stats.reps) rows.push({ label: 'Повторения', value: stats.reps, text: formatCount(stats.reps, ['повторение', 'повторения', 'повторений']) });
+        if (stats.seconds) rows.push({ label: 'Секунды', value: stats.seconds, text: formatDurationShort(stats.seconds) });
+        rows.push({ label: 'Подходы', value: stats.sets, text: formatCount(stats.sets, ['подход', 'подхода', 'подходов']) });
+        return rows;
       }
 
       function setMetric(label, unit = 'reps') {
@@ -1337,8 +1797,14 @@
 
       function normalizeMetric(metric) {
         const value = Number(metric?.value || 0);
+        const safeValue = Number.isFinite(value) ? value : 0;
         const unit = metric?.unit || 'повт';
-        return { unit, value: Number.isFinite(value) ? value : 0 };
+        if (unit === 'seconds' || unit === 'секунды' || unit === 'сек') return { unit: 'сек', value: safeValue };
+        if (unit === 'minutes' || unit === 'минуты' || unit === 'мин') return { unit: 'сек', value: safeValue * 60 };
+        if (unit === 'reps' || unit === 'повторения' || unit === 'повт') return { unit: 'повт', value: safeValue };
+        if (unit === 'km' || unit === 'км') return { unit: 'км', value: safeValue };
+        if (unit === 'm' || unit === 'м') return { unit: 'м', value: safeValue };
+        return { unit: 'повт', value: safeValue };
       }
 
       function addMetric(units, metric) {
@@ -1347,7 +1813,23 @@
       }
 
       function primaryVolume(row) {
-        return row.units['повт'] || row.units['сек'] || row.units['мин'] || row.units['км'] || row.units['м'] || row.sets;
+        return row.units['повт'] || row.units['сек'] || row.units['км'] || row.units['м'] || row.sets;
+      }
+
+      function formatUnits(units, fallbackSets = 0) {
+        const order = ['повт', 'сек', 'км', 'м'];
+        const parts = order
+          .filter(unit => units[unit])
+          .map(unit => `${formatNumber(units[unit])} ${unitName(unit, units[unit])}`);
+        return parts.length ? parts.join(' + ') : formatCount(fallbackSets, ['подход', 'подхода', 'подходов']);
+      }
+
+      function unitName(unit, value) {
+        if (unit === 'повт') return plural(value, ['повторение', 'повторения', 'повторений']);
+        if (unit === 'сек') return plural(value, ['секунда', 'секунды', 'секунд']);
+        if (unit === 'км') return 'км';
+        if (unit === 'м') return 'м';
+        return unit;
       }
 
       function groupExerciseName(name) {
@@ -1370,38 +1852,6 @@
           metric: setMetric(label, exercise?.unit),
           completedAt: new Date().toISOString()
         };
-      }
-
-      function renderStatRow(row, weekKeys) {
-        const variants = Array.from(row.variants).filter(name => groupExerciseName(name) !== row.name);
-        return `
-          <article class="stat-card">
-            <div class="stat-head">
-              <div>
-                <h3>${escapeHtml(row.name)}</h3>
-                <p class="muted tiny">${row.sets} подх.${variants.length ? ` · ${escapeHtml(variants.join(', '))}` : ''}</p>
-              </div>
-              <strong>${escapeHtml(formatUnits(row.units, row.sets))}</strong>
-            </div>
-            <div class="week-chips">
-              ${weekKeys.map(weekKey => renderWeekChip(weekKey, row.weeks[weekKey])).join('')}
-            </div>
-          </article>
-        `;
-      }
-
-      function renderWeekChip(weekKey, data) {
-        const hasData = data && data.sets;
-        const text = hasData ? formatUnits(data.units, data.sets) : '—';
-        return `<span class="week-chip ${hasData ? '' : 'empty'}"><b>${formatDate(weekKey)}</b>${escapeHtml(text)}</span>`;
-      }
-
-      function formatUnits(units, fallbackSets = 0) {
-        const order = ['повт', 'сек', 'мин', 'км', 'м'];
-        const parts = order
-          .filter(unit => units[unit])
-          .map(unit => `${formatNumber(units[unit])} ${unit}`);
-        return parts.length ? parts.join(' + ') : `${fallbackSets} подх.`;
       }
 
       function formatNumber(value) {
@@ -1456,16 +1906,6 @@
         touchWeek(dateKey);
         saveNow();
         render();
-      }
-
-      function updateSetLabel(dateKey, exIndex, setIndex, label) {
-        const day = getDay(dateKey);
-        const exercise = day.exercises[exIndex];
-        if (!exercise || !(setIndex in exercise.sets)) return;
-        exercise.sets[setIndex] = normalizeSetLabel(label, exercise.unit);
-        updateDoneSet(dateKey, exIndex, setIndex);
-        touchWeek(dateKey);
-        scheduleSave();
       }
 
       function updateDoneExercise(dateKey, exIndex) {
@@ -1550,17 +1990,37 @@
         render();
       }
 
+      function setSetValue(dateKey, exIndex, setIndex, value) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise || !(setIndex in exercise.sets)) return;
+        exercise.sets[setIndex] = normalizeSetLabel(value, exercise.unit);
+        updateDoneSet(dateKey, exIndex, setIndex);
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
       function adjustSetValue(dateKey, exIndex, setIndex, delta) {
         const day = getDay(dateKey);
         const exercise = day.exercises[exIndex];
         if (!exercise || !(setIndex in exercise.sets)) return;
         const current = Number(String(exercise.sets[setIndex]).match(/\d+(?:\.\d+)?/)?.[0] || 0);
         const next = Math.max(0, current + Number(delta || 0));
-        exercise.sets[setIndex] = String(next);
-        updateDoneSet(dateKey, exIndex, setIndex);
-        touchWeek(dateKey);
-        saveNow();
-        render();
+        setSetValue(dateKey, exIndex, setIndex, next);
+      }
+
+      function editSetValue(target) {
+        const dateKey = target.dataset.date;
+        const exIndex = Number(target.dataset.ex);
+        const setIndex = Number(target.dataset.set);
+        const exercise = getDay(dateKey).exercises[exIndex];
+        if (!exercise || !(setIndex in exercise.sets)) return;
+        const unitLabel = exercise.unit === 'seconds' ? 'секунды' : 'повторения';
+        const current = String(exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name));
+        const next = prompt(`Сколько ${unitLabel}?`, current);
+        if (next === null) return;
+        setSetValue(dateKey, exIndex, setIndex, next);
       }
 
       function cleanupSessionForDay(dateKey) {
@@ -1601,30 +2061,12 @@
         if (!wasDone) startTimer();
       }
 
-      function createNextEmptyWeek() {
-        const currentKey = weekStartKeyForOffset(weekOffset);
-        const nextKey = toDateKey(addDays(parseDateKey(currentKey), 7));
-        if (!state.weeks[nextKey]) {
-          state.weeks[nextKey] = makeWeek(emptyWeekDays());
-          toast('Создана пустая неделя');
-        } else {
-          toast('Неделя уже есть');
-        }
-        weekOffset += 1;
-        openDateKey = weekDates(nextKey)[6];
-        saveNow();
-        render();
-      }
-
       function handleAction(target) {
         const action = target.dataset.action;
         if (action === 'view-week') { view = 'week'; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
         if (action === 'prev') { weekOffset -= 1; openDateKey = weekDates(weekStartKeyForOffset(weekOffset))[6]; render(); return; }
         if (action === 'next') { weekOffset += 1; openDateKey = weekDates(weekStartKeyForOffset(weekOffset))[6]; render(); return; }
-        if (action === 'new-empty-week') { createNextEmptyWeek(); return; }
-        if (action === 'prev-month') { monthOffset -= 1; render(); return; }
-        if (action === 'next-month') { monthOffset += 1; render(); return; }
         if (action === 'open-day') { openDateKey = target.dataset.date; render(); return; }
         if (action === 'set-day-active') { setDayActive(target.dataset.date, target.dataset.active === 'true'); return; }
         if (action === 'data') { openDataSheet(); return; }
@@ -1641,6 +2083,10 @@
         }
         if (action === 'adjust-set') {
           adjustSetValue(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set), Number(target.dataset.delta));
+          return;
+        }
+        if (action === 'edit-set') {
+          editSetValue(target);
         }
       }
 
@@ -1648,11 +2094,6 @@
         const field = target.dataset.field;
         if (field === 'exercise-name') {
           updateExerciseName(target.dataset.date, Number(target.dataset.ex), target.value);
-          return;
-        }
-        if (field === 'set-label') {
-          updateSetLabel(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set), target.value);
-          updateSetButtonLabel(target);
         }
       }
 
@@ -1661,19 +2102,8 @@
         updateExerciseUnit(target.dataset.date, Number(target.dataset.ex), target.value);
       }
 
-      function updateSetButtonLabel(input) {
-        const item = input.closest('.set-item');
-        const button = item?.querySelector('.set');
-        if (!button) return;
-        const done = button.classList.contains('done');
-        const unit = input.dataset.unit;
-        const text = unit === 'seconds' ? `${input.value || '0'}с` : input.value || '0';
-        button.textContent = `${done ? '✓ ' : ''}${text}`;
-      }
-
       function handleBlur(target) {
-        const field = target.dataset.field;
-        if (field !== 'exercise-name' && field !== 'set-label') return;
+        if (target.dataset.field !== 'exercise-name') return;
         flushSave();
         render();
       }
@@ -1760,10 +2190,52 @@
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
       }
 
+      function clearLongPress() {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+        longPressTarget = null;
+      }
+
+      function startLongPress(event) {
+        const target = event.target.closest('.set[data-action="toggle"]');
+        if (!target) return;
+        clearLongPress();
+        longPressTarget = target;
+        longPressStartX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
+        longPressStartY = event.clientY ?? event.touches?.[0]?.clientY ?? 0;
+        longPressTimer = setTimeout(() => {
+          if (!longPressTarget) return;
+          ignoreNextClick = true;
+          editSetValue(longPressTarget);
+          clearLongPress();
+        }, 520);
+      }
+
+      function moveLongPress(event) {
+        if (!longPressTarget) return;
+        const point = event.touches?.[0] || event;
+        const x = point.clientX ?? longPressStartX;
+        const y = point.clientY ?? longPressStartY;
+        if (Math.abs(x - longPressStartX) > 12 || Math.abs(y - longPressStartY) > 12) clearLongPress();
+      }
+
+      document.addEventListener('pointerdown', startLongPress);
+      document.addEventListener('pointermove', moveLongPress);
+      document.addEventListener('pointerup', clearLongPress);
+      document.addEventListener('pointercancel', clearLongPress);
+      document.addEventListener('contextmenu', event => {
+        if (!event.target.closest('.set[data-action="toggle"]')) return;
+        event.preventDefault();
+      });
+
       document.addEventListener('click', event => {
         const target = event.target.closest('[data-action]');
         if (!target) return;
         event.preventDefault();
+        if (ignoreNextClick && target.dataset.action === 'toggle') {
+          ignoreNextClick = false;
+          return;
+        }
         handleAction(target);
       });
 
