@@ -5,31 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f7f4">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Спорт">
+  <meta name="apple-mobile-web-app-title" content="🏆 Спорт">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Спорт">
+  <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и сводка прогресса.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icon-180.png">
-  <title>Спорт</title>
+  <title>🏆 Спорт</title>
   <style>
     :root {
       color-scheme: light;
       --bg: #f7f7f4;
       --card: #ffffff;
+      --field: #ffffff;
       --ink: #151515;
       --muted: #77756f;
       --line: #e4e1da;
       --soft: #f1efe8;
       --accent: #111111;
+      --accent-ink: #ffffff;
       --done: #1f8f52;
       --danger: #c9342f;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --overlay: rgba(0, 0, 0, 0.22);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0f0f0e;
+      --card: #181817;
+      --field: #20201e;
+      --ink: #f3f1ed;
+      --muted: #a7a29a;
+      --line: #34332f;
+      --soft: #24231f;
+      --accent: #f3f1ed;
+      --accent-ink: #111111;
+      --done: #39b871;
+      --danger: #ff6b62;
+      --shadow: rgba(0, 0, 0, 0.34);
+      --overlay: rgba(0, 0, 0, 0.62);
     }
 
     * { box-sizing: border-box; }
@@ -44,10 +65,10 @@
 
     body {
       min-height: 100dvh;
-      padding: 12px 12px calc(24px + var(--safe-bottom));
+      padding: 12px 12px calc(180px + var(--safe-bottom));
     }
 
-    button, textarea, input { font: inherit; }
+    button, textarea, input, select { font: inherit; }
 
     button {
       min-height: 42px;
@@ -56,14 +77,24 @@
       background: var(--card);
       color: var(--ink);
       padding: 0 14px;
-      font-weight: 700;
+      font-weight: 750;
       touch-action: manipulation;
     }
 
     button:active { transform: scale(0.98); }
-    button.dark { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button.dark { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
     button.danger { color: var(--danger); }
-    button.small { min-height: 32px; padding: 0 10px; font-size: 0.9rem; }
+    button.small { min-height: 34px; padding: 0 10px; font-size: 0.9rem; }
+    button.ghost { background: var(--soft); }
+
+    input, textarea, select {
+      border: 1px solid var(--line);
+      outline: 0;
+      background: var(--field);
+      color: var(--ink);
+    }
+
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 
     .app {
       width: min(100%, 760px);
@@ -78,25 +109,30 @@
       z-index: 10;
       margin: -12px -12px 0;
       padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 10px;
-      background: rgba(247, 247, 244, 0.92);
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(228, 225, 218, 0.8);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    }
+
+    .top-inner,
+    .bottom-inner,
+    .bottom-week {
+      width: min(100%, 760px);
+      margin: 0 auto;
     }
 
     .top-inner {
-      width: min(100%, 760px);
-      margin: 0 auto;
       display: grid;
       gap: 10px;
     }
 
     .title-row,
+    .top-actions,
     .week-row,
-    .day-head,
+    .day-toggle,
     .exercise-head,
     .toolbar,
-    .tabs,
     .stat-head,
     .stat-meta {
       display: flex;
@@ -106,13 +142,39 @@
       flex-wrap: wrap;
     }
 
+    .top-actions { justify-content: flex-end; }
+
     h1, h2, h3, p { margin: 0; }
     h1 { font-size: 1.45rem; letter-spacing: -0.04em; }
-    h2 { font-size: 1.06rem; letter-spacing: -0.02em; }
+    h2 { font-size: 1.05rem; letter-spacing: -0.02em; }
     h3 { font-size: 1rem; letter-spacing: -0.02em; }
 
     .muted { color: var(--muted); }
     .tiny { font-size: 0.82rem; line-height: 1.35; }
+
+    .timer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+
+    .timer-bar span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .timer-bar strong {
+      font-size: 1.6rem;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+
     .pill {
       display: inline-flex;
       align-items: center;
@@ -124,11 +186,8 @@
       font-weight: 800;
       white-space: nowrap;
     }
-    .pill.today { background: #111; color: #fff; }
-    .pill.done { background: #e3f7ea; color: var(--done); }
 
-    .tabs { justify-content: flex-start; }
-    .tabs button { flex: 1 1 0; }
+    .pill.done { background: color-mix(in srgb, var(--done) 17%, var(--card)); color: var(--done); }
 
     .card {
       border: 1px solid var(--line);
@@ -139,31 +198,38 @@
 
     .day {
       display: grid;
-      gap: 10px;
-      padding: 14px;
     }
 
-    .day.today {
-      border-color: #111;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    .day.current {
+      border-color: var(--accent);
+      box-shadow: 0 8px 28px var(--shadow);
     }
 
-    textarea {
+    .day-toggle {
       width: 100%;
-      min-height: 96px;
+      min-height: 58px;
+      padding: 14px;
       border: 0;
-      outline: 0;
-      resize: vertical;
-      border-radius: 14px;
-      background: #fafaf8;
-      color: var(--ink);
-      padding: 12px;
-      line-height: 1.42;
-      font-size: 1rem;
-      box-shadow: inset 0 0 0 1px var(--line);
+      border-radius: 0;
+      background: transparent;
+      text-align: left;
     }
 
-    textarea:focus { background: #fff; box-shadow: inset 0 0 0 2px #111; }
+    .day-toggle:active { transform: none; }
+    .day-toggle h2 { flex: 1 1 auto; }
+
+    .day-body {
+      display: grid;
+      gap: 10px;
+      padding: 0 14px 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .day-body-top {
+      display: grid;
+      gap: 8px;
+      padding-top: 12px;
+    }
 
     .progress {
       height: 8px;
@@ -171,6 +237,7 @@
       background: var(--soft);
       overflow: hidden;
     }
+
     .progress > i {
       display: block;
       height: 100%;
@@ -181,34 +248,66 @@
 
     .exercises {
       display: grid;
-      gap: 8px;
+      gap: 10px;
     }
 
     .exercise {
       display: grid;
-      gap: 8px;
+      gap: 10px;
       padding: 10px;
-      border-radius: 15px;
-      background: #fafaf8;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--field) 72%, var(--soft));
       border: 1px solid var(--line);
     }
 
-    .exercise.done { background: #f0fbf4; border-color: #ccebd8; }
+    .exercise.done { background: color-mix(in srgb, var(--done) 12%, var(--card)); border-color: color-mix(in srgb, var(--done) 34%, var(--line)); }
+
+    .exercise-name {
+      flex: 1 1 160px;
+      min-width: 0;
+      min-height: 42px;
+      border-radius: 13px;
+      padding: 0 12px;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+    }
+
+    .unit-select {
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 0 12px;
+      font-weight: 800;
+    }
 
     .set-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 7px;
+      gap: 8px;
+    }
+
+    .set-item {
+      display: inline-grid;
+      grid-template-columns: auto 62px;
+      gap: 5px;
+      align-items: center;
+      padding: 4px;
+      border-radius: 999px;
+      background: var(--field);
+      border: 1px solid var(--line);
+    }
+
+    .set-item.timed {
+      grid-template-columns: auto auto 62px auto;
     }
 
     .set {
-      min-width: 44px;
-      min-height: 40px;
+      min-width: 50px;
+      min-height: 38px;
       border-radius: 999px;
       border: 1px solid var(--line);
-      background: #fff;
+      background: var(--field);
       color: var(--ink);
-      padding: 0 13px;
+      padding: 0 12px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -221,7 +320,17 @@
       background: var(--done);
       color: #fff;
       border-color: var(--done);
-      box-shadow: 0 5px 16px rgba(31, 143, 82, 0.28);
+      box-shadow: 0 5px 16px color-mix(in srgb, var(--done) 38%, transparent);
+    }
+
+    .set-input {
+      width: 62px;
+      min-height: 38px;
+      border-radius: 999px;
+      text-align: center;
+      padding: 0 6px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
     }
 
     .empty {
@@ -231,6 +340,55 @@
     }
 
     .toolbar { justify-content: flex-start; }
+
+    .add-exercise,
+    .make-training {
+      width: 100%;
+      background: var(--field);
+    }
+
+    .bottom-tabs {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      display: grid;
+      gap: 8px;
+      padding: 10px 12px calc(10px + var(--safe-bottom));
+      background: color-mix(in srgb, var(--bg) 94%, transparent);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
+    }
+
+    .bottom-week {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 46px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .bottom-week .pill {
+      justify-content: center;
+      min-height: 42px;
+    }
+
+    .bottom-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .bottom-tabs button {
+      min-height: 46px;
+      font-size: 1rem;
+    }
+
+    .new-week-button {
+      width: min(100%, 760px);
+      margin: 0 auto;
+    }
 
     .summary {
       display: grid;
@@ -296,7 +454,7 @@
       gap: 2px;
       padding: 7px 9px;
       border-radius: 13px;
-      background: #f0fbf4;
+      background: color-mix(in srgb, var(--done) 14%, var(--card));
       color: var(--done);
       font-size: 0.76rem;
       font-weight: 800;
@@ -316,38 +474,45 @@
       position: fixed;
       inset: 0;
       z-index: 40;
-      background: rgba(0,0,0,0.22);
+      background: var(--overlay);
       padding: 16px;
       align-items: end;
     }
+
     .sheet.show { display: grid; }
+
     .sheet-card {
       width: min(100%, 760px);
       margin: 0 auto;
       border-radius: 22px;
-      background: #fff;
+      background: var(--card);
       padding: 14px;
       display: grid;
       gap: 10px;
-      box-shadow: 0 18px 60px rgba(0,0,0,0.22);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.32);
     }
+
     .json-box {
+      width: 100%;
       min-height: 220px;
+      border-radius: 14px;
+      padding: 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.78rem;
       white-space: pre;
+      resize: vertical;
     }
 
     .toast {
       position: fixed;
       left: 14px;
       right: 14px;
-      bottom: calc(14px + var(--safe-bottom));
+      bottom: calc(142px + var(--safe-bottom));
       z-index: 50;
       padding: 12px 14px;
       border-radius: 16px;
-      background: #111;
-      color: #fff;
+      background: var(--accent);
+      color: var(--accent-ink);
       opacity: 0;
       transform: translateY(14px);
       pointer-events: none;
@@ -355,13 +520,19 @@
       text-align: center;
       font-weight: 700;
     }
+
     .toast.show { opacity: 1; transform: translateY(0); }
+
+    @supports not (color: color-mix(in srgb, white, black)) {
+      .top, .bottom-tabs { background: var(--bg); }
+      .exercise { background: var(--soft); }
+    }
 
     @media (min-width: 720px) {
       body { padding-top: 18px; }
-      .day { padding: 16px; }
+      .day-body { padding: 0 16px 16px; }
       .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .day.today { grid-column: 1 / -1; }
+      .day.open { grid-column: 1 / -1; }
       .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
   </style>
@@ -375,8 +546,8 @@
     (() => {
       'use strict';
 
-      const STORAGE_KEY = 'sport-notes.state.v3';
-      const OLD_SIMPLE_KEY = 'sport-notes.state.v2';
+      const STORAGE_KEY = 'sport-notes.state.v5';
+      const OLD_KEYS = ['sport-notes.state.v4', 'sport-notes.state.v3', 'sport-notes.state.v2'];
       const OLD_KEY = 'sport-week-planner.state.v1';
       const SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
       const SAMPLE = [
@@ -393,8 +564,11 @@
       let view = 'week';
       let weekOffset = 0;
       let monthOffset = 0;
+      let openDateKey = todayKey();
       let saveTimer = null;
       let toastTimer = null;
+      let timerStartedAt = null;
+      let timerInterval = null;
 
       function uid() {
         return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -441,10 +615,6 @@
         return Array.from({ length: 7 }, (_, i) => toDateKey(addDays(start, i)));
       }
 
-      function prevWeekKey(startKey) {
-        return toDateKey(addDays(parseDateKey(startKey), -7));
-      }
-
       function slotForDate(dateKey) {
         return (parseDateKey(dateKey).getDay() + 6) % 7;
       }
@@ -466,25 +636,20 @@
           .replace(/'/g, '&#039;');
       }
 
-      function cleanDays(days) {
-        const next = Array.isArray(days) ? days.slice(0, 7).map(v => String(v ?? '')) : [];
-        while (next.length < 7) next.push('');
-        return next;
+      function emptyDay() {
+        return { active: false, exercises: [] };
       }
 
-      function makeWeek(days) {
-        return {
-          days: cleanDays(days),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
+      function emptyWeekDays() {
+        return Array.from({ length: 7 }, emptyDay);
       }
 
       function defaultState() {
         const startKey = weekStartKeyForDate(todayKey());
         return {
-          version: 3,
+          version: 5,
           id: uid(),
+          theme: 'light',
           weeks: { [startKey]: makeWeek(SAMPLE) },
           sessions: {},
           updatedAt: new Date().toISOString()
@@ -497,10 +662,12 @@
           if (saved) return normalize(JSON.parse(saved));
         } catch (_) {}
 
-        try {
-          const saved = localStorage.getItem(OLD_SIMPLE_KEY);
-          if (saved) return normalize(JSON.parse(saved));
-        } catch (_) {}
+        for (const key of OLD_KEYS) {
+          try {
+            const saved = localStorage.getItem(key);
+            if (saved) return normalize(JSON.parse(saved));
+          } catch (_) {}
+        }
 
         const migrated = migrateOldState();
         if (migrated) return migrated;
@@ -515,12 +682,13 @@
         const weeks = cleanWeeks(next.weeks);
 
         if (!Object.keys(weeks).length) {
-          weeks[currentWeek] = makeWeek(cleanDays(next.days || SAMPLE));
+          weeks[currentWeek] = makeWeek(next.days || SAMPLE);
         }
 
         return {
-          version: 3,
+          version: 5,
           id: next.id || uid(),
+          theme: next.theme === 'dark' ? 'dark' : 'light',
           weeks,
           sessions: cleanSessions(next.sessions),
           updatedAt: next.updatedAt || new Date().toISOString()
@@ -537,6 +705,107 @@
           weeks[startKey].updatedAt = week?.updatedAt || weeks[startKey].updatedAt;
         });
         return weeks;
+      }
+
+      function makeWeek(days) {
+        return {
+          days: cleanDays(days),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      function cleanDays(days) {
+        const next = Array.isArray(days) ? days.slice(0, 7) : [];
+        while (next.length < 7) next.push(emptyDay());
+        return next.map(cleanDay);
+      }
+
+      function cleanDay(day) {
+        if (typeof day === 'string') {
+          const exercises = textToExercises(day);
+          return { active: exercises.length > 0, exercises };
+        }
+        if (!day || typeof day !== 'object') return emptyDay();
+        const exercises = (Array.isArray(day.exercises) ? day.exercises : []).map(cleanExercise).filter(Boolean);
+        const active = typeof day.active === 'boolean' ? day.active : exercises.length > 0;
+        return { active, exercises };
+      }
+
+      function cleanExercise(exercise) {
+        if (typeof exercise === 'string') return parseLineToExercise(exercise);
+        if (!exercise || typeof exercise !== 'object') return null;
+        const name = String(exercise.name ?? '').trim();
+        let unit = exercise.unit === 'seconds' ? 'seconds' : exercise.unit === 'reps' ? 'reps' : inferUnit(name, exercise.sets);
+        let sets = Array.isArray(exercise.sets) ? exercise.sets : [];
+        sets = sets.map(value => normalizeSetLabel(value, unit)).filter(Boolean);
+        if (!sets.length) sets = [defaultSetValue(unit, name)];
+        if (isPlankName(name)) {
+          unit = 'seconds';
+          sets = [sets[0] || '90'];
+        }
+        return { name, unit, sets };
+      }
+
+      function textToExercises(text) {
+        return String(text || '')
+          .split('\n')
+          .map(line => line.trim())
+          .filter(Boolean)
+          .map(parseLineToExercise);
+      }
+
+      function parseLineToExercise(line) {
+        const match = String(line).match(/^(.*?)(?:\s+[—–-]\s+)(.+)$/);
+        const name = (match ? match[1] : line).trim();
+        const tail = (match ? match[2] : '').trim();
+        let unit = inferUnit(name, tail ? [tail] : []);
+        let sets = tail ? splitSets(tail).map(value => normalizeSetLabel(value, unit)).filter(Boolean) : [defaultSetValue(unit, name)];
+        if (isPlankName(name)) {
+          unit = 'seconds';
+          sets = [sets[0] || '90'];
+        }
+        return { name, unit, sets: sets.length ? sets : [defaultSetValue(unit, name)] };
+      }
+
+      function splitSets(tail) {
+        if (!tail) return ['10'];
+        const normalized = tail.replace(/[–—]/g, '-');
+        if (!normalized.includes('-')) return [tail.trim()];
+        const parts = normalized.split('-').map(v => v.trim()).filter(Boolean);
+        if (!parts.length) return [tail.trim()];
+        const suffix = tail.match(/\s(сек|с|мин|км|м)$/i)?.[1];
+        return parts.map((part, index) => {
+          if (index === parts.length - 1 || !suffix || /[а-яa-z]/i.test(part)) return part;
+          return `${part} ${suffix}`;
+        });
+      }
+
+      function inferUnit(name, sets) {
+        const text = `${name || ''} ${Array.isArray(sets) ? sets.map(value => typeof value === 'object' ? value.label ?? value.value ?? '' : value).join(' ') : sets || ''}`.toLowerCase();
+        if (/планк|вис|статика|сек|\bс\b|мин/.test(text)) return 'seconds';
+        return 'reps';
+      }
+
+      function normalizeSetLabel(value, unit) {
+        const raw = value && typeof value === 'object' ? value.label ?? value.value ?? '' : value;
+        const text = String(raw ?? '').trim().replace(',', '.');
+        const match = text.match(/\d+(?:\.\d+)?\+?/);
+        if (match) return match[0];
+        return defaultSetValue(unit, '');
+      }
+
+      function defaultSetValue(unit, name) {
+        if (unit === 'seconds') return isPlankName(name) ? '90' : '30';
+        return '10';
+      }
+
+      function isPlankName(name) {
+        return /планк/i.test(String(name || ''));
+      }
+
+      function isSingleSecondExercise(exercise) {
+        return exercise?.unit === 'seconds' && isPlankName(exercise.name);
       }
 
       function cleanSessions(rawSessions) {
@@ -570,7 +839,8 @@
               (ex?.sets || []).forEach((set, setIndex) => {
                 if (set?.completed) {
                   const label = oldSetLabel(set);
-                  done[`${exIndex}:${setIndex}`] = makeDonePayload(ex?.name || 'Упражнение', label);
+                  const unit = /сек|мин/.test(label) ? 'seconds' : 'reps';
+                  done[`${exIndex}:${setIndex}`] = makeDonePayload({ name: ex?.name || 'Упражнение', unit }, label);
                 }
               });
             });
@@ -592,9 +862,15 @@
 
       function oldSetLabel(set) {
         if (set?.targetReps !== null && set?.targetReps !== undefined) return String(set.targetReps);
-        if (set?.targetDurationMin !== null && set?.targetDurationMin !== undefined) return `${set.targetDurationMin} мин`;
+        if (set?.targetDurationMin !== null && set?.targetDurationMin !== undefined) return `${set.targetDurationMin * 60} сек`;
         if (set?.targetDistanceKm !== null && set?.targetDistanceKm !== undefined) return `${set.targetDistanceKm} км`;
-        return '✓';
+        return '10';
+      }
+
+      function applyTheme() {
+        const theme = state?.theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0f0f0e' : '#f7f7f4');
       }
 
       function saveNow() {
@@ -613,19 +889,9 @@
         saveNow();
       }
 
-      function copyBaseDaysFor(startKey) {
-        const previous = state.weeks[prevWeekKey(startKey)];
-        if (previous) return previous.days;
-        const earlier = Object.keys(state.weeks).filter(key => key < startKey).sort().pop();
-        if (earlier) return state.weeks[earlier].days;
-        const latest = Object.keys(state.weeks).sort().pop();
-        if (latest) return state.weeks[latest].days;
-        return SAMPLE;
-      }
-
       function getWeek(startKey) {
         if (!state.weeks[startKey]) {
-          state.weeks[startKey] = makeWeek(copyBaseDaysFor(startKey));
+          state.weeks[startKey] = makeWeek(emptyWeekDays());
           scheduleSave();
         }
         return state.weeks[startKey];
@@ -633,6 +899,13 @@
 
       function getExistingWeek(startKey) {
         return state.weeks[startKey] || null;
+      }
+
+      function getDay(dateKey) {
+        const week = getWeek(weekStartKeyForDate(dateKey));
+        const slot = slotForDate(dateKey);
+        if (!week.days[slot]) week.days[slot] = emptyDay();
+        return week.days[slot];
       }
 
       function getSession(dateKey) {
@@ -645,51 +918,57 @@
         return state.sessions[dateKey] || { done: {} };
       }
 
-      function parseDayText(text) {
-        return String(text || '')
-          .split('\n')
-          .map(line => line.trim())
-          .filter(Boolean)
-          .map(parseLine);
-      }
-
-      function parseLine(line) {
-        const match = line.match(/^(.*?)(?:\s+[—–-]\s+)(.+)$/);
-        const name = (match ? match[1] : line).trim();
-        const tail = (match ? match[2] : '').trim();
-        const sets = tail ? splitSets(tail) : ['✓'];
-        return { raw: line, name, sets };
-      }
-
-      function splitSets(tail) {
-        if (!tail) return ['✓'];
-        const normalized = tail.replace(/[–—]/g, '-');
-        if (!normalized.includes('-')) return [tail.trim()];
-        const parts = normalized.split('-').map(v => v.trim()).filter(Boolean);
-        if (!parts.length) return [tail.trim()];
-        const suffix = tail.match(/\s(сек|с|мин|км|м)$/i)?.[1];
-        return parts.map((part, index) => {
-          if (index === parts.length - 1 || !suffix || /[а-яa-z]/i.test(part)) return part;
-          return `${part} ${suffix}`;
-        });
-      }
-
       function dayProgress(dateKey) {
-        const week = getWeek(weekStartKeyForDate(dateKey));
-        const exercises = parseDayText(week.days[slotForDate(dateKey)]);
+        const day = getDay(dateKey);
+        if (!day.active) return { total: 0, checked: 0, percent: 0 };
         const done = readSession(dateKey).done;
         let total = 0;
         let checked = 0;
-        exercises.forEach((ex, exIndex) => ex.sets.forEach((_, setIndex) => {
+        day.exercises.forEach((ex, exIndex) => ex.sets.forEach((_, setIndex) => {
           total += 1;
           if (done[`${exIndex}:${setIndex}`]) checked += 1;
         }));
         return { total, checked, percent: total ? Math.round((checked / total) * 100) : 0 };
       }
 
+      function isDayComplete(dateKey) {
+        const progress = dayProgress(dateKey);
+        return progress.total > 0 && progress.checked === progress.total;
+      }
+
+      function timerSeconds() {
+        return timerStartedAt ? Math.floor((Date.now() - timerStartedAt) / 1000) : 0;
+      }
+
+      function formatTimer(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      function updateTimerDisplay() {
+        const node = document.getElementById('timerDisplay');
+        if (node) node.textContent = formatTimer(timerSeconds());
+      }
+
+      function startTimer() {
+        timerStartedAt = Date.now();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+        updateTimerDisplay();
+      }
+
+      function stopTimer() {
+        timerStartedAt = null;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        updateTimerDisplay();
+      }
+
       function render() {
         if (view === 'summary') renderSummary();
         else renderWeek();
+        updateTimerDisplay();
       }
 
       function renderTop(title, subtitle) {
@@ -701,14 +980,45 @@
                   <h1>${escapeHtml(title)}</h1>
                   <p class="muted tiny">${escapeHtml(subtitle)}</p>
                 </div>
-                <button class="dark" data-action="today" type="button">Сегодня</button>
+                <div class="top-actions">
+                  <button data-action="theme" type="button">${state.theme === 'dark' ? 'Светлая' : 'Тёмная'}</button>
+                  <button data-action="data" type="button">JSON</button>
+                </div>
               </div>
-              <div class="tabs">
-                <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button">Неделя</button>
-                <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button">Сводка</button>
+              <div class="timer-bar" aria-live="polite">
+                <span>Секундомер</span>
+                <strong id="timerDisplay">${formatTimer(timerSeconds())}</strong>
               </div>
             </div>
           </header>
+        `;
+      }
+
+      function renderBottomNav() {
+        if (view === 'summary') {
+          return `
+            <nav class="bottom-tabs" aria-label="Разделы">
+              <div class="bottom-inner">
+                <button data-action="view-week" type="button">Неделя</button>
+                <button class="dark" data-action="view-summary" type="button">Сводка</button>
+              </div>
+            </nav>
+          `;
+        }
+
+        return `
+          <nav class="bottom-tabs" aria-label="Неделя и разделы">
+            <div class="bottom-week">
+              <button data-action="prev" type="button">←</button>
+              <span class="pill">${weekOffset === 0 ? 'текущая неделя' : weekOffset > 0 ? `+${weekOffset} нед.` : `${weekOffset} нед.`}</span>
+              <button data-action="next" type="button">→</button>
+            </div>
+            <button class="new-week-button" data-action="new-empty-week" type="button">Новая пустая неделя</button>
+            <div class="bottom-inner">
+              <button class="dark" data-action="view-week" type="button">Неделя</button>
+              <button data-action="view-summary" type="button">Сводка</button>
+            </div>
+          </nav>
         `;
       }
 
@@ -718,66 +1028,107 @@
         const dates = weekDates(weekKey);
         const start = dates[0];
         const end = dates[6];
+
+        if (!dates.includes(openDateKey)) {
+          openDateKey = weekOffset === 0 ? todayKey() : dates[0];
+        }
+
         document.getElementById('app').innerHTML = `
-          ${renderTop('Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
-          <section class="week-row">
-            <button data-action="prev" type="button">←</button>
-            <span class="pill">${weekOffset === 0 ? 'текущая неделя' : weekOffset > 0 ? `+${weekOffset} нед.` : `${weekOffset} нед.`}</span>
-            <button data-action="next" type="button">→</button>
-            <button data-action="data" type="button">JSON</button>
-          </section>
+          ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
           <section class="week-days">
             ${dates.map(dateKey => renderDay(dateKey, week)).join('')}
           </section>
+          ${renderBottomNav()}
         `;
-        resizeTextareas();
       }
 
       function renderDay(dateKey, week) {
         const slot = slotForDate(dateKey);
-        const weekKey = weekStartKeyForDate(dateKey);
-        const text = week.days[slot] || '';
-        const exercises = parseDayText(text);
+        const day = week.days[slot] || emptyDay();
         const progress = dayProgress(dateKey);
-        const isToday = dateKey === todayKey();
+        const isCurrent = dateKey === todayKey();
+        const isOpen = dateKey === openDateKey;
+        const complete = progress.total && progress.checked === progress.total;
         return `
-          <article class="card day ${isToday ? 'today' : ''}" data-date="${dateKey}" data-week="${weekKey}" data-slot="${slot}">
-            <div class="day-head">
-              <div>
-                <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
-                <p class="muted tiny">${progress.checked}/${progress.total || 0} подходов</p>
+          <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
+            <button class="day-toggle" data-action="open-day" data-date="${dateKey}" type="button">
+              <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
+            </button>
+            ${isOpen ? `
+              <div class="day-body">
+                ${day.active ? `
+                  <div class="day-body-top">
+                    <div class="progress"><i style="--value:${progress.percent}%"></i></div>
+                    <div class="title-row">
+                      <span class="muted tiny">${progress.checked}/${progress.total || 0} подходов</span>
+                      ${complete ? '<span class="pill done">готово</span>' : ''}
+                    </div>
+                  </div>
+                  ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">Добавь первое упражнение.</div>'}
+                  <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ упражнение</button>
+                  <button class="danger" data-action="set-day-active" data-active="false" data-date="${dateKey}" type="button">Убрать тренировочный день</button>
+                ` : `
+                  <div class="empty">В этот день нет тренировки.</div>
+                  <button class="make-training dark" data-action="set-day-active" data-active="true" data-date="${dateKey}" type="button">Сделать тренировочным</button>
+                `}
               </div>
-              ${isToday ? '<span class="pill today">сегодня</span>' : progress.total && progress.checked === progress.total ? '<span class="pill done">готово</span>' : '<span class="pill">план</span>'}
-            </div>
-            <div class="progress"><i style="--value:${progress.percent}%"></i></div>
-            <textarea data-field="day" data-week="${weekKey}" data-slot="${slot}" rows="3" placeholder="Напиши как в заметках:\nПодтягивания — 4-4-4-4-4\nПланка — 90 сек">${escapeHtml(text)}</textarea>
-            ${exercises.length ? `<div class="exercises">${exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">Пусто. Просто напиши упражнения выше.</div>'}
+            ` : ''}
           </article>
         `;
       }
 
       function renderExercise(dateKey, exercise, exIndex) {
         const session = readSession(dateKey);
-        const allDone = exercise.sets.every((_, setIndex) => session.done[`${exIndex}:${setIndex}`]);
+        const oneSet = isSingleSecondExercise(exercise);
+        const allDone = exercise.sets.length > 0 && exercise.sets.every((_, setIndex) => session.done[`${exIndex}:${setIndex}`]);
         return `
           <div class="exercise ${allDone ? 'done' : ''}">
             <div class="exercise-head">
-              <h3>${escapeHtml(exercise.name)}</h3>
-              <div class="toolbar">
-                <button class="small" data-action="add-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">+ подход</button>
-                <button class="small danger" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">−</button>
-              </div>
+              <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
+              <select class="unit-select" data-field="exercise-unit" data-date="${dateKey}" data-ex="${exIndex}" aria-label="Единица">
+                <option value="reps" ${exercise.unit === 'reps' ? 'selected' : ''}>повт</option>
+                <option value="seconds" ${exercise.unit === 'seconds' ? 'selected' : ''}>сек</option>
+              </select>
+              <button class="small danger" data-action="remove-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button">Удалить</button>
             </div>
             <div class="set-row">
-              ${exercise.sets.map((label, setIndex) => renderSet(dateKey, label, exIndex, setIndex)).join('')}
+              ${exercise.sets.map((label, setIndex) => renderSet(dateKey, exercise, label, exIndex, setIndex)).join('')}
+            </div>
+            <div class="toolbar">
+              ${oneSet ? '<span class="muted tiny">1 подход</span>' : `
+                <button class="small" data-action="add-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">+ подход</button>
+                <button class="small danger" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">− подход</button>
+              `}
             </div>
           </div>
         `;
       }
 
-      function renderSet(dateKey, label, exIndex, setIndex) {
+      function renderSet(dateKey, exercise, label, exIndex, setIndex) {
         const done = Boolean(readSession(dateKey).done[`${exIndex}:${setIndex}`]);
-        return `<button class="set ${done ? 'done' : ''}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(label)}</button>`;
+        const display = formatSetLabel(exercise, label);
+        const input = `<input class="set-input" data-field="set-label" data-unit="${exercise.unit}" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" value="${escapeHtml(label)}" placeholder="${exercise.unit === 'seconds' ? 'сек' : 'повт'}" inputmode="numeric" aria-label="${exercise.unit === 'seconds' ? 'Секунды' : 'Повторы'}">`;
+        if (exercise.unit === 'seconds') {
+          return `
+            <span class="set-item timed">
+              <button class="small ghost" data-action="adjust-set" data-delta="-10" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">−10</button>
+              <button class="set ${done ? 'done' : ''}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
+              ${input}
+              <button class="small ghost" data-action="adjust-set" data-delta="10" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">+10</button>
+            </span>
+          `;
+        }
+        return `
+          <span class="set-item">
+            <button class="set ${done ? 'done' : ''}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
+            ${input}
+          </span>
+        `;
+      }
+
+      function formatSetLabel(exercise, label) {
+        const text = String(label || defaultSetValue(exercise.unit, exercise.name));
+        return exercise.unit === 'seconds' ? `${text}с` : text;
       }
 
       function monthDate(offset = 0) {
@@ -802,7 +1153,6 @@
             <button data-action="prev-month" type="button">←</button>
             <span class="pill">${escapeHtml(formatMonth(month))}</span>
             <button data-action="next-month" type="button">→</button>
-            <button data-action="data" type="button">JSON</button>
           </section>
           <section class="summary">
             <div class="summary-grid">
@@ -810,8 +1160,9 @@
               <div class="mini-card"><span class="muted tiny">Подходы</span><strong>${stats.sets}</strong></div>
               <div class="mini-card"><span class="muted tiny">Повторы</span><strong>${formatNumber(stats.reps)}</strong></div>
             </div>
-            ${stats.rows.length ? `<div class="stat-list">${stats.rows.map(row => renderStatRow(row, stats.weekKeys)).join('')}</div>` : '<article class="card day"><h2>Пока пусто</h2><p class="muted">Нажми цифры подходов в неделе — здесь появится объём.</p></article>'}
+            ${stats.rows.length ? `<div class="stat-list">${stats.rows.map(row => renderStatRow(row, stats.weekKeys)).join('')}</div>` : '<article class="card day"><div class="day-body" style="border-top:0;padding-top:14px"><h2>Пока пусто</h2><p class="muted">Нажми цифры подходов в неделе — здесь появится объём.</p></div></article>'}
           </section>
+          ${renderBottomNav()}
         `;
       }
 
@@ -827,7 +1178,8 @@
           const weekKey = weekStartKeyForDate(dateKey);
           const week = getExistingWeek(weekKey);
           if (!week) return;
-          const exercises = parseDayText(week.days[slotForDate(dateKey)]);
+          const day = week.days[slotForDate(dateKey)] || emptyDay();
+          const exercises = day.exercises || [];
           let dayDone = false;
 
           Object.entries(session.done || {}).forEach(([key, value]) => {
@@ -837,8 +1189,8 @@
             const fallbackLabel = fallbackExercise?.sets?.[setIndex] || '';
             const payload = typeof value === 'object' ? value : null;
             const exerciseName = payload?.exercise || fallbackExercise?.name || 'Упражнение';
-            const label = payload?.label || fallbackLabel || '✓';
-            const metric = normalizeMetric(payload?.metric || setMetric(label));
+            const label = payload?.label || fallbackLabel || '10';
+            const metric = normalizeMetric(payload?.metric || setMetric(label, fallbackExercise?.unit));
             const groupName = payload?.group || groupExerciseName(exerciseName);
             const rowKey = groupName.toLowerCase();
             const row = rows.get(rowKey) || makeStatRow(groupName);
@@ -884,16 +1236,15 @@
         return { name, sets: 0, units: {}, variants: new Set(), weeks: {} };
       }
 
-      function setMetric(label) {
+      function setMetric(label, unit = 'reps') {
         const text = String(label || '').toLowerCase().replace(',', '.');
         const match = text.match(/\d+(?:\.\d+)?/);
         const value = match ? Number(match[0]) : 0;
-        let unit = 'повт';
-        if (/сек|\bс\b/.test(text)) unit = 'сек';
-        else if (/мин/.test(text)) unit = 'мин';
-        else if (/км/.test(text)) unit = 'км';
-        else if (/\bм\b/.test(text) && !/кг/.test(text)) unit = 'м';
-        return { unit, value };
+        if (unit === 'seconds' || /сек|\bс\b/.test(text)) return { unit: 'сек', value };
+        if (/мин/.test(text)) return { unit: 'мин', value };
+        if (/км/.test(text)) return { unit: 'км', value };
+        if (/\bм\b/.test(text) && !/кг/.test(text)) return { unit: 'м', value };
+        return { unit: 'повт', value };
       }
 
       function normalizeMetric(metric) {
@@ -923,12 +1274,12 @@
         return cleaned || 'Упражнение';
       }
 
-      function makeDonePayload(exerciseName, label) {
+      function makeDonePayload(exercise, label) {
         return {
-          exercise: exerciseName,
-          group: groupExerciseName(exerciseName),
-          label,
-          metric: setMetric(label),
+          exercise: exercise?.name || 'Упражнение',
+          group: groupExerciseName(exercise?.name),
+          label: label || defaultSetValue(exercise?.unit || 'reps', exercise?.name),
+          metric: setMetric(label, exercise?.unit),
           completedAt: new Date().toISOString()
         };
       }
@@ -971,86 +1322,280 @@
         return number.toLocaleString('ru-RU', { maximumFractionDigits: 1 });
       }
 
-      function updateLineSetCount(dateKey, exIndex, delta) {
+      function touchWeek(dateKey) {
         const week = getWeek(weekStartKeyForDate(dateKey));
-        const slot = slotForDate(dateKey);
-        const lines = String(week.days[slot] || '').split('\n');
-        const nonEmpty = lines.map((line, index) => ({ line, index })).filter(item => item.line.trim());
-        const target = nonEmpty[exIndex];
-        if (!target) return;
-        const parsed = parseLine(target.line.trim());
-        const sets = parsed.sets.slice();
-        if (delta > 0) sets.push(sets[sets.length - 1] || '10');
-        if (delta < 0 && sets.length > 1) sets.pop();
-        lines[target.index] = `${parsed.name} — ${sets.join('-')}`;
-        week.days[slot] = lines.join('\n');
         week.updatedAt = new Date().toISOString();
+        return week;
+      }
+
+      function setDayActive(dateKey, active) {
+        const day = getDay(dateKey);
+        day.active = Boolean(active);
+        if (!day.active) {
+          delete state.sessions[dateKey];
+          stopTimer();
+        }
+        openDateKey = dateKey;
+        touchWeek(dateKey);
         saveNow();
         render();
+      }
+
+      function updateExerciseName(dateKey, exIndex, name) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise) return;
+        exercise.name = String(name ?? '');
+        if (isPlankName(exercise.name)) {
+          exercise.unit = 'seconds';
+          exercise.sets = [exercise.sets[0] || '90'];
+        }
+        updateDoneExercise(dateKey, exIndex);
+        touchWeek(dateKey);
+        scheduleSave();
+      }
+
+      function updateExerciseUnit(dateKey, exIndex, unit) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise) return;
+        exercise.unit = unit === 'seconds' ? 'seconds' : 'reps';
+        exercise.sets = exercise.sets.map(value => normalizeSetLabel(value, exercise.unit));
+        if (!exercise.sets.length) exercise.sets = [defaultSetValue(exercise.unit, exercise.name)];
+        if (isSingleSecondExercise(exercise)) exercise.sets = [exercise.sets[0] || '90'];
+        updateDoneExercise(dateKey, exIndex);
+        cleanupSessionForDay(dateKey);
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
+      function updateSetLabel(dateKey, exIndex, setIndex, label) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise || !(setIndex in exercise.sets)) return;
+        exercise.sets[setIndex] = normalizeSetLabel(label, exercise.unit);
+        updateDoneSet(dateKey, exIndex, setIndex);
+        touchWeek(dateKey);
+        scheduleSave();
+      }
+
+      function updateDoneExercise(dateKey, exIndex) {
+        const session = state.sessions[dateKey];
+        const exercise = getDay(dateKey).exercises[exIndex];
+        if (!session?.done || !exercise) return;
+        Object.entries(session.done).forEach(([key, value]) => {
+          const [currentEx, setIndex] = key.split(':').map(Number);
+          if (currentEx !== exIndex || !value || typeof value !== 'object') return;
+          const label = exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name);
+          value.exercise = exercise.name || 'Упражнение';
+          value.group = groupExerciseName(exercise.name);
+          value.label = label;
+          value.metric = setMetric(label, exercise.unit);
+        });
+        session.updatedAt = new Date().toISOString();
+      }
+
+      function updateDoneSet(dateKey, exIndex, setIndex) {
+        const session = state.sessions[dateKey];
+        const key = `${exIndex}:${setIndex}`;
+        const value = session?.done?.[key];
+        const exercise = getDay(dateKey).exercises[exIndex];
+        if (!value || typeof value !== 'object' || !exercise) return;
+        const label = exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name);
+        value.exercise = exercise.name || 'Упражнение';
+        value.group = groupExerciseName(exercise.name);
+        value.label = label;
+        value.metric = setMetric(label, exercise.unit);
+        session.updatedAt = new Date().toISOString();
+      }
+
+      function addExercise(dateKey) {
+        const day = getDay(dateKey);
+        day.active = true;
+        day.exercises.push({ name: '', unit: 'reps', sets: ['10'] });
+        openDateKey = dateKey;
+        touchWeek(dateKey);
+        saveNow();
+        render();
+        setTimeout(() => {
+          const inputs = document.querySelectorAll(`input[data-field="exercise-name"][data-date="${dateKey}"]`);
+          inputs[inputs.length - 1]?.focus();
+        }, 40);
+      }
+
+      function removeExercise(dateKey, exIndex) {
+        const day = getDay(dateKey);
+        if (!day.exercises[exIndex]) return;
+        day.exercises.splice(exIndex, 1);
+        shiftSessionAfterExerciseRemoval(dateKey, exIndex);
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
+      function shiftSessionAfterExerciseRemoval(dateKey, removedExIndex) {
+        const session = state.sessions[dateKey];
+        if (!session?.done) return;
+        const nextDone = {};
+        Object.entries(session.done).forEach(([key, value]) => {
+          const [exIndex, setIndex] = key.split(':').map(Number);
+          if (exIndex < removedExIndex) nextDone[key] = value;
+          if (exIndex > removedExIndex) nextDone[`${exIndex - 1}:${setIndex}`] = value;
+        });
+        session.done = nextDone;
+        session.updatedAt = new Date().toISOString();
+        if (!Object.keys(session.done).length) delete state.sessions[dateKey];
+      }
+
+      function updateLineSetCount(dateKey, exIndex, delta) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise || isSingleSecondExercise(exercise)) return;
+        if (delta > 0) exercise.sets.push(exercise.sets[exercise.sets.length - 1] || defaultSetValue(exercise.unit, exercise.name));
+        if (delta < 0 && exercise.sets.length > 1) {
+          exercise.sets.pop();
+          cleanupSessionForDay(dateKey);
+        }
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
+      function adjustSetValue(dateKey, exIndex, setIndex, delta) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise || !(setIndex in exercise.sets)) return;
+        const current = Number(String(exercise.sets[setIndex]).match(/\d+(?:\.\d+)?/)?.[0] || 0);
+        const next = Math.max(0, current + Number(delta || 0));
+        exercise.sets[setIndex] = String(next);
+        updateDoneSet(dateKey, exIndex, setIndex);
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
+      function cleanupSessionForDay(dateKey) {
+        const session = state.sessions[dateKey];
+        if (!session?.done) return;
+        const day = getDay(dateKey);
+        Object.keys(session.done).forEach(key => {
+          const [exIndex, setIndex] = key.split(':').map(Number);
+          if (!day.active || !day.exercises[exIndex] || !(setIndex in day.exercises[exIndex].sets)) delete session.done[key];
+        });
+        session.updatedAt = new Date().toISOString();
+        if (!Object.keys(session.done).length) delete state.sessions[dateKey];
       }
 
       function toggleSet(dateKey, exIndex, setIndex) {
         const session = getSession(dateKey);
         const key = `${exIndex}:${setIndex}`;
-        if (session.done[key]) {
+        const wasDone = Boolean(session.done[key]);
+        if (wasDone) {
           delete session.done[key];
+          stopTimer();
         } else {
-          const week = getWeek(weekStartKeyForDate(dateKey));
-          const exercise = parseDayText(week.days[slotForDate(dateKey)])[exIndex];
-          const label = exercise?.sets?.[setIndex] || '✓';
-          session.done[key] = makeDonePayload(exercise?.name || 'Упражнение', label);
+          const exercise = getDay(dateKey).exercises[exIndex];
+          const label = exercise?.sets?.[setIndex] || defaultSetValue(exercise?.unit || 'reps', exercise?.name);
+          session.done[key] = makeDonePayload(exercise, label);
         }
         session.updatedAt = new Date().toISOString();
         if (!Object.keys(session.done).length) delete state.sessions[dateKey];
+        saveNow();
+
+        if (!wasDone && isDayComplete(dateKey)) {
+          stopTimer();
+          render();
+          return;
+        }
+
+        render();
+        if (!wasDone) startTimer();
+      }
+
+      function createNextEmptyWeek() {
+        const currentKey = weekStartKeyForOffset(weekOffset);
+        const nextKey = toDateKey(addDays(parseDateKey(currentKey), 7));
+        if (!state.weeks[nextKey]) {
+          state.weeks[nextKey] = makeWeek(emptyWeekDays());
+          toast('Создана пустая неделя');
+        } else {
+          toast('Неделя уже есть');
+        }
+        weekOffset += 1;
+        openDateKey = weekDates(nextKey)[0];
+        saveNow();
+        render();
+      }
+
+      function toggleTheme() {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        applyTheme();
         saveNow();
         render();
       }
 
       function handleAction(target) {
         const action = target.dataset.action;
-        if (action === 'view-week') { view = 'week'; render(); return; }
+        if (action === 'theme') { toggleTheme(); return; }
+        if (action === 'view-week') { view = 'week'; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
-        if (action === 'prev') { weekOffset -= 1; render(); return; }
-        if (action === 'next') { weekOffset += 1; render(); return; }
+        if (action === 'prev') { weekOffset -= 1; openDateKey = null; render(); return; }
+        if (action === 'next') { weekOffset += 1; openDateKey = null; render(); return; }
+        if (action === 'new-empty-week') { createNextEmptyWeek(); return; }
         if (action === 'prev-month') { monthOffset -= 1; render(); return; }
         if (action === 'next-month') { monthOffset += 1; render(); return; }
-        if (action === 'today') { view = 'week'; weekOffset = 0; monthOffset = 0; render(); setTimeout(() => document.querySelector('.day.today')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 40); return; }
+        if (action === 'open-day') { openDateKey = target.dataset.date; render(); return; }
+        if (action === 'set-day-active') { setDayActive(target.dataset.date, target.dataset.active === 'true'); return; }
         if (action === 'data') { openDataSheet(); return; }
         if (action === 'close-sheet') { closeSheet(); return; }
         if (action === 'copy-json') { copyJson(); return; }
         if (action === 'export-json') { exportJson(); return; }
         if (action === 'import-json') { importJson(); return; }
-        if (action === 'toggle') {
-          toggleSet(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set));
-          return;
-        }
+        if (action === 'add-exercise') { addExercise(target.dataset.date); return; }
+        if (action === 'remove-exercise') { removeExercise(target.dataset.date, Number(target.dataset.ex)); return; }
+        if (action === 'toggle') { toggleSet(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set)); return; }
         if (action === 'add-set' || action === 'remove-set') {
           updateLineSetCount(target.dataset.date, Number(target.dataset.ex), action === 'add-set' ? 1 : -1);
+          return;
+        }
+        if (action === 'adjust-set') {
+          adjustSetValue(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set), Number(target.dataset.delta));
         }
       }
 
       function handleInput(target) {
-        if (target.dataset.field !== 'day') return;
-        const week = getWeek(target.dataset.week);
-        week.days[Number(target.dataset.slot)] = target.value;
-        week.updatedAt = new Date().toISOString();
-        resizeTextarea(target);
-        scheduleSave();
+        const field = target.dataset.field;
+        if (field === 'exercise-name') {
+          updateExerciseName(target.dataset.date, Number(target.dataset.ex), target.value);
+          return;
+        }
+        if (field === 'set-label') {
+          updateSetLabel(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set), target.value);
+          updateSetButtonLabel(target);
+        }
       }
 
-      function handleTextareaBlur(target) {
-        if (target.dataset.field !== 'day') return;
+      function handleChange(target) {
+        if (target.dataset.field !== 'exercise-unit') return;
+        updateExerciseUnit(target.dataset.date, Number(target.dataset.ex), target.value);
+      }
+
+      function updateSetButtonLabel(input) {
+        const item = input.closest('.set-item');
+        const button = item?.querySelector('.set');
+        if (!button) return;
+        const done = button.classList.contains('done');
+        const unit = input.dataset.unit;
+        const text = unit === 'seconds' ? `${input.value || '0'}с` : input.value || '0';
+        button.textContent = `${done ? '✓ ' : ''}${text}`;
+      }
+
+      function handleBlur(target) {
+        const field = target.dataset.field;
+        if (field !== 'exercise-name' && field !== 'set-label') return;
         flushSave();
         render();
-      }
-
-      function resizeTextarea(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = `${Math.max(96, textarea.scrollHeight)}px`;
-      }
-
-      function resizeTextareas() {
-        document.querySelectorAll('textarea[data-field="day"]').forEach(resizeTextarea);
       }
 
       function openDataSheet() {
@@ -1111,6 +1656,7 @@
         const box = document.getElementById('jsonBox');
         try {
           state = normalize(JSON.parse(box.value));
+          applyTheme();
           saveNow();
           closeSheet();
           render();
@@ -1142,13 +1688,14 @@
       });
 
       document.addEventListener('input', event => handleInput(event.target));
-      document.addEventListener('blur', event => handleTextareaBlur(event.target), true);
+      document.addEventListener('change', event => handleChange(event.target));
+      document.addEventListener('blur', event => handleBlur(event.target), true);
       window.addEventListener('pagehide', flushSave);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
-      window.addEventListener('resize', () => requestAnimationFrame(resizeTextareas));
 
       registerServiceWorker();
       state = loadState();
+      applyTheme();
       getWeek(weekStartKeyForOffset(0));
       saveNow();
       render();
