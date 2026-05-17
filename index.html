@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f7f7f4">
+  <meta name="theme-color" content="#0f0f0e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="🏆 Спорт">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и сводка прогресса.">
@@ -17,75 +17,102 @@
   <title>🏆 Спорт</title>
   <style>
     :root {
-      color-scheme: light;
-      --bg: #f7f7f4;
-      --card: #ffffff;
-      --field: #ffffff;
-      --ink: #151515;
-      --muted: #77756f;
-      --line: #e4e1da;
-      --soft: #f1efe8;
-      --accent: #111111;
-      --accent-ink: #ffffff;
-      --done: #1f8f52;
-      --danger: #c9342f;
-      --shadow: rgba(0, 0, 0, 0.08);
-      --overlay: rgba(0, 0, 0, 0.22);
+      color-scheme: dark;
+      --bg: #090908;
+      --bg-2: #11100e;
+      --card: #181715;
+      --card-strong: #201f1c;
+      --field: #24231f;
+      --ink: #f7f1e8;
+      --muted: #aba49a;
+      --line: #35322c;
+      --soft: #24221e;
+      --accent: #f3c969;
+      --accent-2: #ff9f43;
+      --accent-ink: #15110a;
+      --done: #4dd982;
+      --danger: #ff6b62;
+      --shadow: rgba(0, 0, 0, 0.42);
+      --glow: rgba(243, 201, 105, 0.18);
+      --overlay: rgba(0, 0, 0, 0.68);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
     }
 
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg: #0f0f0e;
-      --card: #181817;
-      --field: #20201e;
-      --ink: #f3f1ed;
-      --muted: #a7a29a;
-      --line: #34332f;
-      --soft: #24231f;
-      --accent: #f3f1ed;
-      --accent-ink: #111111;
-      --done: #39b871;
-      --danger: #ff6b62;
-      --shadow: rgba(0, 0, 0, 0.34);
-      --overlay: rgba(0, 0, 0, 0.62);
-    }
-
     * { box-sizing: border-box; }
+
+    * { -webkit-tap-highlight-color: transparent; }
+
+    ::selection {
+      background: color-mix(in srgb, var(--accent) 35%, transparent);
+      color: var(--ink);
+    }
 
     html, body {
       margin: 0;
       min-height: 100%;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 18% -10%, rgba(243, 201, 105, 0.14), transparent 32rem),
+        radial-gradient(circle at 100% 6%, rgba(255, 159, 67, 0.09), transparent 24rem),
+        linear-gradient(180deg, var(--bg-2), var(--bg));
       color: var(--ink);
       -webkit-text-size-adjust: 100%;
     }
 
     body {
       min-height: 100dvh;
-      padding: 12px 12px calc(180px + var(--safe-bottom));
+      padding: 12px 12px calc(188px + var(--safe-bottom));
     }
 
     button, textarea, input, select { font: inherit; }
+
+    button, input, select, textarea { -webkit-appearance: none; appearance: none; }
 
     button {
       min-height: 42px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: var(--card);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--field) 92%, white), var(--field));
       color: var(--ink);
       padding: 0 14px;
-      font-weight: 750;
+      font-weight: 780;
+      letter-spacing: -0.01em;
       touch-action: manipulation;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
     }
 
     button:active { transform: scale(0.98); }
-    button.dark { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 36%, transparent);
+      outline-offset: 2px;
+    }
+    button.dark {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--accent-ink);
+      border-color: color-mix(in srgb, var(--accent) 68%, transparent);
+      box-shadow: 0 8px 22px var(--glow);
+    }
     button.danger { color: var(--danger); }
     button.small { min-height: 34px; padding: 0 10px; font-size: 0.9rem; }
     button.ghost { background: var(--soft); }
+
+    select {
+      padding-right: 30px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 15px) 52%,
+        calc(100% - 10px) 52%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
 
     input, textarea, select {
       border: 1px solid var(--line);
@@ -94,7 +121,10 @@
       color: var(--ink);
     }
 
-    input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
 
     .app {
       width: min(100%, 760px);
@@ -103,15 +133,22 @@
       gap: 12px;
     }
 
+    .week-days {
+      display: grid;
+      gap: 10px;
+    }
+
     .top {
       position: sticky;
       top: 0;
       z-index: 10;
       margin: -12px -12px 0;
       padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 10px;
-      background: color-mix(in srgb, var(--bg) 92%, transparent);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background:
+        radial-gradient(circle at 50% -30%, var(--glow), transparent 24rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-2) 97%, transparent), color-mix(in srgb, var(--bg-2) 82%, transparent));
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
       border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     }
 
@@ -159,8 +196,10 @@
       gap: 10px;
       padding: 10px 12px;
       border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--card-strong) 88%, var(--accent)), var(--card));
+      border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
     }
 
     .timer-bar span {
@@ -173,6 +212,8 @@
       font-size: 1.6rem;
       letter-spacing: -0.04em;
       font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--glow);
     }
 
     .pill {
@@ -190,10 +231,12 @@
     .pill.done { background: color-mix(in srgb, var(--done) 17%, var(--card)); color: var(--done); }
 
     .card {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      background: var(--card);
+      border: 1px solid color-mix(in srgb, var(--line) 92%, white);
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
       overflow: hidden;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.24), 0 1px 0 rgba(255, 255, 255, 0.035) inset;
     }
 
     .day {
@@ -201,13 +244,13 @@
     }
 
     .day.current {
-      border-color: var(--accent);
-      box-shadow: 0 8px 28px var(--shadow);
+      border-color: color-mix(in srgb, var(--accent) 72%, var(--line));
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32), 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent) inset;
     }
 
     .day-toggle {
       width: 100%;
-      min-height: 58px;
+      min-height: 60px;
       padding: 14px;
       border: 0;
       border-radius: 0;
@@ -217,6 +260,19 @@
 
     .day-toggle:active { transform: none; }
     .day-toggle h2 { flex: 1 1 auto; }
+    .day-toggle .chevron {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.92rem;
+      transition: transform 0.16s ease;
+    }
+    .day.open .chevron { transform: rotate(180deg); }
 
     .day-body {
       display: grid;
@@ -242,8 +298,9 @@
       display: block;
       height: 100%;
       width: var(--value, 0%);
-      background: var(--done);
+      background: linear-gradient(90deg, var(--done), color-mix(in srgb, var(--done) 68%, var(--accent)));
       border-radius: inherit;
+      box-shadow: 0 0 16px color-mix(in srgb, var(--done) 34%, transparent);
     }
 
     .exercises {
@@ -254,28 +311,30 @@
     .exercise {
       display: grid;
       gap: 10px;
-      padding: 10px;
-      border-radius: 16px;
-      background: color-mix(in srgb, var(--field) 72%, var(--soft));
-      border: 1px solid var(--line);
+      padding: 11px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--field) 84%, white), color-mix(in srgb, var(--field) 72%, var(--soft)));
+      border: 1px solid color-mix(in srgb, var(--line) 86%, white);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     }
 
-    .exercise.done { background: color-mix(in srgb, var(--done) 12%, var(--card)); border-color: color-mix(in srgb, var(--done) 34%, var(--line)); }
+    .exercise.done { background: linear-gradient(180deg, color-mix(in srgb, var(--done) 16%, var(--card)), color-mix(in srgb, var(--done) 10%, var(--card))); border-color: color-mix(in srgb, var(--done) 42%, var(--line)); }
 
     .exercise-name {
       flex: 1 1 160px;
       min-width: 0;
-      min-height: 42px;
-      border-radius: 13px;
+      min-height: 44px;
+      border-radius: 14px;
       padding: 0 12px;
       font-weight: 800;
       letter-spacing: -0.015em;
     }
 
     .unit-select {
-      min-height: 42px;
+      min-height: 44px;
       border-radius: 999px;
-      padding: 0 12px;
+      padding: 0 30px 0 12px;
       font-weight: 800;
     }
 
@@ -287,25 +346,26 @@
 
     .set-item {
       display: inline-grid;
-      grid-template-columns: auto 62px;
+      grid-template-columns: auto 64px;
       gap: 5px;
       align-items: center;
       padding: 4px;
       border-radius: 999px;
-      background: var(--field);
+      background: color-mix(in srgb, var(--field) 78%, black);
       border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.035) inset;
     }
 
     .set-item.timed {
-      grid-template-columns: auto auto 62px auto;
+      grid-template-columns: auto auto 64px auto;
     }
 
     .set {
-      min-width: 50px;
-      min-height: 38px;
+      min-width: 52px;
+      min-height: 40px;
       border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--field);
+      border: 1px solid color-mix(in srgb, var(--line) 84%, white);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--field) 92%, white), var(--field));
       color: var(--ink);
       padding: 0 12px;
       display: inline-flex;
@@ -324,8 +384,8 @@
     }
 
     .set-input {
-      width: 62px;
-      min-height: 38px;
+      width: 64px;
+      min-height: 40px;
       border-radius: 999px;
       text-align: center;
       padding: 0 6px;
@@ -356,10 +416,13 @@
       display: grid;
       gap: 8px;
       padding: 10px 12px calc(10px + var(--safe-bottom));
-      background: color-mix(in srgb, var(--bg) 94%, transparent);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background:
+        radial-gradient(circle at 50% 0, rgba(243, 201, 105, 0.11), transparent 18rem),
+        color-mix(in srgb, var(--bg) 94%, transparent);
+      backdrop-filter: blur(18px) saturate(1.16);
+      -webkit-backdrop-filter: blur(18px) saturate(1.16);
       border-top: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
+      box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.36);
     }
 
     .bottom-week {
@@ -405,9 +468,10 @@
       display: grid;
       gap: 3px;
       padding: 12px;
-      border-radius: 16px;
-      background: var(--card);
-      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
+      border: 1px solid color-mix(in srgb, var(--line) 92%, white);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
     }
 
     .mini-card strong {
@@ -425,9 +489,10 @@
       display: grid;
       gap: 10px;
       padding: 12px;
-      border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
+      border: 1px solid color-mix(in srgb, var(--line) 92%, white);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
     }
 
     .stat-head strong {
@@ -484,12 +549,13 @@
     .sheet-card {
       width: min(100%, 760px);
       margin: 0 auto;
-      border-radius: 22px;
-      background: var(--card);
+      border-radius: 24px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
+      border: 1px solid var(--line);
       padding: 14px;
       display: grid;
       gap: 10px;
-      box-shadow: 0 18px 60px rgba(0,0,0,0.32);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.42);
     }
 
     .json-box {
@@ -528,12 +594,34 @@
       .exercise { background: var(--soft); }
     }
 
+    @media (max-width: 420px) {
+      h1 { font-size: 1.34rem; }
+      .top-actions button { min-height: 38px; padding-inline: 12px; }
+      .exercise-head { display: grid; grid-template-columns: 1fr auto; }
+      .exercise-name { grid-column: 1 / -1; width: 100%; }
+      .set-row { display: grid; grid-template-columns: 1fr; }
+      .set-item,
+      .set-item.timed { display: grid; grid-template-columns: 1fr 64px; width: 100%; border-radius: 20px; }
+      .set-item.timed { grid-template-columns: auto 1fr 64px auto; }
+      .set { width: 100%; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+
     @media (min-width: 720px) {
       body { padding-top: 18px; }
       .day-body { padding: 0 16px 16px; }
       .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .day.open { grid-column: 1 / -1; }
       .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
     }
   </style>
 </head>
@@ -649,7 +737,7 @@
         return {
           version: 5,
           id: uid(),
-          theme: 'light',
+          theme: 'dark',
           weeks: { [startKey]: makeWeek(SAMPLE) },
           sessions: {},
           updatedAt: new Date().toISOString()
@@ -688,7 +776,7 @@
         return {
           version: 5,
           id: next.id || uid(),
-          theme: next.theme === 'dark' ? 'dark' : 'light',
+          theme: 'dark',
           weeks,
           sessions: cleanSessions(next.sessions),
           updatedAt: next.updatedAt || new Date().toISOString()
@@ -868,9 +956,8 @@
       }
 
       function applyTheme() {
-        const theme = state?.theme === 'dark' ? 'dark' : 'light';
-        document.documentElement.dataset.theme = theme;
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0f0f0e' : '#f7f7f4');
+        document.documentElement.dataset.theme = 'dark';
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0f0f0e');
       }
 
       function saveNow() {
@@ -981,7 +1068,6 @@
                   <p class="muted tiny">${escapeHtml(subtitle)}</p>
                 </div>
                 <div class="top-actions">
-                  <button data-action="theme" type="button">${state.theme === 'dark' ? 'Светлая' : 'Тёмная'}</button>
                   <button data-action="data" type="button">JSON</button>
                 </div>
               </div>
@@ -1030,13 +1116,14 @@
         const end = dates[6];
 
         if (!dates.includes(openDateKey)) {
-          openDateKey = weekOffset === 0 ? todayKey() : dates[0];
+          openDateKey = weekOffset === 0 && dates.includes(todayKey()) ? todayKey() : dates[6];
         }
+        const visibleDates = [...dates].reverse();
 
         document.getElementById('app').innerHTML = `
           ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
           <section class="week-days">
-            ${dates.map(dateKey => renderDay(dateKey, week)).join('')}
+            ${visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
           </section>
           ${renderBottomNav()}
         `;
@@ -1051,8 +1138,9 @@
         const complete = progress.total && progress.checked === progress.total;
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
-            <button class="day-toggle" data-action="open-day" data-date="${dateKey}" type="button">
+            <button class="day-toggle" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
               <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
+              <span class="chevron" aria-hidden="true">⌄</span>
             </button>
             ${isOpen ? `
               <div class="day-body">
@@ -1523,25 +1611,17 @@
           toast('Неделя уже есть');
         }
         weekOffset += 1;
-        openDateKey = weekDates(nextKey)[0];
-        saveNow();
-        render();
-      }
-
-      function toggleTheme() {
-        state.theme = state.theme === 'dark' ? 'light' : 'dark';
-        applyTheme();
+        openDateKey = weekDates(nextKey)[6];
         saveNow();
         render();
       }
 
       function handleAction(target) {
         const action = target.dataset.action;
-        if (action === 'theme') { toggleTheme(); return; }
         if (action === 'view-week') { view = 'week'; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
-        if (action === 'prev') { weekOffset -= 1; openDateKey = null; render(); return; }
-        if (action === 'next') { weekOffset += 1; openDateKey = null; render(); return; }
+        if (action === 'prev') { weekOffset -= 1; openDateKey = weekDates(weekStartKeyForOffset(weekOffset))[6]; render(); return; }
+        if (action === 'next') { weekOffset += 1; openDateKey = weekDates(weekStartKeyForOffset(weekOffset))[6]; render(); return; }
         if (action === 'new-empty-week') { createNextEmptyWeek(); return; }
         if (action === 'prev-month') { monthOffset -= 1; render(); return; }
         if (action === 'next-month') { monthOffset += 1; render(); return; }
