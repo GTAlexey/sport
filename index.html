@@ -3,40 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f0f0e">
+  <meta name="theme-color" content="#0b0b0d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="🏆 Спорт">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.8">
-  <link rel="icon" href="icon.svg?v=1.0.8" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.8" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.8">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.9">
+  <link rel="icon" href="icon.svg?v=1.0.9" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.9" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.9">
   <title>🏆 Спорт</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #080807;
-      --bg-2: #11100e;
-      --card: #181612;
-      --card-strong: #201c16;
-      --field: #211e18;
-      --ink: #f7f0e8;
-      --muted: #aaa094;
-      --line: #393226;
-      --soft: #201d17;
+      --bg: #0b0b0d;
+      --bg-2: #121214;
+      --card: #1c1c1e;
+      --card-strong: #242428;
+      --field: #2c2c2e;
+      --ink: #f5f5f7;
+      --muted: #a1a1a6;
+      --line: #3a3a3c;
+      --soft: #171719;
       --accent: #ff6a00;
       --accent-2: #ff8a1f;
-      --accent-ink: #fff3e8;
-      --done: #86c58a;
-      --danger: #df7969;
-      --shadow: rgba(0, 0, 0, 0.46);
-      --glow: rgba(255, 106, 0, 0.24);
-      --overlay: rgba(0, 0, 0, 0.72);
+      --accent-ink: #fff7f0;
+      --done: #34c759;
+      --danger: #ff6b5f;
+      --shadow: rgba(0, 0, 0, 0.32);
+      --glow: rgba(255, 106, 0, 0.18);
+      --overlay: rgba(0, 0, 0, 0.62);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
     }
 
@@ -53,8 +53,8 @@
       margin: 0;
       min-height: 100%;
       background:
-        radial-gradient(circle at 18% -10%, rgba(255, 45, 53, 0.2), transparent 32rem),
-        radial-gradient(circle at 100% 6%, rgba(255, 106, 31, 0.12), transparent 24rem),
+        radial-gradient(circle at 20% -14%, rgba(255, 106, 0, 0.16), transparent 30rem),
+        radial-gradient(circle at 100% 4%, rgba(255, 138, 31, 0.1), transparent 24rem),
         linear-gradient(180deg, var(--bg-2), var(--bg));
       color: var(--ink);
       -webkit-text-size-adjust: 100%;
@@ -62,7 +62,7 @@
 
     body {
       min-height: 100dvh;
-      padding: 6px 8px calc(112px + var(--safe-bottom));
+      padding: 12px 10px calc(136px + var(--safe-bottom));
     }
 
     button, textarea, input, select { font: inherit; }
@@ -70,18 +70,18 @@
     button, input, select, textarea { -webkit-appearance: none; appearance: none; }
 
     button {
-      min-height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
+      min-height: 44px;
+      border: 1px solid color-mix(in srgb, var(--line) 86%, white);
+      border-radius: 14px;
       background: color-mix(in srgb, var(--field) 88%, black);
       color: var(--ink);
-      padding: 0 9px;
-      font-weight: 500;
-      letter-spacing: -0.01em;
+      padding: 0 14px;
+      font-weight: 590;
+      letter-spacing: -0.012em;
       touch-action: manipulation;
       cursor: pointer;
       transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.035) inset;
       user-select: none;
     }
 
@@ -118,7 +118,7 @@
       box-shadow: 0 7px 18px var(--glow);
     }
     button.danger { color: var(--danger); }
-    button.small { min-height: 28px; padding: 0 8px; font-size: 0.8rem; }
+    button.small { min-height: 44px; padding: 0 12px; font-size: 0.86rem; }
     button.ghost { background: color-mix(in srgb, var(--soft) 78%, black); }
 
     select {
@@ -149,12 +149,12 @@
       width: min(100%, 760px);
       margin: 0 auto;
       display: grid;
-      gap: 6px;
+      gap: 10px;
     }
 
     .week-days {
       display: grid;
-      gap: 6px;
+      gap: 10px;
     }
 
     .top {
@@ -242,6 +242,18 @@
 
     .muted { color: var(--muted); }
     .tiny { font-size: 0.82rem; line-height: 1.35; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
 
     .timer-bar {
       flex: 0 0 auto;
@@ -354,24 +366,34 @@
       color: var(--accent-ink);
     }
 
-    .add-day-grid {
+    .add-day-form {
       display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 6px;
+      gap: 10px;
     }
 
-    .add-day-grid button {
-      min-height: 48px;
-      padding: 6px 4px;
-      display: grid;
-      gap: 2px;
-      place-items: center;
-      line-height: 1.1;
+    .add-day-field {
+      min-height: 50px;
+      width: 100%;
+      border-radius: 16px;
+      padding: 0 14px;
+      font-size: 1rem;
+      letter-spacing: -0.015em;
     }
 
-    .add-day-grid small {
-      color: var(--muted);
-      font-size: 0.72rem;
+    .add-day-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .add-day-actions button {
+      width: 100%;
+    }
+
+    .add-day-help {
+      display: block;
+      min-height: 1.2em;
     }
 
     .empty-week-card {
@@ -941,7 +963,6 @@
       .day-body,
       .add-day-card,
       .empty-week-card { padding-inline: 12px; }
-      .add-day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .exercise { padding: 10px; border-radius: 16px; }
       .exercise-head { display: grid; grid-template-columns: 1fr auto; }
       .exercise-name { grid-column: 1 / -1; width: 100%; }
@@ -1007,7 +1028,7 @@
       let view = 'week';
       let weekOffset = 0;
       let openDateKey = todayKey();
-      let showAddDayPicker = false;
+      let showAddDayForm = false;
       let saveTimer = null;
       let toastTimer = null;
       let timerStartedAt = null;
@@ -1128,7 +1149,7 @@
       }
 
       function emptyDay() {
-        return { active: false, exercises: [] };
+        return { active: false, label: '', exercises: [] };
       }
 
       function emptyWeekDays() {
@@ -1215,12 +1236,13 @@
       function cleanDay(day) {
         if (typeof day === 'string') {
           const exercises = textToExercises(day);
-          return { active: exercises.length > 0, exercises };
+          return { active: exercises.length > 0, label: '', exercises };
         }
         if (!day || typeof day !== 'object') return emptyDay();
         const exercises = (Array.isArray(day.exercises) ? day.exercises : []).map(cleanExercise).filter(Boolean);
         const active = typeof day.active === 'boolean' ? day.active : exercises.length > 0;
-        return { active, exercises };
+        const label = String(day.label ?? '').trim().slice(0, 64);
+        return { active, label, exercises };
       }
 
       function cleanExercise(exercise) {
@@ -1360,7 +1382,7 @@
 
       function applyTheme() {
         document.documentElement.dataset.theme = 'dark';
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0f0f0e');
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0b0b0d');
       }
 
       function saveNow() {
@@ -1409,7 +1431,7 @@
       }
 
       function hasDayContent(day) {
-        return Boolean(day?.active || day?.exercises?.length);
+        return Boolean(day?.active || day?.exercises?.length || String(day?.label || '').trim());
       }
 
       function dayProgress(dateKey) {
@@ -1531,8 +1553,8 @@
         document.getElementById('app').innerHTML = `
           ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
           <section class="week-days">
-            ${visibleDates.length ? visibleDates.map(dateKey => renderDay(dateKey, week)).join('') : renderEmptyWeek(!showAddDayPicker)}
-            ${showAddDayPicker ? renderAddDayPicker(dates, week) : (visibleDates.length ? renderAddDayButton() : '')}
+            ${visibleDates.length ? visibleDates.map(dateKey => renderDay(dateKey, week)).join('') : renderEmptyWeek(!showAddDayForm)}
+            ${showAddDayForm ? renderAddDayForm(dates, week) : (visibleDates.length ? renderAddDayButton() : '')}
           </section>
           ${renderBottomNav()}
         `;
@@ -1543,7 +1565,7 @@
           <article class="card empty-week-card">
             <div>
               <h2>Пока нет тренировочных дней</h2>
-              <p>Неделя не забита пустыми карточками. Нажми «Добавить день» и выбери только нужный день.</p>
+              <p>Неделя не забита пустыми карточками. Нажми «Добавить день» и введи название тренировки вручную.</p>
             </div>
             ${showButton ? '<button class="dark" data-action="show-add-day" type="button">+ Добавить день</button>' : ''}
           </article>
@@ -1556,28 +1578,29 @@
         `;
       }
 
-      function renderAddDayPicker(dates, week) {
-        const options = dates
-          .filter(dateKey => !hasDayContent(week.days[slotForDate(dateKey)]))
-          .map(dateKey => {
-            const slot = slotForDate(dateKey);
-            return `
-              <button data-action="add-day" data-date="${dateKey}" type="button">
-                <strong>${SHORT[slot]}</strong>
-                <small>${formatCompactDate(dateKey)}</small>
-              </button>
-            `;
-          })
-          .join('');
+      function renderAddDayForm(dates, week) {
+        const availableCount = dates.filter(dateKey => !hasDayContent(week.days[slotForDate(dateKey)])).length;
 
         return `
           <article class="card add-day-card">
             <div class="add-day-head">
-              <h2>Добавить день</h2>
-              <span class="muted tiny">Выбери день недели — только он появится в списке.</span>
+              <h2>Новый тренировочный день</h2>
+              <span class="muted tiny">Назови день вручную: «Спина», «Ноги», «День A». Пустые дни останутся скрытыми.</span>
             </div>
-            ${options ? `<div class="add-day-grid">${options}</div>` : '<div class="empty">Все дни этой недели уже добавлены.</div>'}
-            <button data-action="hide-add-day" type="button">Скрыть выбор</button>
+            ${availableCount ? `
+              <form class="add-day-form" data-form="add-day">
+                <label class="visually-hidden" for="addDayLabel">Название тренировочного дня</label>
+                <input id="addDayLabel" class="add-day-field" name="dayLabel" autocomplete="off" enterkeyhint="done" maxlength="64" placeholder="Например: Спина" aria-describedby="addDayHelp" required autofocus>
+                <div class="add-day-actions">
+                  <button class="dark" type="submit">Добавить день</button>
+                  <button data-action="hide-add-day" type="button">Отмена</button>
+                </div>
+                <small id="addDayHelp" class="add-day-help muted tiny">Создам ближайший свободный слот этой недели и открою его для упражнений.</small>
+              </form>
+            ` : `
+              <div class="empty">Все семь дней этой недели уже добавлены.</div>
+              <button data-action="hide-add-day" type="button">Закрыть</button>
+            `}
           </article>
         `;
       }
@@ -1593,24 +1616,18 @@
           <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
             <button class="day-toggle" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
               <span class="day-title">
-                <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
+                <h2>${escapeHtml(day.label || `${SHORT[slot]} · ${formatDate(dateKey, true)}`)}</h2>
                 <span class="day-meta">${progress.checked}/${progress.total || 0} подходов${complete ? ' · готово' : ''}</span>
               </span>
             </button>
             ${isOpen ? `
               <div class="day-body">
-                ${day.active ? `
-                  <div class="day-body-top">
-                    <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
-                    ${complete ? '<div class="title-row"><span class="pill done">готово</span></div>' : ''}
-                  </div>
-                  ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : ''}
-                  <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ упражнение</button>
-                  <button class="danger" data-action="set-day-active" data-active="false" data-date="${dateKey}" type="button">Убрать тренировочный день</button>
-                ` : `
-                  <div class="empty">В этот день нет тренировки.</div>
-                  <button class="make-training dark" data-action="set-day-active" data-active="true" data-date="${dateKey}" type="button">Сделать тренировочным</button>
-                `}
+                <div class="day-body-top">
+                  <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
+                  ${complete ? '<div class="title-row"><span class="pill done">готово</span></div>' : ''}
+                </div>
+                ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
+                <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ упражнение</button>
               </div>
             ` : ''}
           </article>
@@ -2070,17 +2087,45 @@
         const day = getDay(dateKey);
         day.active = Boolean(active);
         if (!day.active) {
+          day.label = '';
           day.exercises = [];
           delete state.sessions[dateKey];
           stopTimer();
           if (openDateKey === dateKey) openDateKey = '';
         } else {
           openDateKey = dateKey;
-          showAddDayPicker = false;
+          showAddDayForm = false;
         }
         touchWeek(dateKey);
         saveNow();
         render();
+      }
+
+      function addCustomDay(label) {
+        const weekKey = weekStartKeyForOffset(weekOffset);
+        const dates = weekDates(weekKey);
+        const week = getWeek(weekKey);
+        const today = todayKey();
+        const startIndex = dates.includes(today) ? dates.indexOf(today) : 0;
+        const orderedDates = [...dates.slice(startIndex), ...dates.slice(0, startIndex)];
+        const dateKey = orderedDates.find(key => !hasDayContent(week.days[slotForDate(key)]));
+        if (!dateKey) {
+          toast('В этой неделе уже 7 дней');
+          showAddDayForm = false;
+          render();
+          return;
+        }
+
+        const day = getDay(dateKey);
+        day.active = true;
+        day.label = String(label || '').trim().slice(0, 64) || 'Тренировка';
+        day.exercises = Array.isArray(day.exercises) ? day.exercises : [];
+        openDateKey = dateKey;
+        showAddDayForm = false;
+        touchWeek(dateKey);
+        saveNow();
+        render();
+        setTimeout(() => document.querySelector(`[data-action="add-exercise"][data-date="${dateKey}"]`)?.focus(), 40);
       }
 
       function updateExerciseName(dateKey, exIndex, name) {
@@ -2265,15 +2310,27 @@
         if (!wasDone) startTimer();
       }
 
+      function handleSubmit(form) {
+        if (form.dataset.form !== 'add-day') return;
+        const input = form.elements.dayLabel;
+        const label = String(input?.value || '').trim();
+        if (!label) {
+          input?.focus();
+          toast('Введи название дня');
+          return;
+        }
+        addCustomDay(label);
+      }
+
       function handleAction(target) {
         const action = target.dataset.action;
-        if (action === 'view-week') { view = 'week'; showAddDayPicker = false; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
+        if (action === 'view-week') { view = 'week'; showAddDayForm = false; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
-        if (action === 'prev') { weekOffset -= 1; openDateKey = ''; showAddDayPicker = false; render(); return; }
-        if (action === 'next') { weekOffset += 1; openDateKey = ''; showAddDayPicker = false; render(); return; }
-        if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayPicker = false; render(); return; }
-        if (action === 'show-add-day') { showAddDayPicker = true; openDateKey = ''; render(); return; }
-        if (action === 'hide-add-day') { showAddDayPicker = false; render(); return; }
+        if (action === 'prev') { weekOffset -= 1; openDateKey = ''; showAddDayForm = false; render(); return; }
+        if (action === 'next') { weekOffset += 1; openDateKey = ''; showAddDayForm = false; render(); return; }
+        if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
+        if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
+        if (action === 'hide-add-day') { showAddDayForm = false; render(); return; }
         if (action === 'add-day') { setDayActive(target.dataset.date, true); return; }
         if (action === 'set-day-active') { setDayActive(target.dataset.date, target.dataset.active === 'true'); return; }
         if (action === 'data') { openDataSheet(); return; }
@@ -2403,7 +2460,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.8', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.9', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -2470,6 +2527,12 @@
         handleAction(target);
       });
 
+      document.addEventListener('submit', event => {
+        const form = event.target.closest('form[data-form]');
+        if (!form) return;
+        event.preventDefault();
+        handleSubmit(form);
+      });
       document.addEventListener('input', event => handleInput(event.target));
       document.addEventListener('change', event => handleChange(event.target));
       document.addEventListener('blur', event => handleBlur(event.target), true);
