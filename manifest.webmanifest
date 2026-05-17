@@ -1,15 +1,15 @@
 {
-  "name": "Спорт-неделя",
+  "name": "Спорт",
   "short_name": "Спорт",
-  "description": "Автономная спортивная неделя с локальным сохранением тренировок.",
+  "description": "Автономные спортивные недели, кнопки-подходы и сводка прогресса.",
   "lang": "ru",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f4f7fb",
-  "theme_color": "#0f172a",
+  "background_color": "#f7f7f4",
+  "theme_color": "#f7f7f4",
   "categories": ["health", "fitness", "productivity"],
   "icons": [
     {

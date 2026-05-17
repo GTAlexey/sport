@@ -3,43 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#f7f7f4">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Спорт-неделя">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Спорт">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Спорт-неделя">
-  <meta name="description" content="Автономная спортивная неделя с локальным сохранением тренировок.">
+  <meta name="application-name" content="Спорт">
+  <meta name="description" content="Спортивные недели, кнопки-подходы и сводка прогресса.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icon-180.png">
-  <title>Спорт-неделя</title>
+  <title>Спорт</title>
   <style>
     :root {
       color-scheme: light;
-      --bg: #f4f7fb;
-      --bg-strong: #e8eef8;
-      --panel: rgba(255, 255, 255, 0.92);
-      --panel-solid: #ffffff;
-      --ink: #111827;
-      --muted: #6b7280;
-      --muted-2: #94a3b8;
-      --line: rgba(15, 23, 42, 0.1);
-      --accent: #2563eb;
-      --accent-2: #0f766e;
-      --accent-soft: rgba(37, 99, 235, 0.12);
-      --success: #059669;
-      --success-soft: rgba(5, 150, 105, 0.12);
-      --warning: #d97706;
-      --warning-soft: rgba(217, 119, 6, 0.14);
-      --danger: #dc2626;
-      --danger-soft: rgba(220, 38, 38, 0.12);
-      --shadow: 0 18px 55px rgba(15, 23, 42, 0.12);
-      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
-      --radius-lg: 28px;
-      --radius: 20px;
-      --radius-sm: 14px;
+      --bg: #f7f7f4;
+      --card: #ffffff;
+      --ink: #151515;
+      --muted: #77756f;
+      --line: #e4e1da;
+      --soft: #f1efe8;
+      --accent: #111111;
+      --done: #1f8f52;
+      --danger: #c9342f;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
@@ -47,727 +34,427 @@
 
     * { box-sizing: border-box; }
 
-    html {
+    html, body {
+      margin: 0;
       min-height: 100%;
       background: var(--bg);
+      color: var(--ink);
       -webkit-text-size-adjust: 100%;
     }
 
     body {
       min-height: 100dvh;
-      margin: 0;
-      background:
-        radial-gradient(circle at 8% 0%, rgba(59, 130, 246, 0.22), transparent 34%),
-        radial-gradient(circle at 96% 8%, rgba(20, 184, 166, 0.18), transparent 30%),
-        linear-gradient(180deg, #f8fbff 0%, var(--bg) 48%, #eef3fb 100%);
-      color: var(--ink);
-      overscroll-behavior-y: contain;
+      padding: 12px 12px calc(24px + var(--safe-bottom));
     }
 
-    body.drag-active {
-      user-select: none;
-      -webkit-user-select: none;
-      cursor: grabbing;
-    }
-
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
-
-    button,
-    .tap-target {
-      min-height: 44px;
-    }
+    button, textarea, input { font: inherit; }
 
     button {
-      border: 0;
+      min-height: 42px;
+      border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 0.72rem 1rem;
-      background: #eef2ff;
-      color: #1e3a8a;
-      font-weight: 750;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      background: var(--card);
+      color: var(--ink);
+      padding: 0 14px;
+      font-weight: 700;
+      touch-action: manipulation;
     }
 
     button:active { transform: scale(0.98); }
-    button:focus-visible,
-    input:focus-visible,
-    textarea:focus-visible,
-    select:focus-visible {
-      outline: 3px solid rgba(37, 99, 235, 0.32);
-      outline-offset: 2px;
-    }
+    button.dark { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button.danger { color: var(--danger); }
+    button.small { min-height: 32px; padding: 0 10px; font-size: 0.9rem; }
 
-    button.primary {
-      background: linear-gradient(135deg, #2563eb, #0f766e);
-      color: #ffffff;
-      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.25);
-    }
-
-    button.secondary {
-      background: #ffffff;
-      color: var(--ink);
-      border: 1px solid var(--line);
-    }
-
-    button.success { background: var(--success); color: #ffffff; }
-    button.warning { background: var(--warning-soft); color: #92400e; }
-    button.danger { background: var(--danger-soft); color: #991b1b; }
-    button.ghost { background: transparent; color: var(--muted); }
-    button.small { min-height: 36px; padding: 0.45rem 0.72rem; font-size: 0.88rem; }
-    button.square { width: 44px; padding: 0; display: inline-grid; place-items: center; }
-
-    input,
-    textarea,
-    select {
-      width: 100%;
-      min-height: 44px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.92);
-      color: var(--ink);
-      padding: 0.72rem 0.82rem;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 88px;
-      line-height: 1.45;
-    }
-
-    input[type="checkbox"] {
-      width: 24px;
-      height: 24px;
-      min-height: 24px;
-      padding: 0;
-      accent-color: var(--success);
-    }
-
-    .app-shell {
-      width: min(100%, 1320px);
+    .app {
+      width: min(100%, 760px);
       margin: 0 auto;
+      display: grid;
+      gap: 12px;
     }
 
-    .main {
-      padding: 18px 16px calc(94px + var(--safe-bottom));
-    }
-
-    .topbar {
+    .top {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 10;
+      margin: -12px -12px 0;
+      padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 10px;
+      background: rgba(247, 247, 244, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(228, 225, 218, 0.8);
+    }
+
+    .top-inner {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .title-row,
+    .week-row,
+    .day-head,
+    .exercise-head,
+    .toolbar,
+    .tabs,
+    .stat-head,
+    .stat-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin: -18px -16px 16px;
-      padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      background: rgba(248, 251, 255, 0.78);
-      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-    }
-
-    .brand {
-      min-width: 0;
-    }
-
-    .brand h1,
-    .view-title {
-      margin: 0;
-      font-size: clamp(1.25rem, 4vw, 2rem);
-      line-height: 1.05;
-      letter-spacing: -0.045em;
-    }
-
-    .brand p,
-    .subtitle {
-      margin: 0.25rem 0 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.3;
-    }
-
-    .device-badge {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
       gap: 8px;
-      border-radius: 999px;
-      padding: 0.55rem 0.75rem;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 750;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .device-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 0 4px var(--success-soft);
-    }
-
-    .side-nav { display: none; }
-
-    .bottom-nav {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: calc(10px + var(--safe-bottom));
-      z-index: 30;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      padding: 8px;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.2);
-    }
-
-    .nav-btn {
-      min-height: 54px;
-      border-radius: 18px;
-      padding: 0.35rem 0.25rem;
-      background: transparent;
-      color: var(--muted);
-      font-size: 0.76rem;
-      line-height: 1.1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .nav-btn strong {
-      font-size: 1rem;
-      line-height: 1;
-      font-weight: 900;
-    }
-
-    .nav-btn.active {
-      background: var(--accent-soft);
-      color: #1d4ed8;
-    }
-
-    .section-stack {
-      display: grid;
-      gap: 14px;
-    }
-
-    .card {
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: var(--radius);
-      background: var(--panel);
-      box-shadow: var(--shadow-soft);
-      overflow: hidden;
-    }
-
-    .card.pad { padding: 16px; }
-    .card.soft { background: rgba(255, 255, 255, 0.65); box-shadow: none; }
-
-    .hero {
-      position: relative;
-      padding: 18px;
-      border-radius: var(--radius-lg);
-      background:
-        linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 64, 175, 0.86)),
-        radial-gradient(circle at top right, rgba(20, 184, 166, 0.28), transparent 34%);
-      color: #ffffff;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 170px;
-      height: 170px;
-      right: -70px;
-      top: -50px;
-      border-radius: 50%;
-      border: 30px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .hero > * { position: relative; z-index: 1; }
-    .hero .subtitle { color: rgba(255, 255, 255, 0.72); }
-
-    .hero-row,
-    .split-row,
-    .actions-row,
-    .inline-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
       flex-wrap: wrap;
     }
 
-    .hero-row { justify-content: space-between; }
-    .actions-row { margin-top: 14px; }
-    .actions-row button { flex: 1 1 auto; }
-
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .metric {
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.86);
-      border: 1px solid rgba(15, 23, 42, 0.07);
-    }
-
-    .metric.dark {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.14);
-      color: #ffffff;
-    }
-
-    .metric-label {
-      color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: 750;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .metric.dark .metric-label { color: rgba(255, 255, 255, 0.68); }
-    .metric-value {
-      margin-top: 5px;
-      font-size: clamp(1.35rem, 5vw, 2.1rem);
-      line-height: 1;
-      font-weight: 900;
-      letter-spacing: -0.05em;
-    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 1.45rem; letter-spacing: -0.04em; }
+    h2 { font-size: 1.06rem; letter-spacing: -0.02em; }
+    h3 { font-size: 1rem; letter-spacing: -0.02em; }
 
     .muted { color: var(--muted); }
-    .small-text { font-size: 0.86rem; line-height: 1.4; }
-    .tiny-text { font-size: 0.76rem; line-height: 1.35; }
-    .strong { font-weight: 850; }
-
+    .tiny { font-size: 0.82rem; line-height: 1.35; }
     .pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      width: fit-content;
       border-radius: 999px;
-      padding: 0.42rem 0.66rem;
-      background: #eef2ff;
-      color: #1e3a8a;
+      padding: 5px 9px;
+      background: var(--soft);
+      color: var(--muted);
       font-size: 0.8rem;
       font-weight: 800;
       white-space: nowrap;
     }
+    .pill.today { background: #111; color: #fff; }
+    .pill.done { background: #e3f7ea; color: var(--done); }
 
-    .pill.success { background: var(--success-soft); color: #047857; }
-    .pill.warning { background: var(--warning-soft); color: #92400e; }
-    .pill.danger { background: var(--danger-soft); color: #991b1b; }
-    .pill.gray { background: #f1f5f9; color: #475569; }
-    .pill.dark { background: rgba(255,255,255,0.12); color: #ffffff; }
+    .tabs { justify-content: flex-start; }
+    .tabs button { flex: 1 1 0; }
 
-    .progress-track {
-      width: 100%;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.22);
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--card);
       overflow: hidden;
     }
 
-    .progress-fill {
-      height: 100%;
-      width: var(--value, 0%);
-      border-radius: inherit;
-      background: linear-gradient(90deg, #22c55e, #2563eb);
-      transition: width 0.25s ease;
-    }
-
-    .hero .progress-track { background: rgba(255, 255, 255, 0.16); }
-
-    .exercise-list,
-    .week-list,
-    .day-selector,
-    .history-list {
+    .day {
       display: grid;
       gap: 10px;
-    }
-
-    .exercise-card,
-    .week-card,
-    .editor-day-card,
-    .exercise-editor-card,
-    .set-editor-row,
-    .history-item {
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.82);
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-    }
-
-    .exercise-card { padding: 14px; }
-    .exercise-card.completed { border-color: rgba(5, 150, 105, 0.25); background: rgba(236, 253, 245, 0.78); }
-
-    .exercise-head,
-    .week-head,
-    .editor-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .exercise-head h3,
-    .card h2,
-    .card h3,
-    .week-card h3,
-    .editor-day-card h3,
-    .exercise-editor-card h3 {
-      margin: 0;
-      letter-spacing: -0.03em;
-    }
-
-    .sets-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .set-line {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
-      align-items: start;
-      padding: 10px;
-      border-radius: 14px;
-      background: rgba(248, 250, 252, 0.92);
-      border: 1px solid rgba(15, 23, 42, 0.06);
-    }
-
-    .set-line.done {
-      background: rgba(220, 252, 231, 0.72);
-      border-color: rgba(5, 150, 105, 0.16);
-    }
-
-    .set-fields {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .set-fields input { min-height: 40px; padding: 0.55rem 0.64rem; }
-
-    .label {
-      display: grid;
-      gap: 5px;
-      color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: 750;
-    }
-
-    .label span { padding-left: 2px; }
-
-    .week-card,
-    .editor-day-card,
-    .history-item {
       padding: 14px;
     }
 
-    .week-card.today {
-      border-color: rgba(37, 99, 235, 0.28);
-      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+    .day.today {
+      border-color: #111;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
     }
 
-    .week-card.selected,
-    .editor-day-card.selected {
-      border-color: rgba(15, 118, 110, 0.35);
-      background: rgba(240, 253, 250, 0.86);
-    }
-
-    .week-card.rest,
-    .editor-day-card.rest {
-      background: rgba(248, 250, 252, 0.82);
-      color: #475569;
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .three-col {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .exercise-editor-card {
-      padding: 12px;
-    }
-
-    .exercise-editor-top {
-      display: grid;
-      grid-template-columns: 44px 1fr;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .drag-handle {
-      width: 44px;
-      height: 44px;
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      border: 0;
+      outline: 0;
+      resize: vertical;
       border-radius: 14px;
+      background: #fafaf8;
+      color: var(--ink);
+      padding: 12px;
+      line-height: 1.42;
+      font-size: 1rem;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    textarea:focus { background: #fff; box-shadow: inset 0 0 0 2px #111; }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      overflow: hidden;
+    }
+    .progress > i {
+      display: block;
+      height: 100%;
+      width: var(--value, 0%);
+      background: var(--done);
+      border-radius: inherit;
+    }
+
+    .exercises {
       display: grid;
-      place-items: center;
-      background: #f1f5f9;
-      color: #475569;
-      font-weight: 900;
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
+      gap: 8px;
     }
 
-    .is-dragging {
-      opacity: 0.55;
-      transform: scale(0.995);
-      box-shadow: 0 20px 55px rgba(15, 23, 42, 0.22);
-    }
-
-    .set-editor-row {
+    .exercise {
+      display: grid;
+      gap: 8px;
       padding: 10px;
-      display: grid;
-      grid-template-columns: 44px 1fr;
-      gap: 8px;
-      align-items: start;
+      border-radius: 15px;
+      background: #fafaf8;
+      border: 1px solid var(--line);
     }
 
-    .set-editor-row .drag-handle {
-      width: 44px;
-      height: 44px;
-      min-height: 44px;
-      font-size: 0.9rem;
+    .exercise.done { background: #f0fbf4; border-color: #ccebd8; }
+
+    .set-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
     }
 
-    .set-edit-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+    .set {
+      min-width: 44px;
+      min-height: 40px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .set.done {
+      background: var(--done);
+      color: #fff;
+      border-color: var(--done);
+      box-shadow: 0 5px 16px rgba(31, 143, 82, 0.28);
     }
 
     .empty {
-      padding: 18px;
-      border: 1px dashed rgba(15, 23, 42, 0.18);
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.52);
+      padding: 10px 0;
       color: var(--muted);
-      text-align: center;
+      font-size: 0.92rem;
     }
 
-    .chart-list {
+    .toolbar { justify-content: flex-start; }
+
+    .summary {
+      display: grid;
+      gap: 12px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mini-card {
+      display: grid;
+      gap: 3px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+
+    .mini-card strong {
+      font-size: 1.45rem;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .stat-card {
       display: grid;
       gap: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
     }
 
-    .chart-row {
-      display: grid;
-      gap: 6px;
+    .stat-head strong {
+      font-size: 1.28rem;
+      letter-spacing: -0.035em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
-    .chart-row-head {
+    .stat-meta { justify-content: flex-start; color: var(--muted); }
+
+    .week-chips {
       display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 0.9rem;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
     }
 
+    .week-chip {
+      flex: 0 0 auto;
+      min-width: 74px;
+      display: grid;
+      gap: 2px;
+      padding: 7px 9px;
+      border-radius: 13px;
+      background: #f0fbf4;
+      color: var(--done);
+      font-size: 0.76rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .week-chip.empty {
+      background: var(--soft);
+      color: var(--muted);
+      opacity: 0.75;
+    }
+
+    .week-chip b { color: inherit; font-size: 0.72rem; }
+
+    .sheet {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(0,0,0,0.22);
+      padding: 16px;
+      align-items: end;
+    }
+    .sheet.show { display: grid; }
+    .sheet-card {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      border-radius: 22px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.22);
+    }
     .json-box {
-      min-height: 180px;
+      min-height: 220px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.78rem;
       white-space: pre;
     }
 
-    .notice {
-      padding: 12px;
-      border-radius: 16px;
-      background: #fffbeb;
-      color: #92400e;
-      border: 1px solid rgba(217, 119, 6, 0.16);
-    }
-
-    .notice.info {
-      background: #eff6ff;
-      color: #1e40af;
-      border-color: rgba(37, 99, 235, 0.14);
-    }
-
-    .notice.success {
-      background: #ecfdf5;
-      color: #047857;
-      border-color: rgba(5, 150, 105, 0.14);
-    }
-
     .toast {
       position: fixed;
-      left: 16px;
-      right: 16px;
-      bottom: calc(92px + var(--safe-bottom));
+      left: 14px;
+      right: 14px;
+      bottom: calc(14px + var(--safe-bottom));
       z-index: 50;
       padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(15, 23, 42, 0.92);
-      color: #ffffff;
-      box-shadow: var(--shadow);
-      transform: translateY(18px);
+      border-radius: 16px;
+      background: #111;
+      color: #fff;
       opacity: 0;
+      transform: translateY(14px);
       pointer-events: none;
-      transition: 0.2s ease;
+      transition: 0.18s ease;
+      text-align: center;
+      font-weight: 700;
     }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .hidden { display: none !important; }
+    .toast.show { opacity: 1; transform: translateY(0); }
 
     @media (min-width: 720px) {
-      .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .set-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .set-edit-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    }
-
-    @media (min-width: 980px) {
-      .app-shell {
-        display: grid;
-        grid-template-columns: 280px minmax(0, 1fr);
-        min-height: 100dvh;
-      }
-
-      .side-nav {
-        position: sticky;
-        top: 0;
-        height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        padding: 24px 18px;
-      }
-
-      .side-card {
-        padding: 18px;
-        border-radius: 28px;
-        background: rgba(255, 255, 255, 0.72);
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        box-shadow: var(--shadow-soft);
-      }
-
-      .side-nav-list {
-        display: grid;
-        gap: 8px;
-      }
-
-      .side-nav .nav-btn {
-        min-height: 52px;
-        flex-direction: row;
-        justify-content: flex-start;
-        padding: 0.75rem 0.9rem;
-        font-size: 0.95rem;
-      }
-
-      .side-nav .nav-btn strong { width: 24px; text-align: center; }
-
-      .bottom-nav { display: none; }
-
-      .main {
-        padding: 24px 24px 46px;
-        min-width: 0;
-      }
-
-      .topbar {
-        margin: 0 0 18px;
-        padding: 0 0 18px;
-        background: transparent;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
-
-      .layout-two {
-        display: grid;
-        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-        gap: 16px;
-        align-items: start;
-      }
-
-      .layout-editor {
-        display: grid;
-        grid-template-columns: 320px minmax(0, 1fr);
-        gap: 16px;
-        align-items: start;
-      }
-
-      .toast {
-        left: auto;
-        right: 24px;
-        bottom: 24px;
-        max-width: 420px;
-      }
+      body { padding-top: 18px; }
+      .day { padding: 16px; }
+      .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .day.today { grid-column: 1 / -1; }
+      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
   </style>
 </head>
 <body>
-  <div id="app"></div>
+  <main id="app" class="app"></main>
+  <div id="sheet" class="sheet" aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
     (() => {
       'use strict';
 
-      const STORAGE_KEY = 'sport-week-planner.state.v1';
-      const BACKUP_KEY = 'sport-week-planner.backup.v1';
-      const WEEKDAYS = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
-      const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-      const CATEGORIES = ['Силовая', 'Кардио', 'Мобилити', 'Корпус', 'Растяжка', 'Другое'];
+      const STORAGE_KEY = 'sport-notes.state.v3';
+      const OLD_SIMPLE_KEY = 'sport-notes.state.v2';
+      const OLD_KEY = 'sport-week-planner.state.v1';
+      const SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+      const SAMPLE = [
+        'Подтягивания прямым +5 кг — 4-4-4-4-4\nБрусья +5 кг — 8-8-8-8\nШея статика — 30-30-30-30 сек\nПланка — 90 сек',
+        '',
+        'Отжимания в стойке — 4-4-4-4-4\nВис на турнике — 70+ сек\nСведения лопаток — 20-20\nПриседания с отягощением — 20-20-20\nГолени — 30-30-30',
+        '',
+        'Подтягивания обратным — 6-6-6-6-6\nОтжимания на кулаках — 12-12-12-12\nПриседания — 35-35\nПланка — 90 сек',
+        '',
+        ''
+      ];
 
       let state;
-      let storageAvailable = true;
-      let storageMessage = '';
-      let toastTimer = null;
+      let view = 'week';
+      let weekOffset = 0;
+      let monthOffset = 0;
       let saveTimer = null;
-      const ui = {
-        view: 'today',
-        selectedDateKey: todayKey(),
-        weekOffset: 0,
-        editorSlot: slotIndexForDateKey(todayKey())
-      };
+      let toastTimer = null;
 
-      function uid(prefix) {
-        return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      function uid() {
+        return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
       }
 
-      function clone(value) {
-        return JSON.parse(JSON.stringify(value));
+      function todayKey() {
+        return toDateKey(new Date());
+      }
+
+      function toDateKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+
+      function parseDateKey(key) {
+        const [y, m, d] = String(key).split('-').map(Number);
+        return new Date(y, m - 1, d);
+      }
+
+      function addDays(date, days) {
+        const copy = new Date(date);
+        copy.setDate(copy.getDate() + days);
+        return copy;
+      }
+
+      function startOfWeek(date = new Date()) {
+        const copy = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diff = (copy.getDay() + 6) % 7;
+        copy.setDate(copy.getDate() - diff);
+        return copy;
+      }
+
+      function weekStartKeyForDate(dateKey) {
+        return toDateKey(startOfWeek(parseDateKey(dateKey)));
+      }
+
+      function weekStartKeyForOffset(offset = 0) {
+        const start = startOfWeek(new Date());
+        start.setDate(start.getDate() + offset * 7);
+        return toDateKey(start);
+      }
+
+      function weekDates(startKey) {
+        const start = parseDateKey(startKey);
+        return Array.from({ length: 7 }, (_, i) => toDateKey(addDays(start, i)));
+      }
+
+      function prevWeekKey(startKey) {
+        return toDateKey(addDays(parseDateKey(startKey), -7));
+      }
+
+      function slotForDate(dateKey) {
+        return (parseDateKey(dateKey).getDay() + 6) % 7;
+      }
+
+      function formatDate(dateKey, long = false) {
+        return new Intl.DateTimeFormat('ru-RU', long ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'short' }).format(parseDateKey(dateKey));
+      }
+
+      function formatMonth(date) {
+        return new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(date);
       }
 
       function escapeHtml(value) {
@@ -779,1774 +466,691 @@
           .replace(/'/g, '&#039;');
       }
 
-      function attr(value) {
-        return escapeHtml(value).replace(/`/g, '&#096;');
+      function cleanDays(days) {
+        const next = Array.isArray(days) ? days.slice(0, 7).map(v => String(v ?? '')) : [];
+        while (next.length < 7) next.push('');
+        return next;
       }
 
-      function asNumber(value, fallback = null) {
-        if (value === '' || value === null || value === undefined) return fallback;
-        const normalized = typeof value === 'string'
-          ? value.trim().replace(/\s+/g, '').replace(/,/g, '.')
-          : value;
-        if (normalized === '' || normalized === '.' || normalized === ',') return fallback;
-        const number = Number(normalized);
-        return Number.isFinite(number) && number >= 0 ? number : fallback;
-      }
-
-      function formatNumber(value, digits = 0) {
-        if (!Number.isFinite(value)) return '0';
-        return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: digits }).format(value);
-      }
-
-      function toDateKey(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-
-      function todayKey() {
-        return toDateKey(new Date());
-      }
-
-      function parseDateKey(dateKey) {
-        const [year, month, day] = dateKey.split('-').map(Number);
-        return new Date(year, month - 1, day);
-      }
-
-      function addDays(dateOrKey, amount) {
-        const date = typeof dateOrKey === 'string' ? parseDateKey(dateOrKey) : new Date(dateOrKey);
-        date.setDate(date.getDate() + amount);
-        return date;
-      }
-
-      function startOfWeek(dateOrKey = new Date()) {
-        const date = typeof dateOrKey === 'string' ? parseDateKey(dateOrKey) : new Date(dateOrKey);
-        const local = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        const diff = (local.getDay() - 1 + 7) % 7;
-        local.setDate(local.getDate() - diff);
-        return local;
-      }
-
-      function slotIndexForDateKey(dateKey) {
-        const day = parseDateKey(dateKey).getDay();
-        return (day + 6) % 7;
-      }
-
-      function formatDate(dateKey, mode = 'short') {
-        const date = parseDateKey(dateKey);
-        const options = mode === 'long'
-          ? { weekday: 'long', day: 'numeric', month: 'long' }
-          : { day: 'numeric', month: 'short' };
-        return new Intl.DateTimeFormat('ru-RU', options).format(date);
-      }
-
-      function isPast(dateKey) {
-        return dateKey < todayKey();
-      }
-
-      function isFuture(dateKey) {
-        return dateKey > todayKey();
-      }
-
-      function weekDates(offset = 0) {
-        const start = startOfWeek(new Date());
-        start.setDate(start.getDate() + offset * 7);
-        return Array.from({ length: 7 }, (_, index) => toDateKey(addDays(start, index)));
-      }
-
-      function makeSet(reps = 10, weight = null) {
+      function makeWeek(days) {
         return {
-          id: uid('set'),
-          targetReps: reps,
-          targetWeight: weight,
-          targetDurationMin: null,
-          targetDistanceKm: null,
-          notes: ''
-        };
-      }
-
-      function makeExercise(name = 'Новое упражнение', setsCount = 3, reps = 10) {
-        return {
-          id: uid('ex'),
-          name,
-          category: 'Силовая',
-          notes: '',
-          sets: Array.from({ length: setsCount }, () => makeSet(reps))
+          days: cleanDays(days),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
       }
 
       function defaultState() {
-        const now = new Date().toISOString();
-        const startKey = toDateKey(startOfWeek(new Date()));
-        const days = WEEKDAYS.map((title, slotIndex) => ({
-          id: uid('day'),
-          slotIndex,
-          title,
-          kind: 'rest',
-          notes: '',
-          exercises: []
-        }));
-
-        days[0] = {
-          ...days[0],
-          title: 'Верх тела',
-          kind: 'workout',
-          notes: 'Рабочий темп, без отказа в первых подходах.',
-          exercises: [
-            makeExercise('Отжимания', 3, 12),
-            makeExercise('Тяга гантели в наклоне', 3, 10),
-            makeExercise('Планка', 3, null)
-          ]
-        };
-        days[0].exercises[2].sets.forEach(set => { set.targetDurationMin = 1; set.targetReps = null; });
-
-        days[2] = {
-          ...days[2],
-          title: 'Ноги и корпус',
-          kind: 'workout',
-          notes: 'Разминка 7 минут перед первым упражнением.',
-          exercises: [
-            makeExercise('Приседания', 4, 10),
-            makeExercise('Выпады', 3, 12),
-            makeExercise('Скручивания', 3, 15)
-          ]
-        };
-
-        days[4] = {
-          ...days[4],
-          title: 'Full body',
-          kind: 'workout',
-          notes: 'Лёгкая прогрессия: добавить 1-2 повтора, если было легко.',
-          exercises: [
-            makeExercise('Жим гантелей', 3, 10),
-            makeExercise('Румынская тяга', 3, 10),
-            makeExercise('Бёрпи', 3, 8)
-          ]
-        };
-
+        const startKey = weekStartKeyForDate(todayKey());
         return {
-          schemaVersion: 1,
-          createdAt: now,
-          updatedAt: now,
-          settings: {
-            locale: 'ru-RU',
-            units: 'metric',
-            weekStartsOn: 1,
-            confirmBeforeDelete: true
-          },
-          program: {
-            id: uid('program'),
-            name: 'Моя спортивная неделя',
-            startDateKey: startKey,
-            days
-          },
-          sessionsByDateKey: {},
-          meta: {
-            lastExportAt: null
-          }
+          version: 3,
+          id: uid(),
+          weeks: { [startKey]: makeWeek(SAMPLE) },
+          sessions: {},
+          updatedAt: new Date().toISOString()
         };
-      }
-
-      function normalizeState(raw) {
-        const base = defaultState();
-        const next = raw && typeof raw === 'object' ? raw : base;
-        next.schemaVersion = 1;
-        next.createdAt = next.createdAt || base.createdAt;
-        next.updatedAt = next.updatedAt || new Date().toISOString();
-        next.settings = { ...base.settings, ...(next.settings || {}) };
-        next.program = next.program && typeof next.program === 'object' ? next.program : base.program;
-        next.program.id = next.program.id || uid('program');
-        next.program.name = next.program.name || 'Моя спортивная неделя';
-        next.program.startDateKey = next.program.startDateKey || base.program.startDateKey;
-        next.program.days = Array.isArray(next.program.days) ? next.program.days.slice(0, 7) : [];
-
-        while (next.program.days.length < 7) {
-          const slotIndex = next.program.days.length;
-          next.program.days.push({
-            id: uid('day'),
-            slotIndex,
-            title: WEEKDAYS[slotIndex],
-            kind: 'rest',
-            notes: '',
-            exercises: []
-          });
-        }
-
-        next.program.days = next.program.days.map((day, slotIndex) => ({
-          id: day.id || uid('day'),
-          slotIndex,
-          title: day.title || WEEKDAYS[slotIndex],
-          kind: day.kind === 'workout' ? 'workout' : 'rest',
-          notes: day.notes || '',
-          exercises: Array.isArray(day.exercises) ? day.exercises.map(ex => ({
-            id: ex.id || uid('ex'),
-            name: ex.name || 'Упражнение',
-            category: ex.category || 'Другое',
-            notes: ex.notes || '',
-            sets: Array.isArray(ex.sets) && ex.sets.length ? ex.sets.map(set => ({
-              id: set.id || uid('set'),
-              targetReps: set.targetReps ?? null,
-              targetWeight: set.targetWeight ?? null,
-              targetDurationMin: set.targetDurationMin ?? null,
-              targetDistanceKm: set.targetDistanceKm ?? null,
-              notes: set.notes || ''
-            })) : [makeSet()]
-          })) : []
-        }));
-
-        next.sessionsByDateKey = normalizeSessions(next.sessionsByDateKey);
-        next.meta = { ...(base.meta || {}), ...(next.meta || {}) };
-        return next;
-      }
-
-      function isDateKey(value) {
-        return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
-      }
-
-      function normalizeSessions(sessions) {
-        if (!sessions || typeof sessions !== 'object' || Array.isArray(sessions)) return {};
-        return Object.entries(sessions).reduce((acc, [dateKey, session]) => {
-          if (!isDateKey(dateKey) || !session || typeof session !== 'object') return acc;
-          const normalized = normalizeSession(session, dateKey);
-          if (normalized) acc[dateKey] = normalized;
-          return acc;
-        }, {});
-      }
-
-      function normalizeSession(session, dateKey) {
-        const allowedStatuses = new Set(['in_progress', 'completed', 'partial', 'skipped']);
-        const exercises = Array.isArray(session.exercises) ? session.exercises : [];
-        return {
-          id: session.id || uid('session'),
-          dateKey,
-          source: session.source || 'template',
-          dayTemplateId: session.dayTemplateId || '',
-          status: allowedStatuses.has(session.status) ? session.status : 'in_progress',
-          titleSnapshot: session.titleSnapshot || 'Тренировка',
-          kindSnapshot: session.kindSnapshot === 'rest' ? 'rest' : 'workout',
-          startedAt: session.startedAt || new Date().toISOString(),
-          completedAt: session.completedAt || null,
-          durationSec: asNumber(session.durationSec, null),
-          notes: session.notes || '',
-          exercises: exercises.map(ex => ({
-            id: ex?.id || uid('logex'),
-            templateExerciseId: ex?.templateExerciseId || '',
-            nameSnapshot: ex?.nameSnapshot || 'Упражнение',
-            categorySnapshot: ex?.categorySnapshot || 'Другое',
-            notes: ex?.notes || '',
-            sets: Array.isArray(ex?.sets) ? ex.sets.map(set => ({
-              id: set?.id || uid('logset'),
-              templateSetId: set?.templateSetId || '',
-              targetReps: asNumber(set?.targetReps, null),
-              targetWeight: asNumber(set?.targetWeight, null),
-              targetDurationMin: asNumber(set?.targetDurationMin, null),
-              targetDistanceKm: asNumber(set?.targetDistanceKm, null),
-              completed: Boolean(set?.completed),
-              actualReps: asNumber(set?.actualReps, null),
-              actualWeight: asNumber(set?.actualWeight, null),
-              actualDurationMin: asNumber(set?.actualDurationMin, null),
-              actualDistanceKm: asNumber(set?.actualDistanceKm, null),
-              notes: set?.notes || ''
-            })) : []
-          }))
-        };
-      }
-
-      function checkStorage() {
-        try {
-          const key = '__sport_week_storage_test__';
-          localStorage.setItem(key, '1');
-          localStorage.removeItem(key);
-          storageAvailable = true;
-          storageMessage = 'Локальное сохранение работает.';
-        } catch (error) {
-          storageAvailable = false;
-          storageMessage = 'localStorage недоступен. Данные будут жить только до перезагрузки страницы.';
-        }
       }
 
       function loadState() {
-        checkStorage();
-        if (!storageAvailable) return defaultState();
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
-          if (!saved) return defaultState();
-          return normalizeState(JSON.parse(saved));
-        } catch (error) {
-          storageMessage = 'Сохранение повреждено. Создана новая программа, старую можно попробовать восстановить из backup.';
-          return defaultState();
-        }
-      }
+          if (saved) return normalize(JSON.parse(saved));
+        } catch (_) {}
 
-      function saveState({ silent = false } = {}) {
-        state.updatedAt = new Date().toISOString();
-        if (!storageAvailable) {
-          if (!silent) showToast('Хранилище недоступно: изменения не переживут перезагрузку.');
-          return;
-        }
         try {
-          const previous = localStorage.getItem(STORAGE_KEY);
-          if (previous) localStorage.setItem(BACKUP_KEY, previous);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          storageMessage = 'Изменения сохранены в памяти браузера.';
-        } catch (error) {
-          storageMessage = 'Не удалось сохранить данные. Сделайте экспорт JSON.';
-          if (!silent) showToast('Не удалось сохранить. Экспортируйте JSON, чтобы не потерять данные.');
+          const saved = localStorage.getItem(OLD_SIMPLE_KEY);
+          if (saved) return normalize(JSON.parse(saved));
+        } catch (_) {}
+
+        const migrated = migrateOldState();
+        if (migrated) return migrated;
+
+        return defaultState();
+      }
+
+      function normalize(raw) {
+        const fallback = defaultState();
+        const next = raw && typeof raw === 'object' ? raw : fallback;
+        const currentWeek = weekStartKeyForDate(todayKey());
+        const weeks = cleanWeeks(next.weeks);
+
+        if (!Object.keys(weeks).length) {
+          weeks[currentWeek] = makeWeek(cleanDays(next.days || SAMPLE));
+        }
+
+        return {
+          version: 3,
+          id: next.id || uid(),
+          weeks,
+          sessions: cleanSessions(next.sessions),
+          updatedAt: next.updatedAt || new Date().toISOString()
+        };
+      }
+
+      function cleanWeeks(rawWeeks) {
+        const weeks = {};
+        if (!rawWeeks || typeof rawWeeks !== 'object' || Array.isArray(rawWeeks)) return weeks;
+        Object.entries(rawWeeks).forEach(([startKey, week]) => {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(startKey)) return;
+          weeks[startKey] = makeWeek(week?.days || SAMPLE);
+          weeks[startKey].createdAt = week?.createdAt || weeks[startKey].createdAt;
+          weeks[startKey].updatedAt = week?.updatedAt || weeks[startKey].updatedAt;
+        });
+        return weeks;
+      }
+
+      function cleanSessions(rawSessions) {
+        const sessions = {};
+        if (!rawSessions || typeof rawSessions !== 'object' || Array.isArray(rawSessions)) return sessions;
+        Object.entries(rawSessions).forEach(([dateKey, session]) => {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return;
+          const done = {};
+          const rawDone = session?.done && typeof session.done === 'object' ? session.done : {};
+          Object.entries(rawDone).forEach(([key, value]) => {
+            if (!/^\d+:\d+$/.test(key) || !value) return;
+            done[key] = typeof value === 'object' ? value : true;
+          });
+          if (Object.keys(done).length) {
+            sessions[dateKey] = { done, updatedAt: session?.updatedAt || new Date().toISOString() };
+          }
+        });
+        return sessions;
+      }
+
+      function migrateOldState() {
+        try {
+          const saved = localStorage.getItem(OLD_KEY);
+          if (!saved) return null;
+          const old = JSON.parse(saved);
+          const days = cleanDays(old?.program?.days?.map(oldDayToText));
+          const sessions = {};
+          Object.entries(old?.sessionsByDateKey || {}).forEach(([dateKey, session]) => {
+            const done = {};
+            (session?.exercises || []).forEach((ex, exIndex) => {
+              (ex?.sets || []).forEach((set, setIndex) => {
+                if (set?.completed) {
+                  const label = oldSetLabel(set);
+                  done[`${exIndex}:${setIndex}`] = makeDonePayload(ex?.name || 'Упражнение', label);
+                }
+              });
+            });
+            if (Object.keys(done).length) sessions[dateKey] = { done, updatedAt: new Date().toISOString() };
+          });
+          return normalize({ days, sessions });
+        } catch (_) {
+          return null;
         }
       }
 
-      function scheduleSave({ silent = true } = {}) {
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => saveState({ silent }), 220);
+      function oldDayToText(day) {
+        if (!day || day.kind !== 'workout') return '';
+        return (day.exercises || []).map(ex => {
+          const sets = (ex.sets || []).map(oldSetLabel).join('-');
+          return `${ex.name || 'Упражнение'}${sets ? ` — ${sets}` : ''}`;
+        }).join('\n');
       }
 
-      function flushSave({ silent = true } = {}) {
+      function oldSetLabel(set) {
+        if (set?.targetReps !== null && set?.targetReps !== undefined) return String(set.targetReps);
+        if (set?.targetDurationMin !== null && set?.targetDurationMin !== undefined) return `${set.targetDurationMin} мин`;
+        if (set?.targetDistanceKm !== null && set?.targetDistanceKm !== undefined) return `${set.targetDistanceKm} км`;
+        return '✓';
+      }
+
+      function saveNow() {
+        state.updatedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveNow, 180);
+      }
+
+      function flushSave() {
         clearTimeout(saveTimer);
         saveTimer = null;
-        saveState({ silent });
+        saveNow();
       }
 
-      function showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+      function copyBaseDaysFor(startKey) {
+        const previous = state.weeks[prevWeekKey(startKey)];
+        if (previous) return previous.days;
+        const earlier = Object.keys(state.weeks).filter(key => key < startKey).sort().pop();
+        if (earlier) return state.weeks[earlier].days;
+        const latest = Object.keys(state.weeks).sort().pop();
+        if (latest) return state.weeks[latest].days;
+        return SAMPLE;
       }
 
-      function registerServiceWorker() {
-        if (!('serviceWorker' in navigator)) return;
-        if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(() => {
-            storageMessage = 'Офлайн-режим не удалось включить. Сохранение данных всё равно работает локально.';
-          });
+      function getWeek(startKey) {
+        if (!state.weeks[startKey]) {
+          state.weeks[startKey] = makeWeek(copyBaseDaysFor(startKey));
+          scheduleSave();
+        }
+        return state.weeks[startKey];
+      }
+
+      function getExistingWeek(startKey) {
+        return state.weeks[startKey] || null;
+      }
+
+      function getSession(dateKey) {
+        if (!state.sessions[dateKey]) state.sessions[dateKey] = { done: {}, updatedAt: new Date().toISOString() };
+        if (!state.sessions[dateKey].done) state.sessions[dateKey].done = {};
+        return state.sessions[dateKey];
+      }
+
+      function readSession(dateKey) {
+        return state.sessions[dateKey] || { done: {} };
+      }
+
+      function parseDayText(text) {
+        return String(text || '')
+          .split('\n')
+          .map(line => line.trim())
+          .filter(Boolean)
+          .map(parseLine);
+      }
+
+      function parseLine(line) {
+        const match = line.match(/^(.*?)(?:\s+[—–-]\s+)(.+)$/);
+        const name = (match ? match[1] : line).trim();
+        const tail = (match ? match[2] : '').trim();
+        const sets = tail ? splitSets(tail) : ['✓'];
+        return { raw: line, name, sets };
+      }
+
+      function splitSets(tail) {
+        if (!tail) return ['✓'];
+        const normalized = tail.replace(/[–—]/g, '-');
+        if (!normalized.includes('-')) return [tail.trim()];
+        const parts = normalized.split('-').map(v => v.trim()).filter(Boolean);
+        if (!parts.length) return [tail.trim()];
+        const suffix = tail.match(/\s(сек|с|мин|км|м)$/i)?.[1];
+        return parts.map((part, index) => {
+          if (index === parts.length - 1 || !suffix || /[а-яa-z]/i.test(part)) return part;
+          return `${part} ${suffix}`;
         });
       }
 
-      function getDayForDate(dateKey) {
-        return state.program.days[slotIndexForDateKey(dateKey)];
-      }
-
-      function getDayBySlot(slot) {
-        return state.program.days[slot];
-      }
-
-      function setSummary(set) {
-        const parts = [];
-        if (set.targetReps !== null && set.targetReps !== '') parts.push(`${formatNumber(Number(set.targetReps))} повт.`);
-        if (set.targetWeight !== null && set.targetWeight !== '') parts.push(`${formatNumber(Number(set.targetWeight), 1)} кг`);
-        if (set.targetDurationMin !== null && set.targetDurationMin !== '') parts.push(`${formatNumber(Number(set.targetDurationMin), 1)} мин`);
-        if (set.targetDistanceKm !== null && set.targetDistanceKm !== '') parts.push(`${formatNumber(Number(set.targetDistanceKm), 2)} км`);
-        return parts.length ? parts.join(' · ') : 'свободно';
-      }
-
-      function exerciseTargetSummary(exercise) {
-        const count = exercise.sets?.length || 0;
-        if (!count) return 'без подходов';
-        const first = exercise.sets[0];
-        const allSame = exercise.sets.every(set => JSON.stringify({
-          r: set.targetReps ?? null,
-          w: set.targetWeight ?? null,
-          t: set.targetDurationMin ?? null,
-          d: set.targetDistanceKm ?? null
-        }) === JSON.stringify({
-          r: first.targetReps ?? null,
-          w: first.targetWeight ?? null,
-          t: first.targetDurationMin ?? null,
-          d: first.targetDistanceKm ?? null
+      function dayProgress(dateKey) {
+        const week = getWeek(weekStartKeyForDate(dateKey));
+        const exercises = parseDayText(week.days[slotForDate(dateKey)]);
+        const done = readSession(dateKey).done;
+        let total = 0;
+        let checked = 0;
+        exercises.forEach((ex, exIndex) => ex.sets.forEach((_, setIndex) => {
+          total += 1;
+          if (done[`${exIndex}:${setIndex}`]) checked += 1;
         }));
-        return allSame ? `${count} × ${setSummary(first)}` : `${count} подхода, разные цели`;
-      }
-
-      function createSessionFromTemplate(dateKey, status = 'in_progress') {
-        const day = getDayForDate(dateKey);
-        return {
-          id: uid('session'),
-          dateKey,
-          source: 'template',
-          dayTemplateId: day.id,
-          status,
-          titleSnapshot: day.title,
-          kindSnapshot: day.kind,
-          startedAt: new Date().toISOString(),
-          completedAt: null,
-          durationSec: null,
-          notes: '',
-          exercises: day.kind === 'workout' ? day.exercises.map(ex => ({
-            id: uid('logex'),
-            templateExerciseId: ex.id,
-            nameSnapshot: ex.name,
-            categorySnapshot: ex.category,
-            notes: ex.notes || '',
-            sets: ex.sets.map(set => ({
-              id: uid('logset'),
-              templateSetId: set.id,
-              targetReps: set.targetReps ?? null,
-              targetWeight: set.targetWeight ?? null,
-              targetDurationMin: set.targetDurationMin ?? null,
-              targetDistanceKm: set.targetDistanceKm ?? null,
-              completed: false,
-              actualReps: set.targetReps ?? null,
-              actualWeight: set.targetWeight ?? null,
-              actualDurationMin: set.targetDurationMin ?? null,
-              actualDistanceKm: set.targetDistanceKm ?? null,
-              notes: set.notes || ''
-            }))
-          })) : []
-        };
-      }
-
-      function ensureSession(dateKey) {
-        if (!state.sessionsByDateKey[dateKey]) {
-          state.sessionsByDateKey[dateKey] = createSessionFromTemplate(dateKey);
-          saveState({ silent: true });
-        }
-        return state.sessionsByDateKey[dateKey];
-      }
-
-      function sessionProgress(session) {
-        if (!session) return { totalSets: 0, doneSets: 0, totalExercises: 0, doneExercises: 0, percent: 0 };
-        const totalExercises = session.exercises.length;
-        let totalSets = 0;
-        let doneSets = 0;
-        let doneExercises = 0;
-        session.exercises.forEach(ex => {
-          const sets = ex.sets || [];
-          const exerciseDone = sets.length > 0 && sets.every(set => set.completed);
-          totalSets += sets.length;
-          doneSets += sets.filter(set => set.completed).length;
-          if (exerciseDone) doneExercises += 1;
-        });
-        return {
-          totalSets,
-          doneSets,
-          totalExercises,
-          doneExercises,
-          percent: totalSets ? Math.round((doneSets / totalSets) * 100) : 0
-        };
-      }
-
-      function sessionTotals(session) {
-        const totals = { sets: 0, reps: 0, volume: 0, distance: 0, minutes: 0 };
-        if (!session) return totals;
-        session.exercises.forEach(ex => {
-          ex.sets.forEach(set => {
-            if (!set.completed) return;
-            const reps = Number(set.actualReps ?? set.targetReps ?? 0) || 0;
-            const weight = Number(set.actualWeight ?? set.targetWeight ?? 0) || 0;
-            const minutes = Number(set.actualDurationMin ?? set.targetDurationMin ?? 0) || 0;
-            const distance = Number(set.actualDistanceKm ?? set.targetDistanceKm ?? 0) || 0;
-            totals.sets += 1;
-            totals.reps += reps;
-            totals.volume += reps * weight;
-            totals.minutes += minutes;
-            totals.distance += distance;
-          });
-        });
-        return totals;
-      }
-
-      function dateStatus(dateKey) {
-        const day = getDayForDate(dateKey);
-        const session = state.sessionsByDateKey[dateKey];
-        if (session) {
-          const labels = {
-            in_progress: 'В процессе',
-            completed: 'Выполнено',
-            partial: 'Частично',
-            skipped: 'Пропущено'
-          };
-          return { key: session.status, label: labels[session.status] || 'В процессе' };
-        }
-        if (day.kind === 'rest') return { key: 'rest', label: 'Отдых' };
-        if (isPast(dateKey)) return { key: 'missed', label: 'Не выполнено' };
-        if (dateKey === todayKey()) return { key: 'today', label: 'Сегодня' };
-        if (isFuture(dateKey)) return { key: 'planned', label: 'Запланировано' };
-        return { key: 'planned', label: 'Запланировано' };
-      }
-
-      function statusPill(status) {
-        const cls = {
-          completed: 'success',
-          partial: 'warning',
-          skipped: 'danger',
-          missed: 'danger',
-          rest: 'gray',
-          in_progress: 'warning',
-          today: '',
-          planned: ''
-        }[status.key] || '';
-        return `<span class="pill ${cls}">${escapeHtml(status.label)}</span>`;
-      }
-
-      function plannedSetsForDay(day) {
-        return day.exercises.reduce((sum, ex) => sum + (ex.sets?.length || 0), 0);
-      }
-
-      function calcMetrics() {
-        const sessions = Object.values(state.sessionsByDateKey).sort((a, b) => a.dateKey.localeCompare(b.dateKey));
-        const all = {
-          completed: 0,
-          partial: 0,
-          skipped: 0,
-          totalSets: 0,
-          totalReps: 0,
-          totalVolume: 0,
-          totalDistance: 0,
-          totalMinutes: 0,
-          byExercise: new Map()
-        };
-
-        sessions.forEach(session => {
-          if (session.status === 'completed') all.completed += 1;
-          if (session.status === 'partial') all.partial += 1;
-          if (session.status === 'skipped') all.skipped += 1;
-          const totals = sessionTotals(session);
-          all.totalSets += totals.sets;
-          all.totalReps += totals.reps;
-          all.totalVolume += totals.volume;
-          all.totalDistance += totals.distance;
-          all.totalMinutes += totals.minutes;
-          session.exercises.forEach(ex => {
-            const key = ex.nameSnapshot.trim().toLowerCase() || ex.templateExerciseId || ex.id;
-            const current = all.byExercise.get(key) || {
-              name: ex.nameSnapshot,
-              sessions: new Set(),
-              sets: 0,
-              reps: 0,
-              volume: 0,
-              lastDate: session.dateKey
-            };
-            ex.sets.forEach(set => {
-              if (!set.completed) return;
-              const reps = Number(set.actualReps ?? set.targetReps ?? 0) || 0;
-              const weight = Number(set.actualWeight ?? set.targetWeight ?? 0) || 0;
-              current.sets += 1;
-              current.reps += reps;
-              current.volume += reps * weight;
-            });
-            if (session.status === 'completed' || session.status === 'partial') current.sessions.add(session.dateKey);
-            if (session.dateKey > current.lastDate) current.lastDate = session.dateKey;
-            all.byExercise.set(key, current);
-          });
-        });
-
-        const currentWeek = weekDates(0);
-        const previousWeek = weekDates(-1);
-        const summarizeWeek = dates => {
-          const result = { planned: 0, completed: 0, partial: 0, skipped: 0, missed: 0, sets: 0, reps: 0, volume: 0 };
-          dates.forEach(dateKey => {
-            const day = getDayForDate(dateKey);
-            const session = state.sessionsByDateKey[dateKey];
-            if (day.kind === 'workout') result.planned += 1;
-            if (session?.status === 'completed') result.completed += 1;
-            if (session?.status === 'partial') result.partial += 1;
-            if (session?.status === 'skipped') result.skipped += 1;
-            if (day.kind === 'workout' && !session && dateKey < todayKey()) result.missed += 1;
-            const totals = sessionTotals(session);
-            result.sets += totals.sets;
-            result.reps += totals.reps;
-            result.volume += totals.volume;
-          });
-          result.adherence = result.planned ? Math.round(((result.completed + result.partial * 0.5) / result.planned) * 100) : 100;
-          return result;
-        };
-
-        const current = summarizeWeek(currentWeek);
-        const previous = summarizeWeek(previousWeek);
-        const trend = previous.volume > 0 ? Math.round(((current.volume - previous.volume) / previous.volume) * 100) : (current.volume > 0 ? 100 : 0);
-
-        const streaks = calcStreaks();
-        const topExercises = Array.from(all.byExercise.values())
-          .map(item => ({ ...item, sessionsCount: item.sessions.size }))
-          .sort((a, b) => b.sets - a.sets)
-          .slice(0, 6);
-
-        return { sessions, all, current, previous, trend, streaks, topExercises };
-      }
-
-      function calcStreaks() {
-        const today = todayKey();
-        let current = 0;
-        let started = false;
-        for (let i = 0; i < 180; i += 1) {
-          const dateKey = toDateKey(addDays(today, -i));
-          const day = getDayForDate(dateKey);
-          if (day.kind !== 'workout') continue;
-          const session = state.sessionsByDateKey[dateKey];
-          if (!session && dateKey === today && !started) continue;
-          started = true;
-          if (session?.status === 'completed') current += 1;
-          else break;
-        }
-
-        let longest = 0;
-        let running = 0;
-        for (let i = 365; i >= 0; i -= 1) {
-          const dateKey = toDateKey(addDays(today, -i));
-          const day = getDayForDate(dateKey);
-          if (day.kind !== 'workout') continue;
-          const session = state.sessionsByDateKey[dateKey];
-          if (session?.status === 'completed') {
-            running += 1;
-            longest = Math.max(longest, running);
-          } else if (dateKey < today) {
-            running = 0;
-          }
-        }
-        return { current, longest };
-      }
-
-      function viewLabel(view = ui.view) {
-        return {
-          today: 'Сегодня',
-          week: 'Неделя',
-          day: 'День',
-          editor: 'Редактор',
-          progress: 'Прогресс',
-          data: 'Данные'
-        }[view] || 'Сегодня';
-      }
-
-      function navButtons() {
-        const items = [
-          ['today', 'С', 'Сегодня'],
-          ['week', 'Н', 'Неделя'],
-          ['editor', 'Р', 'Редактор'],
-          ['progress', 'П', 'Прогресс'],
-          ['data', 'Д', 'Данные']
-        ];
-        return items.map(([view, mark, label]) => `
-          <button class="nav-btn ${ui.view === view ? 'active' : ''}" data-action="set-view" data-view="${view}" type="button">
-            <strong>${mark}</strong><span>${label}</span>
-          </button>
-        `).join('');
+        return { total, checked, percent: total ? Math.round((checked / total) * 100) : 0 };
       }
 
       function render() {
-        const app = document.getElementById('app');
-        const device = detectDevice();
-        app.innerHTML = `
-          <div class="app-shell ${device.key}">
-            <aside class="side-nav" aria-label="Основная навигация">
-              <div class="side-card">
-                <div class="brand">
-                  <h1>Спорт-неделя</h1>
-                  <p>Автономная программа тренировок в одном HTML-файле.</p>
-                </div>
-              </div>
-              <div class="side-card side-nav-list">${navButtons()}</div>
-              <div class="side-card small-text muted">
-                Режим: <strong>${device.label}</strong><br>
-                Данные хранятся локально в этом браузере.
-              </div>
-            </aside>
-            <main class="main">
-              <header class="topbar">
-                <div class="brand">
-                  <h1>${viewLabel()}</h1>
-                  <p>${escapeHtml(state.program.name)} · ${formatDate(todayKey(), 'long')}</p>
-                </div>
-                <span class="device-badge"><span class="device-dot"></span>${device.label}</span>
-              </header>
-              ${renderCurrentView()}
-            </main>
-            <nav class="bottom-nav" aria-label="Основная навигация">${navButtons()}</nav>
-          </div>
-        `;
-        requestAnimationFrame(attachReorderHandlers);
+        if (view === 'summary') renderSummary();
+        else renderWeek();
       }
 
-      function detectDevice() {
-        const mobile = window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
-        return mobile ? { key: 'mobile', label: 'мобильный' } : { key: 'desktop', label: 'десктоп' };
-      }
-
-      function renderCurrentView() {
-        if (ui.view === 'week') return renderWeekView();
-        if (ui.view === 'day') return renderDayView(ui.selectedDateKey);
-        if (ui.view === 'editor') return renderEditorView();
-        if (ui.view === 'progress') return renderProgressView();
-        if (ui.view === 'data') return renderDataView();
-        return renderTodayView();
-      }
-
-      function renderTodayView() {
-        const dateKey = todayKey();
-        const day = getDayForDate(dateKey);
-        const session = state.sessionsByDateKey[dateKey];
-        const progress = sessionProgress(session);
-        const status = dateStatus(dateKey);
-        const subtitle = day.kind === 'workout'
-          ? `${day.exercises.length} упражн. · ${plannedSetsForDay(day)} подходов`
-          : 'День отдыха или свободной активности';
-
+      function renderTop(title, subtitle) {
         return `
-          <section class="section-stack">
-            <div class="hero">
-              <div class="hero-row">
+          <header class="top">
+            <div class="top-inner">
+              <div class="title-row">
                 <div>
-                  <span class="pill dark">${escapeHtml(WEEKDAYS[slotIndexForDateKey(dateKey)])}</span>
-                  <h2 class="view-title" style="margin-top: 12px;">${escapeHtml(day.title)}</h2>
-                  <p class="subtitle">${formatDate(dateKey, 'long')} · ${subtitle}</p>
+                  <h1>${escapeHtml(title)}</h1>
+                  <p class="muted tiny">${escapeHtml(subtitle)}</p>
                 </div>
-                ${statusPill(status).replace('pill ', 'pill dark ')}
+                <button class="dark" data-action="today" type="button">Сегодня</button>
               </div>
-              <div style="margin-top: 18px;">
-                <div class="split-row" style="justify-content: space-between; margin-bottom: 8px;">
-                  <span class="small-text">Прогресс подходов</span>
-                  <strong>${progress.doneSets}/${progress.totalSets}</strong>
-                </div>
-                <div class="progress-track"><div class="progress-fill" style="--value:${progress.percent}%"></div></div>
-              </div>
-              <div class="actions-row">
-                ${day.kind === 'workout' ? renderPrimarySessionButton(dateKey) : `<button class="primary" data-action="activate-day" data-slot="${slotIndexForDateKey(dateKey)}" type="button">Создать тренировку на сегодня</button>`}
-                <button class="secondary" data-action="set-view" data-view="week" type="button">Вся неделя</button>
+              <div class="tabs">
+                <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button">Неделя</button>
+                <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button">Сводка</button>
               </div>
             </div>
-            ${renderDayPanel(dateKey)}
-          </section>
+          </header>
         `;
       }
 
-      function renderPrimarySessionButton(dateKey) {
-        const session = state.sessionsByDateKey[dateKey];
-        if (!session) return `<button class="primary" data-action="start-workout" data-date="${dateKey}" type="button">Начать тренировку</button>`;
-        if (session.status === 'completed') return `<button class="success" data-action="undo-session" data-date="${dateKey}" type="button">Вернуть к редактированию</button>`;
-        if (session.status === 'partial') return `<button class="warning" data-action="start-workout" data-date="${dateKey}" type="button">Продолжить частичную</button>`;
-        if (session.status === 'skipped') return `<button class="warning" data-action="undo-session" data-date="${dateKey}" type="button">Отменить пропуск</button>`;
-        return `<button class="primary" data-action="start-workout" data-date="${dateKey}" type="button">Продолжить</button>`;
-      }
-
-      function renderDayView(dateKey) {
-        return `<section class="section-stack">${renderDayPanel(dateKey, true)}</section>`;
-      }
-
-      function renderDayPanel(dateKey, withHeader = false) {
-        const day = getDayForDate(dateKey);
-        const session = state.sessionsByDateKey[dateKey];
-        const status = dateStatus(dateKey);
-        const progress = sessionProgress(session);
-        const selectedSlot = slotIndexForDateKey(dateKey);
-        const header = withHeader ? `
-          <div class="hero">
-            <div class="hero-row">
-              <div>
-                <span class="pill dark">${escapeHtml(formatDate(dateKey, 'long'))}</span>
-                <h2 class="view-title" style="margin-top: 12px;">${escapeHtml(day.title)}</h2>
-                <p class="subtitle">${dateKey === todayKey() ? 'Это сегодняшняя программа.' : `Сегодня: ${formatDate(todayKey(), 'long')}`}</p>
-              </div>
-              ${statusPill(status).replace('pill ', 'pill dark ')}
-            </div>
-            <div class="actions-row">
-              ${day.kind === 'workout' ? renderPrimarySessionButton(dateKey) : `<button class="primary" data-action="activate-day" data-slot="${selectedSlot}" type="button">Создать тренировочный день</button>`}
-              <button class="secondary" data-action="open-editor-slot" data-slot="${selectedSlot}" type="button">Редактировать программу</button>
-            </div>
-          </div>
-        ` : '';
-
-        if (day.kind !== 'workout') {
-          return `
-            ${header}
-            <div class="card pad">
-              <div class="exercise-head">
-                <div>
-                  <h2>${escapeHtml(day.title)}</h2>
-                  <p class="muted small-text">На этот день нет обязательной тренировки. Можно оставить его днём отдыха или создать новую тренировку.</p>
-                </div>
-                ${statusPill(status)}
-              </div>
-              ${day.notes ? `<div class="notice info" style="margin-top: 12px;">${escapeHtml(day.notes)}</div>` : ''}
-              <div class="actions-row">
-                <button class="primary" data-action="activate-day" data-slot="${selectedSlot}" type="button">Создать тренировочный день</button>
-                <button class="secondary" data-action="open-editor-slot" data-slot="${selectedSlot}" type="button">Открыть редактор</button>
-              </div>
-            </div>
-          `;
-        }
-
-        if (!session) {
-          return `
-            ${header}
-            <div class="card pad section-stack">
-              <div class="exercise-head">
-                <div>
-                  <h2>${escapeHtml(day.title)}</h2>
-                  <p class="muted small-text">План: ${day.exercises.length} упражнений, ${plannedSetsForDay(day)} подходов.</p>
-                </div>
-                ${statusPill(status)}
-              </div>
-              ${day.notes ? `<div class="notice info">${escapeHtml(day.notes)}</div>` : ''}
-              ${day.exercises.length ? `<div class="exercise-list">${day.exercises.map(renderPlannedExercise).join('')}</div>` : `<div class="empty">В этом тренировочном дне пока нет упражнений.</div>`}
-              <div class="actions-row">
-                <button class="primary" data-action="start-workout" data-date="${dateKey}" type="button">Начать тренировку</button>
-                <button class="warning" data-action="skip-workout" data-date="${dateKey}" type="button">Отметить пропуск</button>
-                <button class="secondary" data-action="open-editor-slot" data-slot="${selectedSlot}" type="button">Скорректировать план</button>
-              </div>
-            </div>
-          `;
-        }
-
-        return `
-          ${header}
-          <div class="card pad section-stack">
-            <div class="exercise-head">
-              <div>
-                <h2>${escapeHtml(session.titleSnapshot)}</h2>
-                <p class="muted small-text">Snapshot сохранён на дату ${formatDate(dateKey)}. Изменения программы не сломают эту запись.</p>
-              </div>
-              ${statusPill(status)}
-            </div>
-            <div>
-              <div class="split-row" style="justify-content: space-between; margin-bottom: 8px;">
-                <span class="small-text muted">Выполнено подходов</span>
-                <strong>${progress.doneSets}/${progress.totalSets} · ${progress.percent}%</strong>
-              </div>
-              <div class="progress-track"><div class="progress-fill" style="--value:${progress.percent}%"></div></div>
-            </div>
-            <label class="label">
-              <span>Короткая заметка к тренировке</span>
-              <textarea data-field="session.notes" data-date="${dateKey}" placeholder="Например: хорошо пошёл третий подход, болело колено, увеличить вес в следующий раз">${escapeHtml(session.notes || '')}</textarea>
-            </label>
-            <div class="exercise-list">${session.exercises.length ? session.exercises.map((exercise, exIndex) => renderSessionExercise(dateKey, exercise, exIndex)).join('') : '<div class="empty">В snapshot нет упражнений.</div>'}</div>
-            <div class="actions-row">
-              <button class="secondary" data-action="mark-all" data-date="${dateKey}" data-value="true" type="button">Отметить все</button>
-              <button class="secondary" data-action="mark-all" data-date="${dateKey}" data-value="false" type="button">Снять все</button>
-              <button class="primary" data-action="complete-workout" data-date="${dateKey}" type="button">Завершить</button>
-              <button class="warning" data-action="skip-workout" data-date="${dateKey}" type="button">Пропустить</button>
-              <button class="danger" data-action="delete-session" data-date="${dateKey}" type="button">Удалить запись</button>
-            </div>
-          </div>
-        `;
-      }
-
-      function renderPlannedExercise(exercise) {
-        return `
-          <article class="exercise-card">
-            <div class="exercise-head">
-              <div>
-                <h3>${escapeHtml(exercise.name)}</h3>
-                <p class="muted small-text">${escapeHtml(exercise.category)} · ${exerciseTargetSummary(exercise)}</p>
-              </div>
-              <span class="pill gray">план</span>
-            </div>
-            ${exercise.notes ? `<p class="small-text muted">${escapeHtml(exercise.notes)}</p>` : ''}
-            <div class="sets-list">
-              ${exercise.sets.map((set, index) => `<div class="set-line"><div class="strong">${index + 1}</div><div>${escapeHtml(setSummary(set))}${set.notes ? `<div class="tiny-text muted">${escapeHtml(set.notes)}</div>` : ''}</div></div>`).join('')}
-            </div>
-          </article>
-        `;
-      }
-
-      function renderSessionExercise(dateKey, exercise, exIndex) {
-        const done = exercise.sets.length > 0 && exercise.sets.every(set => set.completed);
-        return `
-          <article class="exercise-card ${done ? 'completed' : ''}">
-            <div class="exercise-head">
-              <div>
-                <h3>${escapeHtml(exercise.nameSnapshot)}</h3>
-                <p class="muted small-text">${escapeHtml(exercise.categorySnapshot || 'Другое')} · ${exercise.sets.filter(set => set.completed).length}/${exercise.sets.length} подходов</p>
-              </div>
-              ${done ? '<span class="pill success">готово</span>' : '<span class="pill gray">в работе</span>'}
-            </div>
-            ${exercise.notes ? `<p class="small-text muted">${escapeHtml(exercise.notes)}</p>` : ''}
-            <div class="sets-list">
-              ${exercise.sets.map((set, setIndex) => renderSessionSet(dateKey, set, exIndex, setIndex)).join('')}
-            </div>
-          </article>
-        `;
-      }
-
-      function renderSessionSet(dateKey, set, exIndex, setIndex) {
-        return `
-          <div class="set-line ${set.completed ? 'done' : ''}">
-            <input type="checkbox" aria-label="Подход ${setIndex + 1}" data-field="sessionSet.completed" data-date="${dateKey}" data-ex-index="${exIndex}" data-set-index="${setIndex}" ${set.completed ? 'checked' : ''}>
-            <div>
-              <div class="split-row" style="justify-content: space-between;">
-                <strong>Подход ${setIndex + 1}</strong>
-                <span class="tiny-text muted">Цель: ${escapeHtml(setSummary(set))}</span>
-              </div>
-              <div class="set-fields">
-                <label class="label"><span>Повт.</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="1" data-field="sessionSet.actualReps" data-date="${dateKey}" data-ex-index="${exIndex}" data-set-index="${setIndex}" value="${attr(set.actualReps ?? '')}"></label>
-                <label class="label"><span>Кг</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="0.5" data-field="sessionSet.actualWeight" data-date="${dateKey}" data-ex-index="${exIndex}" data-set-index="${setIndex}" value="${attr(set.actualWeight ?? '')}"></label>
-                <label class="label"><span>Мин</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="0.1" data-field="sessionSet.actualDurationMin" data-date="${dateKey}" data-ex-index="${exIndex}" data-set-index="${setIndex}" value="${attr(set.actualDurationMin ?? '')}"></label>
-                <label class="label"><span>Км</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="0.01" data-field="sessionSet.actualDistanceKm" data-date="${dateKey}" data-ex-index="${exIndex}" data-set-index="${setIndex}" value="${attr(set.actualDistanceKm ?? '')}"></label>
-              </div>
-              <label class="label" style="margin-top: 8px;"><span>Заметка к подходу</span><input data-field="sessionSet.notes" data-date="${dateKey}" data-ex-index="${exIndex}" data-set-index="${setIndex}" value="${attr(set.notes || '')}" placeholder="Коротко"></label>
-            </div>
-          </div>
-        `;
-      }
-
-      function renderWeekView() {
-        const dates = weekDates(ui.weekOffset);
-        if (!dates.includes(ui.selectedDateKey)) ui.selectedDateKey = dates[0];
+      function renderWeek() {
+        const weekKey = weekStartKeyForOffset(weekOffset);
+        const week = getWeek(weekKey);
+        const dates = weekDates(weekKey);
         const start = dates[0];
         const end = dates[6];
-        return `
-          <section class="layout-two">
-            <div class="section-stack">
-              <div class="card pad">
-                <div class="exercise-head">
-                  <div>
-                    <h2>Неделя</h2>
-                    <p class="muted small-text">${formatDate(start)} — ${formatDate(end)}</p>
-                  </div>
-                  <span class="pill ${ui.weekOffset === 0 ? 'success' : 'gray'}">${ui.weekOffset === 0 ? 'текущая' : ui.weekOffset > 0 ? `+${ui.weekOffset}` : ui.weekOffset}</span>
-                </div>
-                <div class="actions-row">
-                  <button class="secondary" data-action="week-prev" type="button">Назад</button>
-                  <button class="secondary" data-action="week-today" type="button">Текущая</button>
-                  <button class="secondary" data-action="week-next" type="button">Вперёд</button>
-                </div>
-              </div>
-              <div class="week-list">${dates.map(renderWeekCard).join('')}</div>
-            </div>
-            <div class="section-stack">${renderDayPanel(ui.selectedDateKey, true)}</div>
+        document.getElementById('app').innerHTML = `
+          ${renderTop('Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
+          <section class="week-row">
+            <button data-action="prev" type="button">←</button>
+            <span class="pill">${weekOffset === 0 ? 'текущая неделя' : weekOffset > 0 ? `+${weekOffset} нед.` : `${weekOffset} нед.`}</span>
+            <button data-action="next" type="button">→</button>
+            <button data-action="data" type="button">JSON</button>
+          </section>
+          <section class="week-days">
+            ${dates.map(dateKey => renderDay(dateKey, week)).join('')}
           </section>
         `;
+        resizeTextareas();
       }
 
-      function renderWeekCard(dateKey) {
-        const day = getDayForDate(dateKey);
-        const status = dateStatus(dateKey);
-        const session = state.sessionsByDateKey[dateKey];
-        const progress = sessionProgress(session);
-        const selected = ui.selectedDateKey === dateKey;
-        const today = dateKey === todayKey();
-        const planned = day.kind === 'workout' ? `${day.exercises.length} упр. · ${plannedSetsForDay(day)} подх.` : 'отдых';
+      function renderDay(dateKey, week) {
+        const slot = slotForDate(dateKey);
+        const weekKey = weekStartKeyForDate(dateKey);
+        const text = week.days[slot] || '';
+        const exercises = parseDayText(text);
+        const progress = dayProgress(dateKey);
+        const isToday = dateKey === todayKey();
         return `
-          <article class="week-card ${selected ? 'selected' : ''} ${today ? 'today' : ''} ${day.kind === 'rest' ? 'rest' : ''}" data-action="select-week-date" data-date="${dateKey}" role="button" tabindex="0">
-            <div class="week-head">
+          <article class="card day ${isToday ? 'today' : ''}" data-date="${dateKey}" data-week="${weekKey}" data-slot="${slot}">
+            <div class="day-head">
               <div>
-                <h3>${escapeHtml(WEEKDAYS_SHORT[slotIndexForDateKey(dateKey)])} · ${escapeHtml(day.title)}</h3>
-                <p class="muted small-text">${formatDate(dateKey)} · ${planned}</p>
+                <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
+                <p class="muted tiny">${progress.checked}/${progress.total || 0} подходов</p>
               </div>
-              ${statusPill(status)}
+              ${isToday ? '<span class="pill today">сегодня</span>' : progress.total && progress.checked === progress.total ? '<span class="pill done">готово</span>' : '<span class="pill">план</span>'}
             </div>
-            ${session ? `<div style="margin-top: 10px;"><div class="progress-track"><div class="progress-fill" style="--value:${progress.percent}%"></div></div></div>` : ''}
+            <div class="progress"><i style="--value:${progress.percent}%"></i></div>
+            <textarea data-field="day" data-week="${weekKey}" data-slot="${slot}" rows="3" placeholder="Напиши как в заметках:\nПодтягивания — 4-4-4-4-4\nПланка — 90 сек">${escapeHtml(text)}</textarea>
+            ${exercises.length ? `<div class="exercises">${exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">Пусто. Просто напиши упражнения выше.</div>'}
           </article>
         `;
       }
 
-      function renderEditorView() {
-        const day = getDayBySlot(ui.editorSlot);
+      function renderExercise(dateKey, exercise, exIndex) {
+        const session = readSession(dateKey);
+        const allDone = exercise.sets.every((_, setIndex) => session.done[`${exIndex}:${setIndex}`]);
         return `
-          <section class="layout-editor">
-            <div class="section-stack">
-              <div class="card pad">
-                <h2>Дни недели</h2>
-                <p class="muted small-text">Количество тренировочных дней меняется через создание или удаление тренировки в нужном календарном слоте.</p>
-              </div>
-              <div class="day-selector">${state.program.days.map(renderEditorDayCard).join('')}</div>
-            </div>
-            <div class="section-stack">
-              <div class="card pad section-stack">
-                <div class="exercise-head">
-                  <div>
-                    <h2>${escapeHtml(WEEKDAYS[ui.editorSlot])}</h2>
-                    <p class="muted small-text">Редактируйте шаблон. Завершённые тренировки сохраняют свой snapshot.</p>
-                  </div>
-                  <span class="pill ${day.kind === 'workout' ? 'success' : 'gray'}">${day.kind === 'workout' ? 'тренировка' : 'отдых'}</span>
-                </div>
-                <div class="form-grid">
-                  <label class="label"><span>Название дня</span><input data-field="day.title" data-slot="${ui.editorSlot}" value="${attr(day.title)}" placeholder="Например: Ноги"></label>
-                  <label class="label"><span>Тип дня</span><select data-field="day.kind" data-slot="${ui.editorSlot}">
-                    <option value="workout" ${day.kind === 'workout' ? 'selected' : ''}>Тренировка</option>
-                    <option value="rest" ${day.kind === 'rest' ? 'selected' : ''}>Отдых</option>
-                  </select></label>
-                  <label class="label"><span>Заметка к шаблону дня</span><textarea data-field="day.notes" data-slot="${ui.editorSlot}" placeholder="Разминка, цель, ограничения">${escapeHtml(day.notes || '')}</textarea></label>
-                </div>
-                <div class="actions-row">
-                  ${day.kind === 'workout' ? `<button class="primary" data-action="add-exercise" data-slot="${ui.editorSlot}" type="button">Добавить упражнение</button><button class="danger" data-action="delete-training-day" data-slot="${ui.editorSlot}" type="button">Удалить тренировочный день</button>` : `<button class="primary" data-action="activate-day" data-slot="${ui.editorSlot}" type="button">Создать тренировочный день</button>`}
-                  <button class="secondary" data-action="open-date-for-slot" data-slot="${ui.editorSlot}" type="button">Посмотреть ближайший день</button>
-                </div>
-              </div>
-              ${day.kind === 'workout' ? renderExerciseEditor(day) : `<div class="empty">Это день отдыха. Создайте тренировочный день, чтобы добавить упражнения.</div>`}
-            </div>
-          </section>
-        `;
-      }
-
-      function renderEditorDayCard(day) {
-        return `
-          <article class="editor-day-card ${ui.editorSlot === day.slotIndex ? 'selected' : ''} ${day.kind === 'rest' ? 'rest' : ''}" data-action="select-editor-slot" data-slot="${day.slotIndex}" role="button" tabindex="0">
-            <div class="editor-head">
-              <div>
-                <h3>${escapeHtml(WEEKDAYS_SHORT[day.slotIndex])} · ${escapeHtml(day.title)}</h3>
-                <p class="muted small-text">${day.kind === 'workout' ? `${day.exercises.length} упражн. · ${plannedSetsForDay(day)} подходов` : 'день отдыха'}</p>
-              </div>
-              <span class="pill ${day.kind === 'workout' ? 'success' : 'gray'}">${day.kind === 'workout' ? 'on' : 'rest'}</span>
-            </div>
-          </article>
-        `;
-      }
-
-      function renderExerciseEditor(day) {
-        if (!day.exercises.length) {
-          return `<div class="card pad"><div class="empty">Упражнений пока нет.</div><div class="actions-row"><button class="primary" data-action="add-exercise" data-slot="${ui.editorSlot}" type="button">Добавить первое упражнение</button></div></div>`;
-        }
-        return `
-          <div class="section-stack" id="exercise-editor-list" data-slot="${ui.editorSlot}">
-            ${day.exercises.map((exercise, index) => renderExerciseEditorCard(exercise, index, day.exercises.length)).join('')}
-          </div>
-        `;
-      }
-
-      function renderExerciseEditorCard(exercise, index, total) {
-        return `
-          <article class="exercise-editor-card" data-id="${exercise.id}" data-exercise-id="${exercise.id}">
-            <div class="exercise-editor-top">
-              <div class="drag-handle" title="Перетащить">≡</div>
-              <div class="section-stack">
-                <div class="exercise-head">
-                  <div>
-                    <h3>Упражнение ${index + 1}</h3>
-                    <p class="muted small-text">${exerciseTargetSummary(exercise)}</p>
-                  </div>
-                  <div class="inline-row">
-                    <button class="small square secondary" data-action="move-exercise" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-direction="up" ${index === 0 ? 'disabled' : ''} type="button">↑</button>
-                    <button class="small square secondary" data-action="move-exercise" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-direction="down" ${index === total - 1 ? 'disabled' : ''} type="button">↓</button>
-                  </div>
-                </div>
-                <div class="two-col">
-                  <label class="label"><span>Название</span><input data-field="exercise.name" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" value="${attr(exercise.name)}"></label>
-                  <label class="label"><span>Категория</span><select data-field="exercise.category" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}">${CATEGORIES.map(cat => `<option value="${attr(cat)}" ${exercise.category === cat ? 'selected' : ''}>${escapeHtml(cat)}</option>`).join('')}</select></label>
-                </div>
-                <label class="label"><span>Заметка к упражнению</span><input data-field="exercise.notes" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" value="${attr(exercise.notes || '')}" placeholder="Техника, темп, ограничение"></label>
-                <div class="sets-list" data-set-list="${exercise.id}">
-                  ${exercise.sets.map((set, setIndex) => renderSetEditorRow(exercise, set, setIndex)).join('')}
-                </div>
-                <div class="actions-row">
-                  <button class="secondary" data-action="add-set" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" type="button">Добавить подход</button>
-                  <button class="secondary" data-action="duplicate-exercise" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" type="button">Дублировать</button>
-                  <button class="danger" data-action="delete-exercise" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" type="button">Удалить упражнение</button>
-                </div>
-              </div>
-            </div>
-          </article>
-        `;
-      }
-
-      function renderSetEditorRow(exercise, set, setIndex) {
-        return `
-          <div class="set-editor-row" data-id="${set.id}" data-set-id="${set.id}">
-            <div class="drag-handle" title="Перетащить подход">≡</div>
-            <div class="section-stack">
-              <div class="split-row" style="justify-content: space-between;">
-                <strong>Подход ${setIndex + 1}</strong>
-                <div class="inline-row">
-                  <button class="small square secondary" data-action="move-set" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" data-direction="up" ${setIndex === 0 ? 'disabled' : ''} type="button">↑</button>
-                  <button class="small square secondary" data-action="move-set" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" data-direction="down" ${setIndex === exercise.sets.length - 1 ? 'disabled' : ''} type="button">↓</button>
-                </div>
-              </div>
-              <div class="set-edit-grid">
-                <label class="label"><span>Повт.</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="1" data-field="templateSet.targetReps" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" value="${attr(set.targetReps ?? '')}"></label>
-                <label class="label"><span>Кг</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="0.5" data-field="templateSet.targetWeight" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" value="${attr(set.targetWeight ?? '')}"></label>
-                <label class="label"><span>Мин</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="0.1" data-field="templateSet.targetDurationMin" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" value="${attr(set.targetDurationMin ?? '')}"></label>
-                <label class="label"><span>Км</span><input inputmode="decimal" type="text" pattern="[0-9]*[,.]?[0-9]*" step="0.01" data-field="templateSet.targetDistanceKm" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" value="${attr(set.targetDistanceKm ?? '')}"></label>
-              </div>
-              <label class="label"><span>Заметка к подходу</span><input data-field="templateSet.notes" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" value="${attr(set.notes || '')}" placeholder="Опционально"></label>
-              <div class="inline-row">
-                <button class="small secondary" data-action="duplicate-set" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" type="button">Копировать подход</button>
-                <button class="small danger" data-action="delete-set" data-slot="${ui.editorSlot}" data-exercise-id="${exercise.id}" data-set-id="${set.id}" type="button">Удалить</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      function renderProgressView() {
-        const metrics = calcMetrics();
-        const current = metrics.current;
-        const all = metrics.all;
-        const planned = Math.max(current.planned, 1);
-        const adherence = current.planned ? current.adherence : 100;
-        const trendLabel = metrics.trend > 0 ? `+${metrics.trend}%` : `${metrics.trend}%`;
-        return `
-          <section class="section-stack">
-            <div class="hero">
-              <span class="pill dark">сводка</span>
-              <h2 class="view-title" style="margin-top: 12px;">Прогресс недели: ${adherence}%</h2>
-              <p class="subtitle">Выполнено ${current.completed} из ${current.planned} запланированных тренировок. Частичные считаются как половина в adherence.</p>
-              <div style="margin-top: 16px;"><div class="progress-track"><div class="progress-fill" style="--value:${Math.min(100, adherence)}%"></div></div></div>
-              <div class="metric-grid" style="margin-top: 16px;">
-                <div class="metric dark"><div class="metric-label">Серия</div><div class="metric-value">${metrics.streaks.current}</div></div>
-                <div class="metric dark"><div class="metric-label">Лучшая</div><div class="metric-value">${metrics.streaks.longest}</div></div>
-                <div class="metric dark"><div class="metric-label">Подходы</div><div class="metric-value">${formatNumber(current.sets)}</div></div>
-                <div class="metric dark"><div class="metric-label">Динамика объёма</div><div class="metric-value">${trendLabel}</div></div>
-              </div>
-            </div>
-
-            <div class="metric-grid">
-              <div class="metric"><div class="metric-label">Всего тренировок</div><div class="metric-value">${formatNumber(all.completed + all.partial)}</div><p class="muted tiny-text">Завершённые и частичные</p></div>
-              <div class="metric"><div class="metric-label">Повторения</div><div class="metric-value">${formatNumber(all.totalReps)}</div><p class="muted tiny-text">По выполненным подходам</p></div>
-              <div class="metric"><div class="metric-label">Тоннаж</div><div class="metric-value">${formatNumber(all.totalVolume, 1)}</div><p class="muted tiny-text">Повторы × кг</p></div>
-              <div class="metric"><div class="metric-label">Кардио</div><div class="metric-value">${formatNumber(all.totalDistance, 2)}</div><p class="muted tiny-text">Км по выполненным подходам</p></div>
-            </div>
-
-            <div class="layout-two">
-              <div class="card pad section-stack">
-                <h2>Текущая неделя</h2>
-                <div class="chart-list">
-                  ${weekDates(0).map(dateKey => renderWeekMetricRow(dateKey)).join('')}
-                </div>
-              </div>
-              <div class="card pad section-stack">
-                <h2>Топ упражнений</h2>
-                ${metrics.topExercises.length ? `<div class="chart-list">${metrics.topExercises.map(item => renderExerciseMetricRow(item, all.totalSets)).join('')}</div>` : '<div class="empty">Пока нет выполненных подходов.</div>'}
-              </div>
-            </div>
-
-            <div class="card pad section-stack">
-              <div class="exercise-head">
-                <div>
-                  <h2>История и заметки</h2>
-                  <p class="muted small-text">Последние тренировки сохраняются по датам.</p>
-                </div>
-                <button class="secondary" data-action="set-view" data-view="data" type="button">Экспорт</button>
-              </div>
-              ${metrics.sessions.length ? `<div class="history-list">${metrics.sessions.slice().reverse().slice(0, 8).map(renderHistoryItem).join('')}</div>` : '<div class="empty">История появится после первой тренировки.</div>'}
-            </div>
-          </section>
-        `;
-      }
-
-      function renderWeekMetricRow(dateKey) {
-        const day = getDayForDate(dateKey);
-        const session = state.sessionsByDateKey[dateKey];
-        const status = dateStatus(dateKey);
-        const progress = sessionProgress(session);
-        const value = day.kind === 'workout' ? (session ? progress.percent : 0) : 100;
-        return `
-          <div class="chart-row">
-            <div class="chart-row-head"><span>${escapeHtml(WEEKDAYS_SHORT[slotIndexForDateKey(dateKey)])} · ${escapeHtml(day.title)}</span><strong>${escapeHtml(status.label)}</strong></div>
-            <div class="progress-track"><div class="progress-fill" style="--value:${value}%"></div></div>
-          </div>
-        `;
-      }
-
-      function renderExerciseMetricRow(item, totalSets) {
-        const value = totalSets ? Math.round((item.sets / totalSets) * 100) : 0;
-        return `
-          <div class="chart-row">
-            <div class="chart-row-head"><span>${escapeHtml(item.name)}</span><strong>${formatNumber(item.sets)} подх.</strong></div>
-            <div class="progress-track"><div class="progress-fill" style="--value:${Math.max(4, value)}%"></div></div>
-            <p class="muted tiny-text">${formatNumber(item.reps)} повторений · ${formatNumber(item.volume, 1)} тоннаж · ${item.sessionsCount} тренировок</p>
-          </div>
-        `;
-      }
-
-      function renderHistoryItem(session) {
-        const totals = sessionTotals(session);
-        return `
-          <article class="history-item">
+          <div class="exercise ${allDone ? 'done' : ''}">
             <div class="exercise-head">
-              <div>
-                <h3>${formatDate(session.dateKey, 'long')} · ${escapeHtml(session.titleSnapshot)}</h3>
-                <p class="muted small-text">${formatNumber(totals.sets)} подходов · ${formatNumber(totals.reps)} повторений · ${formatNumber(totals.volume, 1)} тоннаж</p>
-                ${session.notes ? `<p class="small-text">${escapeHtml(session.notes)}</p>` : ''}
+              <h3>${escapeHtml(exercise.name)}</h3>
+              <div class="toolbar">
+                <button class="small" data-action="add-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">+ подход</button>
+                <button class="small danger" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button">−</button>
               </div>
-              ${statusPill({ key: session.status, label: session.status === 'completed' ? 'Выполнено' : session.status === 'partial' ? 'Частично' : session.status === 'skipped' ? 'Пропуск' : 'В процессе' })}
+            </div>
+            <div class="set-row">
+              ${exercise.sets.map((label, setIndex) => renderSet(dateKey, label, exIndex, setIndex)).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderSet(dateKey, label, exIndex, setIndex) {
+        const done = Boolean(readSession(dateKey).done[`${exIndex}:${setIndex}`]);
+        return `<button class="set ${done ? 'done' : ''}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(label)}</button>`;
+      }
+
+      function monthDate(offset = 0) {
+        const date = new Date();
+        date.setDate(1);
+        date.setHours(0, 0, 0, 0);
+        date.setMonth(date.getMonth() + offset);
+        return date;
+      }
+
+      function sameMonth(dateKey, month) {
+        const date = parseDateKey(dateKey);
+        return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
+      }
+
+      function renderSummary() {
+        const month = monthDate(monthOffset);
+        const stats = buildMonthStats(month);
+        document.getElementById('app').innerHTML = `
+          ${renderTop('Сводка', formatMonth(month))}
+          <section class="week-row">
+            <button data-action="prev-month" type="button">←</button>
+            <span class="pill">${escapeHtml(formatMonth(month))}</span>
+            <button data-action="next-month" type="button">→</button>
+            <button data-action="data" type="button">JSON</button>
+          </section>
+          <section class="summary">
+            <div class="summary-grid">
+              <div class="mini-card"><span class="muted tiny">Тренировки</span><strong>${stats.workouts}</strong></div>
+              <div class="mini-card"><span class="muted tiny">Подходы</span><strong>${stats.sets}</strong></div>
+              <div class="mini-card"><span class="muted tiny">Повторы</span><strong>${formatNumber(stats.reps)}</strong></div>
+            </div>
+            ${stats.rows.length ? `<div class="stat-list">${stats.rows.map(row => renderStatRow(row, stats.weekKeys)).join('')}</div>` : '<article class="card day"><h2>Пока пусто</h2><p class="muted">Нажми цифры подходов в неделе — здесь появится объём.</p></article>'}
+          </section>
+        `;
+      }
+
+      function buildMonthStats(month) {
+        const rows = new Map();
+        const workouts = new Set();
+        const weekKeys = weeksInMonth(month);
+        let sets = 0;
+        let reps = 0;
+
+        Object.entries(state.sessions).forEach(([dateKey, session]) => {
+          if (!sameMonth(dateKey, month)) return;
+          const weekKey = weekStartKeyForDate(dateKey);
+          const week = getExistingWeek(weekKey);
+          if (!week) return;
+          const exercises = parseDayText(week.days[slotForDate(dateKey)]);
+          let dayDone = false;
+
+          Object.entries(session.done || {}).forEach(([key, value]) => {
+            if (!value) return;
+            const [exIndex, setIndex] = key.split(':').map(Number);
+            const fallbackExercise = exercises[exIndex];
+            const fallbackLabel = fallbackExercise?.sets?.[setIndex] || '';
+            const payload = typeof value === 'object' ? value : null;
+            const exerciseName = payload?.exercise || fallbackExercise?.name || 'Упражнение';
+            const label = payload?.label || fallbackLabel || '✓';
+            const metric = normalizeMetric(payload?.metric || setMetric(label));
+            const groupName = payload?.group || groupExerciseName(exerciseName);
+            const rowKey = groupName.toLowerCase();
+            const row = rows.get(rowKey) || makeStatRow(groupName);
+
+            row.sets += 1;
+            row.variants.add(exerciseName);
+            addMetric(row.units, metric);
+            if (!row.weeks[weekKey]) row.weeks[weekKey] = { sets: 0, units: {} };
+            row.weeks[weekKey].sets += 1;
+            addMetric(row.weeks[weekKey].units, metric);
+            rows.set(rowKey, row);
+
+            sets += 1;
+            if (metric.unit === 'повт') reps += metric.value;
+            dayDone = true;
+          });
+
+          if (dayDone) workouts.add(dateKey);
+        });
+
+        return {
+          workouts: workouts.size,
+          sets,
+          reps,
+          weekKeys,
+          rows: Array.from(rows.values()).sort((a, b) => primaryVolume(b) - primaryVolume(a) || b.sets - a.sets || a.name.localeCompare(b.name, 'ru'))
+        };
+      }
+
+      function weeksInMonth(month) {
+        const start = new Date(month.getFullYear(), month.getMonth(), 1);
+        const end = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+        const keys = [];
+        let cursor = startOfWeek(start);
+        while (cursor <= end) {
+          keys.push(toDateKey(cursor));
+          cursor = addDays(cursor, 7);
+        }
+        return keys;
+      }
+
+      function makeStatRow(name) {
+        return { name, sets: 0, units: {}, variants: new Set(), weeks: {} };
+      }
+
+      function setMetric(label) {
+        const text = String(label || '').toLowerCase().replace(',', '.');
+        const match = text.match(/\d+(?:\.\d+)?/);
+        const value = match ? Number(match[0]) : 0;
+        let unit = 'повт';
+        if (/сек|\bс\b/.test(text)) unit = 'сек';
+        else if (/мин/.test(text)) unit = 'мин';
+        else if (/км/.test(text)) unit = 'км';
+        else if (/\bм\b/.test(text) && !/кг/.test(text)) unit = 'м';
+        return { unit, value };
+      }
+
+      function normalizeMetric(metric) {
+        const value = Number(metric?.value || 0);
+        const unit = metric?.unit || 'повт';
+        return { unit, value: Number.isFinite(value) ? value : 0 };
+      }
+
+      function addMetric(units, metric) {
+        if (!metric.value) return;
+        units[metric.unit] = (units[metric.unit] || 0) + metric.value;
+      }
+
+      function primaryVolume(row) {
+        return row.units['повт'] || row.units['сек'] || row.units['мин'] || row.units['км'] || row.units['м'] || row.sets;
+      }
+
+      function groupExerciseName(name) {
+        const cleaned = String(name || 'Упражнение')
+          .replace(/\s+\+?\d+(?:[,.]\d+)?\s*кг/ig, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        const lower = cleaned.toLowerCase();
+        if (lower.startsWith('подтяг')) return 'Подтягивания';
+        if (lower.startsWith('присед')) return 'Приседания';
+        if (lower === 'брусья') return 'Брусья';
+        return cleaned || 'Упражнение';
+      }
+
+      function makeDonePayload(exerciseName, label) {
+        return {
+          exercise: exerciseName,
+          group: groupExerciseName(exerciseName),
+          label,
+          metric: setMetric(label),
+          completedAt: new Date().toISOString()
+        };
+      }
+
+      function renderStatRow(row, weekKeys) {
+        const variants = Array.from(row.variants).filter(name => groupExerciseName(name) !== row.name);
+        return `
+          <article class="stat-card">
+            <div class="stat-head">
+              <div>
+                <h3>${escapeHtml(row.name)}</h3>
+                <p class="muted tiny">${row.sets} подх.${variants.length ? ` · ${escapeHtml(variants.join(', '))}` : ''}</p>
+              </div>
+              <strong>${escapeHtml(formatUnits(row.units, row.sets))}</strong>
+            </div>
+            <div class="week-chips">
+              ${weekKeys.map(weekKey => renderWeekChip(weekKey, row.weeks[weekKey])).join('')}
             </div>
           </article>
         `;
       }
 
-      function renderDataView() {
-        const json = JSON.stringify(state, null, 2);
-        return `
-          <section class="section-stack">
-            <div class="card pad section-stack">
-              <div class="exercise-head">
-                <div>
-                  <h2>Хранение и перенос</h2>
-                  <p class="muted small-text">Приложение автономное: данные находятся только в памяти текущего браузера и URL. Делайте экспорт перед переносом или очисткой Safari.</p>
-                </div>
-                <span class="pill ${storageAvailable ? 'success' : 'danger'}">${storageAvailable ? 'localStorage ok' : 'нет storage'}</span>
-              </div>
-              <div class="notice ${storageAvailable ? 'success' : ''}">${escapeHtml(storageMessage)}</div>
-              <div class="actions-row">
-                <button class="primary" data-action="export-json" type="button">Скачать JSON</button>
-                <button class="secondary" data-action="copy-json" type="button">Копировать JSON</button>
-                <button class="secondary" data-action="restore-backup" type="button">Восстановить backup</button>
-              </div>
-              <textarea id="exportBox" class="json-box" readonly>${escapeHtml(json)}</textarea>
-            </div>
-
-            <div class="layout-two">
-              <div class="card pad section-stack">
-                <h2>Импорт</h2>
-                <p class="muted small-text">Вставьте JSON или выберите файл экспорта. Импорт заменит текущие данные после подтверждения.</p>
-                <textarea id="importBox" class="json-box" placeholder="Вставьте JSON сюда"></textarea>
-                <input id="importFile" class="hidden" type="file" accept="application/json,.json">
-                <div class="actions-row">
-                  <button class="primary" data-action="import-json" type="button">Импортировать текст</button>
-                  <button class="secondary" data-action="pick-import-file" type="button">Выбрать файл</button>
-                </div>
-              </div>
-
-              <div class="card pad section-stack">
-                <h2>Сброс и пример</h2>
-                <p class="muted small-text">Можно вернуться к примерной программе. История будет удалена только после подтверждения.</p>
-                <div class="actions-row">
-                  <button class="warning" data-action="load-sample" type="button">Загрузить пример</button>
-                  <button class="danger" data-action="reset-app" type="button">Полный сброс</button>
-                </div>
-                <div class="notice info">
-                  Для iPhone: сохраните этот HTML-файл в Files или откройте его со статического хостинга. После первого открытия интернет не нужен, пока файл доступен устройству.
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
+      function renderWeekChip(weekKey, data) {
+        const hasData = data && data.sets;
+        const text = hasData ? formatUnits(data.units, data.sets) : '—';
+        return `<span class="week-chip ${hasData ? '' : 'empty'}"><b>${formatDate(weekKey)}</b>${escapeHtml(text)}</span>`;
       }
 
-      function findExercise(slot, exerciseId) {
-        const day = getDayBySlot(Number(slot));
-        return day.exercises.find(ex => ex.id === exerciseId);
+      function formatUnits(units, fallbackSets = 0) {
+        const order = ['повт', 'сек', 'мин', 'км', 'м'];
+        const parts = order
+          .filter(unit => units[unit])
+          .map(unit => `${formatNumber(units[unit])} ${unit}`);
+        return parts.length ? parts.join(' + ') : `${fallbackSets} подх.`;
       }
 
-      function findSet(slot, exerciseId, setId) {
-        const exercise = findExercise(slot, exerciseId);
-        return exercise?.sets.find(set => set.id === setId);
+      function formatNumber(value) {
+        const number = Number(value || 0);
+        if (Number.isInteger(number)) return String(number);
+        return number.toLocaleString('ru-RU', { maximumFractionDigits: 1 });
       }
 
-      function moveItem(array, from, to) {
-        if (from === to || from < 0 || to < 0 || from >= array.length || to >= array.length) return;
-        const [item] = array.splice(from, 1);
-        array.splice(to, 0, item);
-      }
-
-      function activateDay(slot) {
-        const day = getDayBySlot(Number(slot));
-        day.kind = 'workout';
-        if (!day.exercises.length) day.exercises.push(makeExercise('Новое упражнение', 3, 10));
-        saveState();
-        showToast('Тренировочный день создан.');
+      function updateLineSetCount(dateKey, exIndex, delta) {
+        const week = getWeek(weekStartKeyForDate(dateKey));
+        const slot = slotForDate(dateKey);
+        const lines = String(week.days[slot] || '').split('\n');
+        const nonEmpty = lines.map((line, index) => ({ line, index })).filter(item => item.line.trim());
+        const target = nonEmpty[exIndex];
+        if (!target) return;
+        const parsed = parseLine(target.line.trim());
+        const sets = parsed.sets.slice();
+        if (delta > 0) sets.push(sets[sets.length - 1] || '10');
+        if (delta < 0 && sets.length > 1) sets.pop();
+        lines[target.index] = `${parsed.name} — ${sets.join('-')}`;
+        week.days[slot] = lines.join('\n');
+        week.updatedAt = new Date().toISOString();
+        saveNow();
         render();
       }
 
-      function nearestDateForSlot(slot) {
-        const dates = weekDates(0);
-        const direct = dates[Number(slot)];
-        if (direct >= todayKey()) return direct;
-        return weekDates(1)[Number(slot)];
+      function toggleSet(dateKey, exIndex, setIndex) {
+        const session = getSession(dateKey);
+        const key = `${exIndex}:${setIndex}`;
+        if (session.done[key]) {
+          delete session.done[key];
+        } else {
+          const week = getWeek(weekStartKeyForDate(dateKey));
+          const exercise = parseDayText(week.days[slotForDate(dateKey)])[exIndex];
+          const label = exercise?.sets?.[setIndex] || '✓';
+          session.done[key] = makeDonePayload(exercise?.name || 'Упражнение', label);
+        }
+        session.updatedAt = new Date().toISOString();
+        if (!Object.keys(session.done).length) delete state.sessions[dateKey];
+        saveNow();
+        render();
       }
 
-      function handleAction(button) {
-        const action = button.dataset.action;
-        const slot = Number(button.dataset.slot);
-        const dateKey = button.dataset.date;
-        const exerciseId = button.dataset.exerciseId;
-        const setId = button.dataset.setId;
-
-        if (action === 'set-view') {
-          ui.view = button.dataset.view;
-          if (ui.view === 'today') ui.selectedDateKey = todayKey();
-          render();
-          return;
-        }
-        if (action === 'select-week-date') {
-          ui.selectedDateKey = dateKey;
-          render();
-          return;
-        }
-        if (action === 'week-prev') { ui.weekOffset -= 1; ui.selectedDateKey = weekDates(ui.weekOffset)[0]; render(); return; }
-        if (action === 'week-next') { ui.weekOffset += 1; ui.selectedDateKey = weekDates(ui.weekOffset)[0]; render(); return; }
-        if (action === 'week-today') { ui.weekOffset = 0; ui.selectedDateKey = todayKey(); render(); return; }
-        if (action === 'select-editor-slot') { ui.editorSlot = slot; render(); return; }
-        if (action === 'open-editor-slot') { ui.editorSlot = slot; ui.view = 'editor'; render(); return; }
-        if (action === 'open-date-for-slot') { ui.selectedDateKey = nearestDateForSlot(slot); ui.view = 'day'; render(); return; }
-        if (action === 'activate-day') { activateDay(slot); return; }
-
-        if (action === 'delete-training-day') {
-          if (!confirm('Удалить тренировочный день из шаблона? История уже выполненных тренировок сохранится.')) return;
-          const day = getDayBySlot(slot);
-          day.kind = 'rest';
-          day.exercises = [];
-          saveState();
-          showToast('День переведён в отдых.');
-          render();
-          return;
-        }
-
-        if (action === 'add-exercise') {
-          const day = getDayBySlot(slot);
-          day.kind = 'workout';
-          day.exercises.push(makeExercise('Новое упражнение', 3, 10));
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'duplicate-exercise') {
-          const day = getDayBySlot(slot);
-          const index = day.exercises.findIndex(ex => ex.id === exerciseId);
-          if (index === -1) return;
-          const copy = clone(day.exercises[index]);
-          copy.id = uid('ex');
-          copy.name = `${copy.name} копия`;
-          copy.sets = copy.sets.map(set => ({ ...set, id: uid('set') }));
-          day.exercises.splice(index + 1, 0, copy);
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'delete-exercise') {
-          if (!confirm('Удалить упражнение из шаблона? История уже выполненных тренировок сохранится.')) return;
-          const day = getDayBySlot(slot);
-          day.exercises = day.exercises.filter(ex => ex.id !== exerciseId);
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'move-exercise') {
-          const day = getDayBySlot(slot);
-          const index = day.exercises.findIndex(ex => ex.id === exerciseId);
-          const direction = button.dataset.direction === 'up' ? -1 : 1;
-          moveItem(day.exercises, index, index + direction);
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'add-set') {
-          const exercise = findExercise(slot, exerciseId);
-          if (!exercise) return;
-          const last = exercise.sets[exercise.sets.length - 1];
-          exercise.sets.push(last ? { ...clone(last), id: uid('set') } : makeSet());
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'duplicate-set') {
-          const exercise = findExercise(slot, exerciseId);
-          const index = exercise?.sets.findIndex(set => set.id === setId) ?? -1;
-          if (!exercise || index === -1) return;
-          exercise.sets.splice(index + 1, 0, { ...clone(exercise.sets[index]), id: uid('set') });
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'delete-set') {
-          const exercise = findExercise(slot, exerciseId);
-          if (!exercise) return;
-          if (exercise.sets.length <= 1 && !confirm('Это последний подход. Удалить его?')) return;
-          exercise.sets = exercise.sets.filter(set => set.id !== setId);
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'move-set') {
-          const exercise = findExercise(slot, exerciseId);
-          if (!exercise) return;
-          const index = exercise.sets.findIndex(set => set.id === setId);
-          const direction = button.dataset.direction === 'up' ? -1 : 1;
-          moveItem(exercise.sets, index, index + direction);
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'start-workout') {
-          ensureSession(dateKey);
-          ui.selectedDateKey = dateKey;
-          ui.view = dateKey === todayKey() ? 'today' : 'day';
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'complete-workout') {
-          const session = ensureSession(dateKey);
-          const progress = sessionProgress(session);
-          if (progress.doneSets === 0 && !confirm('Нет выполненных подходов. Всё равно завершить как пропуск/частичную запись?')) return;
-          session.status = progress.doneSets >= progress.totalSets && progress.totalSets > 0 ? 'completed' : 'partial';
-          session.completedAt = new Date().toISOString();
-          if (session.startedAt) session.durationSec = Math.max(0, Math.round((new Date(session.completedAt) - new Date(session.startedAt)) / 1000));
-          saveState();
-          showToast(session.status === 'completed' ? 'Тренировка выполнена.' : 'Сохранено как частичная тренировка.');
-          render();
-          return;
-        }
-
-        if (action === 'skip-workout') {
-          if (!confirm('Отметить тренировку как пропущенную?')) return;
-          const session = ensureSession(dateKey);
-          session.status = 'skipped';
-          session.completedAt = new Date().toISOString();
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'undo-session') {
-          const session = ensureSession(dateKey);
-          session.status = 'in_progress';
-          session.completedAt = null;
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'delete-session') {
-          if (!confirm('Удалить запись тренировки за эту дату? Шаблон программы не изменится.')) return;
-          delete state.sessionsByDateKey[dateKey];
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'mark-all') {
-          const session = ensureSession(dateKey);
-          const value = button.dataset.value === 'true';
-          session.exercises.forEach(ex => ex.sets.forEach(set => { set.completed = value; }));
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === 'export-json') { exportJson(); return; }
+      function handleAction(target) {
+        const action = target.dataset.action;
+        if (action === 'view-week') { view = 'week'; render(); return; }
+        if (action === 'view-summary') { view = 'summary'; render(); return; }
+        if (action === 'prev') { weekOffset -= 1; render(); return; }
+        if (action === 'next') { weekOffset += 1; render(); return; }
+        if (action === 'prev-month') { monthOffset -= 1; render(); return; }
+        if (action === 'next-month') { monthOffset += 1; render(); return; }
+        if (action === 'today') { view = 'week'; weekOffset = 0; monthOffset = 0; render(); setTimeout(() => document.querySelector('.day.today')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 40); return; }
+        if (action === 'data') { openDataSheet(); return; }
+        if (action === 'close-sheet') { closeSheet(); return; }
         if (action === 'copy-json') { copyJson(); return; }
-        if (action === 'pick-import-file') { document.getElementById('importFile')?.click(); return; }
-        if (action === 'import-json') { importJsonFromText(); return; }
-        if (action === 'restore-backup') { restoreBackup(); return; }
-        if (action === 'load-sample') { loadSample(); return; }
-        if (action === 'reset-app') { resetApp(); return; }
+        if (action === 'export-json') { exportJson(); return; }
+        if (action === 'import-json') { importJson(); return; }
+        if (action === 'toggle') {
+          toggleSet(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set));
+          return;
+        }
+        if (action === 'add-set' || action === 'remove-set') {
+          updateLineSetCount(target.dataset.date, Number(target.dataset.ex), action === 'add-set' ? 1 : -1);
+        }
       }
 
-      function handleFieldChange(input, { renderOnChange = false, immediateSave = true } = {}) {
-        const field = input.dataset.field;
-        if (!field) return;
-        const slot = Number(input.dataset.slot);
-        const exerciseId = input.dataset.exerciseId;
-        const setId = input.dataset.setId;
-        const dateKey = input.dataset.date;
-        let shouldRender = false;
-
-        if (field === 'day.title' || field === 'day.notes' || field === 'day.kind') {
-          const day = getDayBySlot(slot);
-          const prop = field.split('.')[1];
-          day[prop] = input.value;
-          if (field === 'day.kind' && input.value === 'workout' && !day.exercises.length) day.exercises.push(makeExercise('Новое упражнение', 3, 10));
-          shouldRender = field === 'day.kind';
-        }
-
-        if (field.startsWith('exercise.')) {
-          const exercise = findExercise(slot, exerciseId);
-          if (!exercise) return;
-          exercise[field.split('.')[1]] = input.value;
-          shouldRender = field === 'exercise.category';
-        }
-
-        if (field.startsWith('templateSet.')) {
-          const set = findSet(slot, exerciseId, setId);
-          if (!set) return;
-          const prop = field.split('.')[1];
-          set[prop] = prop === 'notes' ? input.value : asNumber(input.value, null);
-        }
-
-        if (field === 'session.notes') {
-          const session = ensureSession(dateKey);
-          session.notes = input.value;
-        }
-
-        if (field.startsWith('sessionSet.')) {
-          const session = ensureSession(dateKey);
-          const ex = session.exercises[Number(input.dataset.exIndex)];
-          const set = ex?.sets[Number(input.dataset.setIndex)];
-          if (!set) return;
-          const prop = field.split('.')[1];
-          if (prop === 'completed') {
-            set.completed = input.checked;
-            if (set.completed) {
-              set.actualReps = set.actualReps ?? set.targetReps;
-              set.actualWeight = set.actualWeight ?? set.targetWeight;
-              set.actualDurationMin = set.actualDurationMin ?? set.targetDurationMin;
-              set.actualDistanceKm = set.actualDistanceKm ?? set.targetDistanceKm;
-            }
-            shouldRender = true;
-          } else if (prop === 'notes') {
-            set.notes = input.value;
-          } else {
-            set[prop] = asNumber(input.value, null);
-          }
-          if (session.status === 'completed' || session.status === 'partial' || session.status === 'skipped') {
-            session.status = 'in_progress';
-            session.completedAt = null;
-          }
-        }
-
-        if (immediateSave) flushSave({ silent: true });
-        else scheduleSave({ silent: true });
-        if (shouldRender && renderOnChange) render();
+      function handleInput(target) {
+        if (target.dataset.field !== 'day') return;
+        const week = getWeek(target.dataset.week);
+        week.days[Number(target.dataset.slot)] = target.value;
+        week.updatedAt = new Date().toISOString();
+        resizeTextarea(target);
+        scheduleSave();
       }
 
-      async function exportJson() {
-        state.meta.lastExportAt = new Date().toISOString();
-        flushSave({ silent: true });
+      function handleTextareaBlur(target) {
+        if (target.dataset.field !== 'day') return;
+        flushSave();
         render();
-        const text = JSON.stringify(state, null, 2);
-        const filename = `sport-week-backup-${todayKey()}.json`;
-        const file = new File([text], filename, { type: 'application/json' });
+      }
 
-        if (navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: 'Sport Week Backup', text: 'Резервная копия спортивной программы' });
-            showToast('JSON отправлен в системное меню iOS.');
-            return;
-          } catch (error) {
-            if (error?.name === 'AbortError') return;
-          }
-        }
+      function resizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${Math.max(96, textarea.scrollHeight)}px`;
+      }
 
-        try {
-          const blob = new Blob([text], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = filename;
-          link.rel = 'noopener';
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          setTimeout(() => URL.revokeObjectURL(url), 1500);
-          showToast('JSON экспортирован. Если Safari не скачал файл — скопируйте текст ниже.');
-        } catch (error) {
-          selectExportBox();
-          showToast('Скачивание недоступно. Выделил JSON — скопируйте вручную.');
-        }
+      function resizeTextareas() {
+        document.querySelectorAll('textarea[data-field="day"]').forEach(resizeTextarea);
+      }
+
+      function openDataSheet() {
+        flushSave();
+        const sheet = document.getElementById('sheet');
+        sheet.innerHTML = `
+          <div class="sheet-card">
+            <div class="title-row">
+              <h2>JSON</h2>
+              <button data-action="close-sheet" type="button">Закрыть</button>
+            </div>
+            <div class="toolbar">
+              <button class="dark" data-action="copy-json" type="button">Копировать</button>
+              <button data-action="export-json" type="button">Скачать</button>
+              <button data-action="import-json" type="button">Импорт</button>
+            </div>
+            <textarea id="jsonBox" class="json-box">${escapeHtml(JSON.stringify(state, null, 2))}</textarea>
+          </div>
+        `;
+        sheet.classList.add('show');
+        sheet.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeSheet() {
+        const sheet = document.getElementById('sheet');
+        sheet.classList.remove('show');
+        sheet.setAttribute('aria-hidden', 'true');
       }
 
       async function copyJson() {
         const text = JSON.stringify(state, null, 2);
         try {
-          if (!navigator.clipboard?.writeText) throw new Error('Clipboard API недоступен');
           await navigator.clipboard.writeText(text);
-          showToast('JSON скопирован в буфер.');
-        } catch (error) {
-          selectExportBox();
-          showToast('Выделил JSON. Скопируйте вручную.');
+          toast('Скопировано');
+        } catch (_) {
+          const box = document.getElementById('jsonBox');
+          box?.focus();
+          box?.select();
+          toast('Выделил текст');
         }
       }
 
-      function selectExportBox() {
-        const box = document.getElementById('exportBox');
-        box?.focus();
-        box?.select();
-        box?.setSelectionRange?.(0, box.value.length);
+      function exportJson() {
+        flushSave();
+        const text = JSON.stringify(state, null, 2);
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sport-${todayKey()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
 
-      function importJsonFromText(text) {
-        const source = text ?? document.getElementById('importBox')?.value;
-        if (!source?.trim()) { showToast('JSON для импорта пустой.'); return; }
+      function importJson() {
+        const box = document.getElementById('jsonBox');
         try {
-          const imported = normalizeState(JSON.parse(source));
-          if (!confirm('Импорт заменит текущую программу и историю. Продолжить?')) return;
-          state = imported;
-          saveState();
-          ui.view = 'today';
-          ui.selectedDateKey = todayKey();
-          ui.editorSlot = slotIndexForDateKey(todayKey());
-          showToast('Импорт завершён.');
+          state = normalize(JSON.parse(box.value));
+          saveNow();
+          closeSheet();
           render();
-        } catch (error) {
-          showToast('Не удалось импортировать JSON. Проверьте файл.');
+          toast('Импортировано');
+        } catch (_) {
+          toast('JSON битый');
         }
       }
 
-      function restoreBackup() {
-        if (!storageAvailable) { showToast('Backup недоступен без localStorage.'); return; }
-        const backup = localStorage.getItem(BACKUP_KEY);
-        if (!backup) { showToast('Backup пока не найден.'); return; }
-        if (!confirm('Восстановить предыдущую сохранённую версию? Текущее состояние станет backup.')) return;
-        importJsonFromText(backup);
+      function toast(message) {
+        const node = document.getElementById('toast');
+        node.textContent = message;
+        node.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => node.classList.remove('show'), 1600);
       }
 
-      function loadSample() {
-        if (!confirm('Загрузить примерную программу? Текущие данные будут заменены.')) return;
-        state = defaultState();
-        saveState();
-        ui.view = 'today';
-        ui.selectedDateKey = todayKey();
-        ui.editorSlot = slotIndexForDateKey(todayKey());
-        render();
-      }
-
-      function resetApp() {
-        if (!confirm('Полностью сбросить приложение и удалить историю?')) return;
-        if (storageAvailable) {
-          localStorage.removeItem(STORAGE_KEY);
-          localStorage.removeItem(BACKUP_KEY);
-        }
-        state = defaultState();
-        saveState();
-        ui.view = 'today';
-        ui.selectedDateKey = todayKey();
-        ui.editorSlot = slotIndexForDateKey(todayKey());
-        render();
-      }
-
-      function attachReorderHandlers() {
-        const exerciseList = document.getElementById('exercise-editor-list');
-        if (exerciseList) {
-          enableReorder(exerciseList, '.exercise-editor-card', '.drag-handle', order => {
-            const day = getDayBySlot(ui.editorSlot);
-            const map = new Map(day.exercises.map(ex => [ex.id, ex]));
-            day.exercises = order.map(id => map.get(id)).filter(Boolean);
-            saveState({ silent: true });
-            render();
-          });
-        }
-
-        document.querySelectorAll('[data-set-list]').forEach(list => {
-          enableReorder(list, '.set-editor-row', '.drag-handle', order => {
-            const exercise = findExercise(ui.editorSlot, list.dataset.setList);
-            if (!exercise) return;
-            const map = new Map(exercise.sets.map(set => [set.id, set]));
-            exercise.sets = order.map(id => map.get(id)).filter(Boolean);
-            saveState({ silent: true });
-            render();
-          });
-        });
-      }
-
-      function enableReorder(container, itemSelector, handleSelector, onOrder) {
-        const handles = container.querySelectorAll(handleSelector);
-        handles.forEach(handle => {
-          handle.addEventListener('pointerdown', event => {
-            if (event.button !== undefined && event.button !== 0) return;
-            const item = event.target.closest(itemSelector);
-            if (!item) return;
-            event.preventDefault();
-            let dragging = item;
-            let rafId = null;
-            const pointerId = event.pointerId;
-            dragging.classList.add('is-dragging');
-            document.body.classList.add('drag-active');
-            handle.setPointerCapture?.(pointerId);
-
-            const cleanup = ({ commit = true } = {}) => {
-              window.removeEventListener('pointermove', onMove);
-              window.removeEventListener('pointerup', onUp);
-              window.removeEventListener('pointercancel', onCancel);
-              handle.removeEventListener('lostpointercapture', onLostCapture);
-              if (rafId) cancelAnimationFrame(rafId);
-              if (!dragging) {
-                document.body.classList.remove('drag-active');
-                return;
-              }
-              dragging.classList.remove('is-dragging');
-              document.body.classList.remove('drag-active');
-              const order = Array.from(container.querySelectorAll(itemSelector)).map(node => node.dataset.id).filter(Boolean);
-              dragging = null;
-              if (commit) onOrder(order);
-            };
-
-            const onMove = moveEvent => {
-              if (!dragging) return;
-              moveEvent.preventDefault();
-              const y = moveEvent.clientY;
-              if (rafId) cancelAnimationFrame(rafId);
-              rafId = requestAnimationFrame(() => {
-                rafId = null;
-                autoScrollDuringDrag(y);
-                const afterElement = getDragAfterElement(container, y, itemSelector, dragging);
-                if (afterElement == null) container.appendChild(dragging);
-                else container.insertBefore(dragging, afterElement);
-              });
-            };
-
-            const onUp = () => cleanup({ commit: true });
-            const onCancel = () => cleanup({ commit: true });
-            const onLostCapture = () => cleanup({ commit: true });
-
-            window.addEventListener('pointermove', onMove, { passive: false });
-            window.addEventListener('pointerup', onUp, { once: true });
-            window.addEventListener('pointercancel', onCancel, { once: true });
-            handle.addEventListener('lostpointercapture', onLostCapture, { once: true });
-          });
-        });
-      }
-
-      function autoScrollDuringDrag(clientY) {
-        const margin = 72;
-        const maxStep = 18;
-        if (clientY < margin) {
-          window.scrollBy({ top: -maxStep, behavior: 'auto' });
-          return;
-        }
-        if (window.innerHeight - clientY < margin) {
-          window.scrollBy({ top: maxStep, behavior: 'auto' });
-        }
-      }
-
-      function getDragAfterElement(container, y, itemSelector, dragging) {
-        const draggableElements = [...container.querySelectorAll(itemSelector)].filter(element => element !== dragging);
-        return draggableElements.reduce((closest, child) => {
-          const box = child.getBoundingClientRect();
-          const offset = y - box.top - box.height / 2;
-          if (offset < 0 && offset > closest.offset) return { offset, element: child };
-          return closest;
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
+      function registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) return;
+        if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
       }
 
       document.addEventListener('click', event => {
-        const actionTarget = event.target.closest('[data-action]');
-        if (!actionTarget) return;
+        const target = event.target.closest('[data-action]');
+        if (!target) return;
         event.preventDefault();
-        handleAction(actionTarget);
+        handleAction(target);
       });
 
-      document.addEventListener('keydown', event => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        const card = event.target.closest('[data-action="select-week-date"], [data-action="select-editor-slot"]');
-        if (!card) return;
-        event.preventDefault();
-        handleAction(card);
-      });
-
-      document.addEventListener('change', event => {
-        if (event.target.id === 'importFile') {
-          const file = event.target.files?.[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => importJsonFromText(String(reader.result || ''));
-          reader.readAsText(file);
-          event.target.value = '';
-          return;
-        }
-        handleFieldChange(event.target, { renderOnChange: true, immediateSave: true });
-      });
-
-      document.addEventListener('input', event => {
-        const target = event.target;
-        if (!target?.dataset?.field) return;
-        if (target.type === 'checkbox' || target.tagName === 'SELECT') return;
-        handleFieldChange(target, { renderOnChange: false, immediateSave: false });
-      });
-
-      window.addEventListener('pagehide', () => flushSave({ silent: true }));
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') flushSave({ silent: true });
-      });
-
-      window.addEventListener('resize', () => {
-        clearTimeout(window.__sportResizeTimer);
-        window.__sportResizeTimer = setTimeout(render, 150);
-      });
+      document.addEventListener('input', event => handleInput(event.target));
+      document.addEventListener('blur', event => handleTextareaBlur(event.target), true);
+      window.addEventListener('pagehide', flushSave);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
+      window.addEventListener('resize', () => requestAnimationFrame(resizeTextareas));
 
       registerServiceWorker();
       state = loadState();
-      saveState({ silent: true });
+      getWeek(weekStartKeyForOffset(0));
+      saveNow();
       render();
     })();
   </script>
