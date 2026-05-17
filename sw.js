@@ -1,6 +1,7 @@
-const CACHE_NAME = 'sport-week-planner-v1.0.5';
+const APP_VERSION = '1.0.6';
+const CACHE_PREFIX = 'sport-week-planner-';
+const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const APP_SHELL = [
-  './',
   './index.html',
   './manifest.webmanifest',
   './icon.svg',
@@ -12,7 +13,7 @@ const APP_SHELL = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
+      .then(cache => cache.addAll(APP_SHELL.map(url => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -20,13 +21,17 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+      .then(keys => {
+        const oldAppCaches = keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME);
+        return Promise.all(oldAppCaches.map(key => caches.delete(key)))
+          .then(() => self.clients.claim())
+          .then(() => oldAppCaches.length ? reloadOpenClients() : undefined);
+      })
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
@@ -36,25 +41,35 @@ self.addEventListener('fetch', event => {
   if (requestUrl.origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
-          return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
+    event.respondWith(networkFirstHtml(event.request));
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(cached => cached || fetch(event.request).then(response => {
-        if (!response || response.status !== 200 || response.type !== 'basic') return response;
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      }))
-  );
+  event.respondWith(cacheFirst(event.request));
 });
+
+function networkFirstHtml(request) {
+  return fetch(new Request(request, { cache: 'reload' }))
+    .then(response => {
+      if (!response || response.status !== 200 || response.type !== 'basic') return response;
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+      return response;
+    })
+    .catch(() => caches.match('./index.html'));
+}
+
+function cacheFirst(request) {
+  return caches.match(request)
+    .then(cached => cached || fetch(new Request(request, { cache: 'reload' })).then(response => {
+      if (!response || response.status !== 200 || response.type !== 'basic') return response;
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+      return response;
+    }));
+}
+
+function reloadOpenClients() {
+  return self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    .then(clients => Promise.all(clients.map(client => client.navigate(client.url).catch(() => undefined))));
+}

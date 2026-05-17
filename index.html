@@ -10,30 +10,30 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.6">
+  <link rel="icon" href="icon.svg?v=1.0.6" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.6" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.6">
   <title>🏆 Спорт</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #080607;
-      --bg-2: #13090b;
-      --card: #181113;
-      --card-strong: #241316;
-      --field: #26191c;
-      --ink: #fff4ee;
-      --muted: #b9a5a1;
-      --line: #3d272b;
-      --soft: #241518;
-      --accent: #ff2d35;
-      --accent-2: #ff6a1f;
-      --accent-ink: #fff7f3;
-      --done: #38d978;
-      --danger: #ff574f;
+      --bg: #080807;
+      --bg-2: #11100e;
+      --card: #181612;
+      --card-strong: #201c16;
+      --field: #211e18;
+      --ink: #f7f0e8;
+      --muted: #aaa094;
+      --line: #393226;
+      --soft: #201d17;
+      --accent: #d89536;
+      --accent-2: #efb156;
+      --accent-ink: #fff6e4;
+      --done: #86c58a;
+      --danger: #df7969;
       --shadow: rgba(0, 0, 0, 0.46);
-      --glow: rgba(255, 45, 53, 0.24);
+      --glow: rgba(216, 149, 54, 0.18);
       --overlay: rgba(0, 0, 0, 0.72);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -62,7 +62,7 @@
 
     body {
       min-height: 100dvh;
-      padding: 12px 12px calc(188px + var(--safe-bottom));
+      padding: 6px 8px calc(112px + var(--safe-bottom));
     }
 
     button, textarea, input, select { font: inherit; }
@@ -70,21 +70,40 @@
     button, input, select, textarea { -webkit-appearance: none; appearance: none; }
 
     button {
-      min-height: 42px;
+      min-height: 34px;
       border: 1px solid var(--line);
-      border-radius: 999px;
-      background: linear-gradient(180deg, color-mix(in srgb, var(--field) 92%, white), var(--field));
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--field) 88%, black);
       color: var(--ink);
-      padding: 0 14px;
-      font-weight: 780;
+      padding: 0 9px;
+      font-weight: 500;
       letter-spacing: -0.01em;
       touch-action: manipulation;
       cursor: pointer;
       transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+      user-select: none;
     }
 
     button:active { transform: scale(0.98); }
+
+    @media (hover: hover) and (pointer: fine) {
+      button:hover {
+        border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+        background: color-mix(in srgb, var(--field) 92%, var(--accent));
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+      }
+
+      button.dark:hover {
+        border-color: var(--accent-2);
+        box-shadow: 0 9px 24px var(--glow);
+      }
+
+      button.danger:hover {
+        border-color: color-mix(in srgb, var(--danger) 46%, var(--line));
+        background: color-mix(in srgb, var(--field) 86%, var(--danger));
+      }
+    }
     button:focus-visible,
     input:focus-visible,
     textarea:focus-visible,
@@ -93,14 +112,14 @@
       outline-offset: 2px;
     }
     button.dark {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
       color: var(--accent-ink);
-      border-color: color-mix(in srgb, var(--accent) 68%, transparent);
-      box-shadow: 0 8px 22px var(--glow);
+      border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+      box-shadow: 0 7px 18px var(--glow);
     }
     button.danger { color: var(--danger); }
-    button.small { min-height: 34px; padding: 0 10px; font-size: 0.9rem; }
-    button.ghost { background: var(--soft); }
+    button.small { min-height: 28px; padding: 0 8px; font-size: 0.8rem; }
+    button.ghost { background: color-mix(in srgb, var(--soft) 78%, black); }
 
     select {
       padding-right: 30px;
@@ -130,20 +149,20 @@
       width: min(100%, 760px);
       margin: 0 auto;
       display: grid;
-      gap: 12px;
+      gap: 6px;
     }
 
     .week-days {
       display: grid;
-      gap: 10px;
+      gap: 6px;
     }
 
     .top {
       position: sticky;
       top: 0;
       z-index: 10;
-      margin: -12px -12px 0;
-      padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 10px;
+      margin: -8px -8px 0;
+      padding: calc(7px + env(safe-area-inset-top, 0px)) 8px 7px;
       background:
         radial-gradient(circle at 50% -30%, var(--glow), transparent 24rem),
         linear-gradient(180deg, color-mix(in srgb, var(--bg-2) 97%, transparent), color-mix(in srgb, var(--bg-2) 82%, transparent));
@@ -161,7 +180,9 @@
 
     .top-inner {
       display: grid;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 8px;
     }
 
     .title-row,
@@ -184,12 +205,13 @@
     h1, h2, h3, p { margin: 0; }
     h1 {
       color: var(--muted);
-      font-size: 1.02rem;
-      letter-spacing: -0.02em;
-      font-weight: 860;
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+      font-weight: 500;
+      text-transform: uppercase;
     }
-    h2 { font-size: 1.05rem; letter-spacing: -0.02em; }
-    h3 { font-size: 1rem; letter-spacing: -0.02em; }
+    h2 { font-size: 1rem; letter-spacing: -0.02em; font-weight: 600; }
+    h3 { font-size: 0.96rem; letter-spacing: -0.02em; font-weight: 600; }
 
     .top-title {
       display: grid;
@@ -199,12 +221,12 @@
 
     .top-subtitle {
       color: var(--accent-ink);
-      font-size: clamp(1.85rem, 9vw, 3.05rem);
-      line-height: 0.92;
-      letter-spacing: -0.075em;
-      font-weight: 940;
+      font-size: clamp(1.3rem, 6.6vw, 2.1rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+      font-weight: 550;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 0 28px var(--glow);
+      text-shadow: 0 0 18px var(--glow);
     }
 
     .muted { color: var(--muted); }
@@ -214,38 +236,39 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 18px;
+      gap: 8px;
+      min-width: 152px;
+      padding: 8px 10px;
+      border-radius: 16px;
       background:
         linear-gradient(135deg, color-mix(in srgb, var(--card-strong) 88%, var(--accent)), var(--card));
       border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
     }
 
     .timer-bar span {
       color: var(--muted);
       font-size: 0.82rem;
-      font-weight: 800;
+      font-weight: 500;
     }
 
     .timer-bar strong {
-      font-size: 1.6rem;
+      font-size: 1.28rem;
       letter-spacing: -0.04em;
       font-variant-numeric: tabular-nums;
       color: var(--accent);
-      text-shadow: 0 0 20px var(--glow);
+      text-shadow: 0 0 16px var(--glow);
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
       border-radius: 999px;
-      padding: 5px 9px;
+      padding: 4px 8px;
       background: var(--soft);
       color: var(--muted);
-      font-size: 0.8rem;
-      font-weight: 800;
+      font-size: 0.78rem;
+      font-weight: 500;
       white-space: nowrap;
     }
 
@@ -253,11 +276,11 @@
 
     .card {
       border: 1px solid color-mix(in srgb, var(--line) 92%, white);
-      border-radius: 22px;
+      border-radius: 18px;
       background:
         linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
       overflow: hidden;
-      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.24), 0 1px 0 rgba(255, 255, 255, 0.035) inset;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255, 255, 255, 0.035) inset;
     }
 
     .day {
@@ -279,9 +302,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background:
-        radial-gradient(circle at 0 0, color-mix(in srgb, var(--accent) 12%, transparent), transparent 12rem),
-        transparent;
+      background: transparent;
       text-align: left;
     }
 
@@ -303,7 +324,7 @@
     .day-meta {
       color: var(--muted);
       font-size: 0.8rem;
-      font-weight: 820;
+      font-weight: 500;
     }
 
     .day-toggle .chevron {
@@ -347,6 +368,7 @@
       background: linear-gradient(90deg, var(--done), color-mix(in srgb, var(--done) 68%, var(--accent)));
       border-radius: inherit;
       box-shadow: 0 0 16px color-mix(in srgb, var(--done) 34%, transparent);
+      transition: width 0.22s ease;
     }
 
     .exercises {
@@ -371,17 +393,41 @@
       flex: 1 1 160px;
       min-width: 0;
       min-height: 44px;
-      border-radius: 14px;
-      padding: 0 12px;
-      font-weight: 800;
+      border: 0;
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      border-radius: 0;
+      background: transparent;
+      padding: 0 2px;
+      font-weight: 500;
       letter-spacing: -0.015em;
+      box-shadow: none;
+    }
+
+    .exercise-name:focus {
+      border-color: var(--accent);
+      box-shadow: none;
     }
 
     .unit-select {
       min-height: 44px;
-      border-radius: 999px;
-      padding: 0 30px 0 12px;
-      font-weight: 800;
+      border: 0;
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      border-radius: 0;
+      background-color: transparent;
+      padding: 0 26px 0 2px;
+      font-weight: 500;
+      box-shadow: none;
+    }
+
+    .unit-select:focus {
+      border-color: var(--accent);
+      box-shadow: none;
+    }
+
+    .exercise-head .remove-exercise {
+      min-height: 44px;
+      align-self: stretch;
+      border-radius: 14px;
     }
 
     .set-row {
@@ -393,13 +439,13 @@
     .set-item {
       display: inline-grid;
       grid-template-columns: auto;
-      gap: 5px;
+      gap: 6px;
       align-items: center;
-      padding: 4px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--field) 78%, black);
-      border: 1px solid var(--line);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.035) inset;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
     }
 
     .set-item.timed {
@@ -418,7 +464,7 @@
       align-items: center;
       justify-content: center;
       gap: 7px;
-      font-weight: 850;
+      font-weight: 500;
       font-variant-numeric: tabular-nums;
     }
 
@@ -549,7 +595,7 @@
     .bar-note {
       color: var(--muted);
       font-size: 0.74rem;
-      font-weight: 850;
+      font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
@@ -566,7 +612,7 @@
       font-size: clamp(2.25rem, 13vw, 4.6rem);
       line-height: 0.92;
       letter-spacing: -0.08em;
-      font-weight: 920;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
       text-shadow: 0 0 28px var(--glow);
     }
@@ -617,6 +663,7 @@
       border-radius: inherit;
       background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--done));
       box-shadow: 0 0 18px var(--glow);
+      transition: width 0.22s ease;
     }
 
     .chart-grid {
@@ -668,13 +715,14 @@
       border-radius: 999px 999px 7px 7px;
       background: linear-gradient(180deg, var(--accent-2), var(--accent));
       box-shadow: 0 0 20px var(--glow);
+      transition: height 0.22s ease;
     }
 
     .month-bar b,
     .weekday-bar b {
       color: var(--muted);
       font-size: 0.72rem;
-      font-weight: 850;
+      font-weight: 500;
       text-align: center;
       white-space: nowrap;
     }
@@ -710,7 +758,7 @@
     .rank-top span,
     .unit-top span {
       color: var(--muted);
-      font-weight: 850;
+      font-weight: 500;
       font-size: 0.86rem;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
@@ -739,6 +787,7 @@
       border-radius: 999px 999px 7px 7px;
       background: linear-gradient(180deg, var(--done), color-mix(in srgb, var(--done) 48%, var(--accent)));
       opacity: var(--alpha, 1);
+      transition: height 0.22s ease, opacity 0.22s ease;
     }
 
     .empty-hero {
@@ -753,7 +802,7 @@
       inset: 0;
       z-index: 40;
       background: var(--overlay);
-      padding: 16px;
+      padding: 16px 16px calc(16px + var(--safe-bottom));
       align-items: end;
     }
 
@@ -761,12 +810,14 @@
 
     .sheet-card {
       width: min(100%, 760px);
+      max-height: min(76dvh, 620px);
       margin: 0 auto;
       border-radius: 24px;
       background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
       border: 1px solid var(--line);
       padding: 14px;
       display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
       gap: 10px;
       box-shadow: 0 18px 60px rgba(0,0,0,0.42);
     }
@@ -774,12 +825,15 @@
     .json-box {
       width: 100%;
       min-height: 220px;
+      max-height: 100%;
       border-radius: 14px;
       padding: 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.78rem;
+      line-height: 1.45;
       white-space: pre;
       resize: vertical;
+      overflow: auto;
     }
 
     .toast {
@@ -797,7 +851,7 @@
       pointer-events: none;
       transition: 0.18s ease;
       text-align: center;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -807,18 +861,51 @@
       .exercise { background: var(--soft); }
     }
 
+    @media (max-width: 520px) {
+      .top-inner {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      .timer-bar {
+        min-width: 0;
+      }
+    }
+
     @media (max-width: 420px) {
-      h1 { font-size: 1.34rem; }
+      body { padding-inline: 6px; }
+      h1 { font-size: 0.78rem; }
+      .top { margin-inline: -6px; padding-inline: 6px; }
+      .top-subtitle { font-size: clamp(1.22rem, 8vw, 1.72rem); }
       .top-actions button { min-height: 38px; padding-inline: 12px; }
+      .day-toggle { padding: 13px 12px; }
+      .day-body { padding-inline: 12px; }
+      .exercise { padding: 10px; border-radius: 16px; }
       .exercise-head { display: grid; grid-template-columns: 1fr auto; }
       .exercise-name { grid-column: 1 / -1; width: 100%; }
+      .unit-select { min-width: 0; }
+      .exercise-head .remove-exercise { min-height: 44px; }
+      .toolbar button { flex: 1 1 120px; min-height: 38px; }
       .set-row { display: grid; grid-template-columns: 1fr; }
-      .set-item { display: grid; grid-template-columns: 1fr; width: 100%; border-radius: 20px; }
-      .set-item.timed { grid-template-columns: auto 1fr auto; }
-      .set { width: 100%; }
+      .set-item { display: grid; grid-template-columns: 1fr; width: 100%; border-radius: 0; }
+      .set-item.timed { grid-template-columns: minmax(44px, auto) 1fr minmax(44px, auto); }
+      .set { width: 100%; min-height: 44px; }
       .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .summary-hero { grid-template-columns: 116px minmax(0, 1fr); gap: 12px; }
+      .summary-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 12px; }
+      .summary-hero-copy { justify-items: center; }
+      .hero-caption { justify-content: center; }
       .activity-ring { width: 116px; }
+    }
+
+    @media (max-width: 340px) {
+      .bottom-tabs { padding-inline: 8px; }
+      .bottom-inner,
+      .bottom-week { gap: 6px; }
+      .bottom-week { grid-template-columns: 42px minmax(0, 1fr) 42px; }
+      .bottom-tabs button { font-size: 0.9rem; padding-inline: 6px; }
+      .bottom-inner { grid-template-columns: 1fr; }
+      .bottom-tabs button { min-height: 42px; }
+      .summary-grid { grid-template-columns: 1fr; }
     }
 
     @media (min-width: 720px) {
@@ -1260,7 +1347,7 @@
 
       function dayProgress(dateKey) {
         const day = getDay(dateKey);
-        if (!day.active) return { total: 0, checked: 0, percent: 0 };
+        if (!day.active && !day.exercises.length) return { total: 0, checked: 0, percent: 0 };
         const done = readSession(dateKey).done;
         let total = 0;
         let checked = 0;
@@ -1331,9 +1418,9 @@
       function renderBottomNav() {
         const tabs = `
           <div class="bottom-inner">
-            <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button">Неделя</button>
-            <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button">Статистика</button>
-            <button data-action="data" type="button">Настройки</button>
+            <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button" aria-current="${view === 'week' ? 'page' : 'false'}">Неделя</button>
+            <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button" aria-current="${view === 'summary' ? 'page' : 'false'}">Статистика</button>
+            <button data-action="data" type="button" aria-haspopup="dialog">Настройки</button>
           </div>
         `;
 
@@ -1348,9 +1435,9 @@
         return `
           <nav class="bottom-tabs" aria-label="Неделя и разделы">
             <div class="bottom-week">
-              <button data-action="prev" type="button">←</button>
-              <span class="pill">${escapeHtml(formatWeekRange(weekStartKeyForOffset(weekOffset)))}</span>
-              <button data-action="next" type="button">→</button>
+              <button data-action="prev" type="button" aria-label="Предыдущая неделя">←</button>
+              <span class="pill" aria-live="polite">${escapeHtml(formatWeekRange(weekStartKeyForOffset(weekOffset)))}</span>
+              <button data-action="next" type="button" aria-label="Следующая неделя">→</button>
             </div>
             ${tabs}
           </nav>
@@ -1398,13 +1485,10 @@
               <div class="day-body">
                 ${day.active ? `
                   <div class="day-body-top">
-                    <div class="progress"><i style="--value:${progress.percent}%"></i></div>
-                    <div class="title-row">
-                      <span class="muted tiny">${progress.checked}/${progress.total || 0} подходов</span>
-                      ${complete ? '<span class="pill done">готово</span>' : ''}
-                    </div>
+                    <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
+                    ${complete ? '<div class="title-row"><span class="pill done">готово</span></div>' : ''}
                   </div>
-                  ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">Добавь первое упражнение.</div>'}
+                  ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : ''}
                   <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ упражнение</button>
                   <button class="danger" data-action="set-day-active" data-active="false" data-date="${dateKey}" type="button">Убрать тренировочный день</button>
                 ` : `
@@ -1429,7 +1513,7 @@
                 <option value="reps" ${exercise.unit === 'reps' ? 'selected' : ''}>повторения</option>
                 <option value="seconds" ${exercise.unit === 'seconds' ? 'selected' : ''}>секунды</option>
               </select>
-              <button class="small danger" data-action="remove-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button">Удалить</button>
+              <button class="small danger remove-exercise" data-action="remove-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button">Удалить</button>
             </div>
             <div class="set-row">
               ${exercise.sets.map((label, setIndex) => renderSet(dateKey, exercise, label, exIndex, setIndex)).join('')}
@@ -1485,7 +1569,7 @@
         const topExercise = stats.rows[0]?.name || 'пока нет лидера';
         return `
           <article class="summary-hero">
-            <div class="activity-ring" style="--value:${clamp(stats.completionPercent, 0, 100)}">
+            <div class="activity-ring" role="img" aria-label="Выполнено ${stats.completionPercent}% запланированных подходов" style="--value:${clamp(stats.completionPercent, 0, 100)}">
               <div class="ring-core">
                 <strong>${stats.completionPercent}%</strong>
                 <span>выполнено</span>
@@ -1535,7 +1619,7 @@
             <span class="chart-label">${escapeHtml(label)}</span>
             <strong>${escapeHtml(value)}</strong>
             <p class="muted tiny">${escapeHtml(note)}</p>
-            <div class="metric-meter"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
+            <div class="metric-meter" role="presentation"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
           </article>
         `;
       }
@@ -1578,14 +1662,14 @@
             <div class="rank-list">
               ${topRows.map(row => {
                 const percent = primaryVolume(row) / max * 100;
+                const variants = row.variants?.size > 1 ? ` · ${row.variants.size} варианта` : '';
                 return `
                   <div class="rank-row">
                     <div class="rank-top">
                       <strong>${escapeHtml(row.name)}</strong>
-                      <span>${escapeHtml(formatUnits(row.units, row.sets))}</span>
+                      <span>${escapeHtml(`${formatUnits(row.units, row.sets)}${variants}`)}</span>
                     </div>
-                    <div class="rank-meter"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
-                    <p class="muted tiny">${formatCount(row.sets, ['подход', 'подхода', 'подходов'])}</p>
+                    <div class="rank-meter" role="presentation"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
                   </div>
                 `;
               }).join('')}
@@ -2112,10 +2196,10 @@
         flushSave();
         const sheet = document.getElementById('sheet');
         sheet.innerHTML = `
-          <div class="sheet-card">
+          <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
             <div class="title-row">
-              <h2>JSON</h2>
-              <button data-action="close-sheet" type="button">Закрыть</button>
+              <h2 id="sheetTitle">JSON</h2>
+              <button data-action="close-sheet" type="button" aria-label="Закрыть настройки">Закрыть</button>
             </div>
             <div class="toolbar">
               <button class="dark" data-action="copy-json" type="button">Копировать</button>
@@ -2187,7 +2271,31 @@
       function registerServiceWorker() {
         if (!('serviceWorker' in navigator)) return;
         if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
-        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js?v=1.0.6', { updateViaCache: 'none' })
+            .then(registration => {
+              registration.update().catch(() => {});
+              if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              registration.addEventListener('updatefound', () => {
+                const worker = registration.installing;
+                if (!worker) return;
+                worker.addEventListener('statechange', () => {
+                  if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                    worker.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                });
+              });
+            })
+            .catch(() => {});
+        });
       }
 
       function clearLongPress() {
