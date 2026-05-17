@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.6">
-  <link rel="icon" href="icon.svg?v=1.0.6" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.6" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.6">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.7">
+  <link rel="icon" href="icon.svg?v=1.0.7" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.7" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.7">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -327,19 +327,55 @@
       font-weight: 500;
     }
 
-    .day-toggle .chevron {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: color-mix(in srgb, var(--accent) 12%, var(--soft));
-      color: var(--accent-ink);
-      font-size: 0.95rem;
-      transition: transform 0.16s ease, background 0.16s ease;
+    .add-day-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
     }
-    .day.open .chevron { transform: rotate(180deg); background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+
+    .add-day-head {
+      display: grid;
+      gap: 4px;
+    }
+
+    .add-day-head h2 {
+      color: var(--accent-ink);
+    }
+
+    .add-day-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .add-day-grid button {
+      min-height: 48px;
+      padding: 6px 4px;
+      display: grid;
+      gap: 2px;
+      place-items: center;
+      line-height: 1.1;
+    }
+
+    .add-day-grid small {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .empty-week-card {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .empty-week-card h2 {
+      color: var(--accent-ink);
+    }
+
+    .empty-week-card p {
+      color: var(--muted);
+      line-height: 1.42;
+    }
 
     .day-body {
       display: grid;
@@ -484,7 +520,8 @@
     .toolbar { justify-content: flex-start; }
 
     .add-exercise,
-    .make-training {
+    .make-training,
+    .add-day-button {
       width: 100%;
       background: var(--field);
     }
@@ -879,7 +916,10 @@
       .top-subtitle { font-size: clamp(1.22rem, 8vw, 1.72rem); }
       .top-actions button { min-height: 38px; padding-inline: 12px; }
       .day-toggle { padding: 13px 12px; }
-      .day-body { padding-inline: 12px; }
+      .day-body,
+      .add-day-card,
+      .empty-week-card { padding-inline: 12px; }
+      .add-day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .exercise { padding: 10px; border-radius: 16px; }
       .exercise-head { display: grid; grid-template-columns: 1fr auto; }
       .exercise-name { grid-column: 1 / -1; width: 100%; }
@@ -945,6 +985,7 @@
       let view = 'week';
       let weekOffset = 0;
       let openDateKey = todayKey();
+      let showAddDayPicker = false;
       let saveTimer = null;
       let toastTimer = null;
       let timerStartedAt = null;
@@ -1345,9 +1386,13 @@
         return state.sessions[dateKey] || { done: {} };
       }
 
+      function hasDayContent(day) {
+        return Boolean(day?.active || day?.exercises?.length);
+      }
+
       function dayProgress(dateKey) {
         const day = getDay(dateKey);
-        if (!day.active && !day.exercises.length) return { total: 0, checked: 0, percent: 0 };
+        if (!hasDayContent(day)) return { total: 0, checked: 0, percent: 0 };
         const done = readSession(dateKey).done;
         let total = 0;
         let checked = 0;
@@ -1450,18 +1495,68 @@
         const dates = weekDates(weekKey);
         const start = dates[0];
         const end = dates[6];
+        const visibleDates = [...dates]
+          .reverse()
+          .filter(dateKey => hasDayContent(week.days[slotForDate(dateKey)]));
 
-        if (!dates.includes(openDateKey)) {
+        if (openDateKey && visibleDates.length && !visibleDates.includes(openDateKey)) {
+          openDateKey = visibleDates[0];
+        }
+        if (!visibleDates.length && !dates.includes(openDateKey)) {
           openDateKey = weekOffset === 0 && dates.includes(todayKey()) ? todayKey() : dates[6];
         }
-        const visibleDates = [...dates].reverse();
 
         document.getElementById('app').innerHTML = `
           ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
           <section class="week-days">
-            ${visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
+            ${visibleDates.length ? visibleDates.map(dateKey => renderDay(dateKey, week)).join('') : renderEmptyWeek(!showAddDayPicker)}
+            ${showAddDayPicker ? renderAddDayPicker(dates, week) : (visibleDates.length ? renderAddDayButton() : '')}
           </section>
           ${renderBottomNav()}
+        `;
+      }
+
+      function renderEmptyWeek(showButton = true) {
+        return `
+          <article class="card empty-week-card">
+            <div>
+              <h2>Пока нет тренировочных дней</h2>
+              <p>Неделя не забита пустыми карточками. Нажми «Добавить день» и выбери только нужный день.</p>
+            </div>
+            ${showButton ? '<button class="dark" data-action="show-add-day" type="button">+ Добавить день</button>' : ''}
+          </article>
+        `;
+      }
+
+      function renderAddDayButton() {
+        return `
+          <button class="add-day-button dark" data-action="show-add-day" type="button">+ Добавить день</button>
+        `;
+      }
+
+      function renderAddDayPicker(dates, week) {
+        const options = dates
+          .filter(dateKey => !hasDayContent(week.days[slotForDate(dateKey)]))
+          .map(dateKey => {
+            const slot = slotForDate(dateKey);
+            return `
+              <button data-action="add-day" data-date="${dateKey}" type="button">
+                <strong>${SHORT[slot]}</strong>
+                <small>${formatCompactDate(dateKey)}</small>
+              </button>
+            `;
+          })
+          .join('');
+
+        return `
+          <article class="card add-day-card">
+            <div class="add-day-head">
+              <h2>Добавить день</h2>
+              <span class="muted tiny">Выбери день недели — только он появится в списке.</span>
+            </div>
+            ${options ? `<div class="add-day-grid">${options}</div>` : '<div class="empty">Все дни этой недели уже добавлены.</div>'}
+            <button data-action="hide-add-day" type="button">Скрыть выбор</button>
+          </article>
         `;
       }
 
@@ -1470,7 +1565,7 @@
         const day = week.days[slot] || emptyDay();
         const progress = dayProgress(dateKey);
         const isCurrent = dateKey === todayKey();
-        const isOpen = dateKey === openDateKey;
+        const isOpen = Boolean(openDateKey && dateKey === openDateKey);
         const complete = progress.total && progress.checked === progress.total;
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
@@ -1479,7 +1574,6 @@
                 <h2>${SHORT[slot]} · ${formatDate(dateKey, true)}</h2>
                 <span class="day-meta">${progress.checked}/${progress.total || 0} подходов${complete ? ' · готово' : ''}</span>
               </span>
-              <span class="chevron" aria-hidden="true">⌄</span>
             </button>
             ${isOpen ? `
               <div class="day-body">
@@ -1954,10 +2048,14 @@
         const day = getDay(dateKey);
         day.active = Boolean(active);
         if (!day.active) {
+          day.exercises = [];
           delete state.sessions[dateKey];
           stopTimer();
+          if (openDateKey === dateKey) openDateKey = '';
+        } else {
+          openDateKey = dateKey;
+          showAddDayPicker = false;
         }
-        openDateKey = dateKey;
         touchWeek(dateKey);
         saveNow();
         render();
@@ -2147,11 +2245,14 @@
 
       function handleAction(target) {
         const action = target.dataset.action;
-        if (action === 'view-week') { view = 'week'; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
+        if (action === 'view-week') { view = 'week'; showAddDayPicker = false; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
-        if (action === 'prev') { weekOffset -= 1; openDateKey = weekDates(weekStartKeyForOffset(weekOffset))[6]; render(); return; }
-        if (action === 'next') { weekOffset += 1; openDateKey = weekDates(weekStartKeyForOffset(weekOffset))[6]; render(); return; }
-        if (action === 'open-day') { openDateKey = target.dataset.date; render(); return; }
+        if (action === 'prev') { weekOffset -= 1; openDateKey = ''; showAddDayPicker = false; render(); return; }
+        if (action === 'next') { weekOffset += 1; openDateKey = ''; showAddDayPicker = false; render(); return; }
+        if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayPicker = false; render(); return; }
+        if (action === 'show-add-day') { showAddDayPicker = true; openDateKey = ''; render(); return; }
+        if (action === 'hide-add-day') { showAddDayPicker = false; render(); return; }
+        if (action === 'add-day') { setDayActive(target.dataset.date, true); return; }
         if (action === 'set-day-active') { setDayActive(target.dataset.date, target.dataset.active === 'true'); return; }
         if (action === 'data') { openDataSheet(); return; }
         if (action === 'close-sheet') { closeSheet(); return; }
@@ -2280,7 +2381,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.6', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.7', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
