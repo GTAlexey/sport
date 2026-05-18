@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.12">
-  <link rel="icon" href="icon.svg?v=1.0.12" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.12" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.12">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.13">
+  <link rel="icon" href="icon.svg?v=1.0.13" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.13" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.13">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -161,8 +161,8 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      margin: -8px -8px 0;
-      padding: calc(7px + env(safe-area-inset-top, 0px)) 8px 7px;
+      margin: -8px 0 0;
+      padding: calc(7px + env(safe-area-inset-top, 0px)) 0 7px;
       background:
         radial-gradient(circle at 50% -30%, var(--glow), transparent 24rem),
         linear-gradient(180deg, color-mix(in srgb, var(--bg-2) 97%, transparent), color-mix(in srgb, var(--bg-2) 82%, transparent));
@@ -183,6 +183,7 @@
       justify-content: space-between;
       gap: 10px;
       min-width: 0;
+      padding-inline: 2px;
     }
 
     .title-row,
@@ -369,18 +370,17 @@
 
     .day-date-wrap {
       position: relative;
-      flex: 0 0 52px;
-      width: 52px;
-      min-height: 50px;
+      flex: 0 0 44px;
+      width: 44px;
+      min-height: 48px;
       border-radius: 14px;
     }
 
     .day-date {
       width: 100%;
-      min-height: 50px;
+      min-height: 48px;
       display: grid;
       place-items: center;
-      gap: 1px;
       padding: 5px 4px;
       border-radius: inherit;
       background: color-mix(in srgb, var(--field) 72%, black);
@@ -420,10 +420,10 @@
 
     .day-date strong {
       color: var(--accent-ink);
-      font-size: 1.12rem;
+      font-size: 1.34rem;
       line-height: 0.95;
-      letter-spacing: -0.045em;
-      font-weight: 700;
+      letter-spacing: -0.055em;
+      font-weight: 750;
     }
 
     .day-title {
@@ -461,18 +461,6 @@
       color: var(--done);
     }
 
-    .day-delete-button {
-      flex: 0 0 auto;
-      width: 38px;
-      min-width: 38px;
-      min-height: 38px;
-      height: 38px;
-      padding: 0;
-      border-radius: 999px;
-      font-size: 1.3rem;
-      line-height: 1;
-    }
-
     .add-day-card {
       display: grid;
       gap: 12px;
@@ -495,7 +483,7 @@
 
     .add-day-fields {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 138px;
+      grid-template-columns: minmax(0, 1fr);
       gap: 8px;
       align-items: center;
     }
@@ -609,32 +597,23 @@
       box-shadow: none;
     }
 
-    .exercise-head .remove-exercise {
-      flex: 0 0 auto;
-      width: 40px;
-      min-width: 40px;
-      height: 40px;
-      min-height: 40px;
-      align-self: center;
-      padding: 0;
-      border-radius: 999px;
-      font-size: 1.24rem;
-      line-height: 1;
-    }
-
     .set-row {
+      --set-gap: clamp(3px, 1.15vw, 7px);
+      --set-control-size: clamp(30px, 8.8vw, 40px);
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
-      gap: 8px;
+      gap: var(--set-gap);
       overflow: visible;
       padding-bottom: 0;
+      min-width: 0;
     }
 
     .set-item {
-      flex: 0 0 auto;
+      flex: 1 1 0;
+      min-width: 0;
       display: inline-grid;
-      grid-template-columns: auto;
+      grid-template-columns: minmax(0, 1fr);
       gap: 6px;
       align-items: center;
       padding: 0;
@@ -645,14 +624,14 @@
     }
 
     .set-control {
-      flex: 0 0 40px;
-      width: 40px;
-      min-width: 40px;
-      min-height: 40px;
-      height: 40px;
+      flex: 0 0 var(--set-control-size);
+      width: var(--set-control-size);
+      min-width: 0;
+      min-height: var(--set-control-size);
+      height: var(--set-control-size);
       padding: 0;
       border-radius: 999px;
-      font-size: 1.12rem;
+      font-size: clamp(0.92rem, 4.5vw, 1.12rem);
       line-height: 1;
     }
 
@@ -662,19 +641,24 @@
     }
 
     .set {
-      min-width: 52px;
-      min-height: 40px;
+      width: 100%;
+      min-width: 0;
+      min-height: var(--set-control-size);
       border-radius: 999px;
       border: 1px solid color-mix(in srgb, var(--line) 84%, white);
       background: linear-gradient(180deg, color-mix(in srgb, var(--field) 92%, white), var(--field));
       color: var(--ink);
-      padding: 0 12px;
+      padding: 0 clamp(4px, 1.8vw, 12px);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
+      gap: 4px;
+      font-size: clamp(0.78rem, 3.35vw, 0.96rem);
       font-weight: 500;
       font-variant-numeric: tabular-nums;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .set.done {
@@ -1068,7 +1052,7 @@
     @media (max-width: 420px) {
       body { padding-inline: 6px; }
       h1 { font-size: 0.78rem; }
-      .top { margin-inline: -6px; padding-inline: 6px; }
+      .top { margin-inline: 0; padding-inline: 0; }
       .top-subtitle { font-size: clamp(0.92rem, 4.5vw, 1.08rem); }
       .timer-bar { min-width: 82px; }
       .top-actions button { min-height: 38px; padding-inline: 12px; }
@@ -1077,15 +1061,13 @@
       .add-day-card,
       .empty-week-card { padding-inline: 12px; }
       .exercise { padding: 10px; border-radius: 16px; }
-      .exercise-head { display: grid; grid-template-columns: 1fr auto; }
-      .exercise-name { grid-column: 1 / -1; width: 100%; }
-      .exercise-head .remove-exercise { min-height: 44px; }
+      .exercise-head { flex-wrap: nowrap; }
+      .exercise-name { width: 100%; }
       .toolbar button { flex: 1 1 120px; min-height: 38px; }
       .add-day-fields,
       .add-day-actions { grid-template-columns: 1fr; }
-      .set-row { display: flex; flex-wrap: wrap; overflow: visible; }
-      .set-item { display: inline-grid; grid-template-columns: auto; width: auto; min-width: max-content; border-radius: 0; }
-      .set { width: auto; min-width: 58px; min-height: 44px; }
+      .set-row { gap: 3px; }
+      .set { min-height: 38px; }
       .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .summary-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 12px; }
       .summary-hero-copy { justify-items: center; }
@@ -1137,7 +1119,7 @@
       let state;
       let view = 'week';
       let weekOffset = 0;
-      let openDateKey = todayKey();
+      let openDateKey = null;
       let showAddDayForm = false;
       let saveTimer = null;
       let toastTimer = null;
@@ -1217,6 +1199,11 @@
 
       function formatDate(dateKey, long = false) {
         return new Intl.DateTimeFormat('ru-RU', long ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'short' }).format(parseDateKey(dateKey));
+      }
+
+      function weekdayName(dateKey) {
+        const name = new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(parseDateKey(dateKey));
+        return name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Тренировка';
       }
 
       function formatCompactDate(dateKey) {
@@ -1600,16 +1587,17 @@
         const dates = weekDates(weekKey);
         const start = dates[0];
         const end = dates[6];
-        const visibleDates = [...dates]
-          .reverse()
-          .filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
+        const visibleDates = dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
         const isEmpty = visibleDates.length === 0;
         if (isEmpty) showAddDayForm = true;
 
-        if (openDateKey && visibleDates.length && !visibleDates.includes(openDateKey)) {
-          openDateKey = visibleDates[0];
+        if (visibleDates.length) {
+          const today = todayKey();
+          const defaultOpenDate = visibleDates.includes(today) ? today : visibleDates[0];
+          if (openDateKey === null || (openDateKey && !visibleDates.includes(openDateKey))) openDateKey = defaultOpenDate;
+        } else {
+          openDateKey = '';
         }
-        if (!visibleDates.length) openDateKey = '';
 
         document.getElementById('app').innerHTML = `
           ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`, { weekControls: true })}
@@ -1636,15 +1624,13 @@
           <article class="card add-day-card">
             <div class="add-day-head">
               <h2>${isFirstDay ? 'Назначь первый тренировочный день' : 'Новый тренировочный день'}</h2>
-              <span class="muted tiny">Выбери дату и название вручную. Никакие другие дни не появятся сами.</span>
+              <span class="muted tiny">Выбери дату — название подставится по календарю. Никакие другие дни не появятся сами.</span>
             </div>
             ${availableDates.length ? `
               <form class="add-day-form" data-form="add-day">
                 <div class="add-day-fields">
-                  <label class="visually-hidden" for="addDayLabel">Название тренировочного дня</label>
-                  <input id="addDayLabel" class="add-day-field" name="dayLabel" autocomplete="off" enterkeyhint="done" maxlength="64" placeholder="Например: Спина" required autofocus>
                   <label class="visually-hidden" for="addDayDate">Дата тренировочного дня</label>
-                  <input id="addDayDate" class="add-day-date" name="dayDate" type="date" min="${dates[0]}" max="${dates[6]}" value="${defaultDate}" required>
+                  <input id="addDayDate" class="add-day-date" name="dayDate" type="date" min="${dates[0]}" max="${dates[6]}" value="${defaultDate}" required autofocus>
                 </div>
                 <div class="add-day-actions">
                   <button class="dark" type="submit">${isFirstDay ? 'Создать первый день' : 'Добавить день'}</button>
@@ -1664,23 +1650,20 @@
         const day = week.days[slot] || emptyDay();
         const progress = dayProgress(dateKey);
         const date = parseDateKey(dateKey);
-        const dayNumber = String(date.getDate()).padStart(2, '0');
-        const monthLabel = new Intl.DateTimeFormat('ru-RU', { month: 'short' }).format(date).replace('.', '');
+        const dayNumber = String(date.getDate());
         const isCurrent = dateKey === todayKey();
         const isOpen = Boolean(openDateKey && dateKey === openDateKey);
         const complete = Boolean(progress.total && progress.checked === progress.total);
-        const title = day.label || 'Тренировка';
+        const title = weekdayName(dateKey);
         const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
-        const status = complete ? 'готово' : `${progress.percent}%`;
+        const status = complete ? 'готово' : 'в работе';
         return `
-          <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
+          <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}" title="Удерживай карточку дня, чтобы удалить">
             <div class="day-toggle" aria-label="${escapeHtml(title)}">
               <span class="day-head">
                 <label class="day-date-wrap" aria-label="Изменить дату: ${escapeHtml(formatDate(dateKey, true))}">
                   <span class="day-date" aria-hidden="true">
-                    <b>${escapeHtml(SHORT[slot])}</b>
                     <strong>${escapeHtml(dayNumber)}</strong>
-                    <em>${escapeHtml(monthLabel)}</em>
                   </span>
                   <input class="day-date-input" data-field="day-date" data-date="${dateKey}" type="date" value="${dateKey}" aria-label="Перенести день на другую дату">
                 </label>
@@ -1691,7 +1674,6 @@
                   </span>
                 </button>
                 <span class="pill day-status ${complete ? 'done' : ''}">${escapeHtml(status)}</span>
-                <button class="small danger day-delete-button" data-action="delete-day" data-date="${dateKey}" type="button" aria-label="Удалить день ${escapeHtml(title)}">×</button>
               </span>
             </div>
             ${isOpen ? `
@@ -1711,10 +1693,9 @@
         const session = readSession(dateKey);
         const allDone = exercise.sets.length > 0 && exercise.sets.every((_, setIndex) => session.done[`${exIndex}:${setIndex}`]);
         return `
-          <div class="exercise ${allDone ? 'done' : ''}">
+          <div class="exercise ${allDone ? 'done' : ''}" data-date="${dateKey}" data-ex="${exIndex}" title="Удерживай карточку упражнения, чтобы удалить">
             <div class="exercise-head">
               <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
-              <button class="small danger remove-exercise" data-action="remove-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Удалить упражнение">×</button>
             </div>
             <div class="set-row">
               <button class="small set-control" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Убрать подход" ${exercise.sets.length <= 1 ? 'disabled' : ''}>−</button>
@@ -1731,7 +1712,7 @@
         const aria = `Подход ${setIndex + 1}: ${display}.`;
         return `
           <span class="set-item">
-            <button class="set ${done ? 'done' : ''}" aria-label="${escapeHtml(aria)}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${done ? '✓ ' : ''}${escapeHtml(display)}</button>
+            <button class="set ${done ? 'done' : ''}" aria-label="${escapeHtml(aria)}" aria-pressed="${done ? 'true' : 'false'}" data-action="toggle" data-date="${dateKey}" data-ex="${exIndex}" data-set="${setIndex}" type="button">${escapeHtml(display)}</button>
           </span>
         `;
       }
@@ -2124,7 +2105,7 @@
           day.exercises = [];
           delete state.sessions[dateKey];
           stopTimer();
-          if (openDateKey === dateKey) openDateKey = '';
+          if (openDateKey === dateKey) openDateKey = null;
         } else {
           day.manual = true;
           openDateKey = dateKey;
@@ -2139,7 +2120,7 @@
         return cleanDay(JSON.parse(JSON.stringify(day || emptyDay())));
       }
 
-      function addCustomDay(dateKey, label) {
+      function addCustomDay(dateKey) {
         const weekKey = weekStartKeyForOffset(weekOffset);
         const dates = weekDates(weekKey);
         if (!isDateKey(dateKey) || !dates.includes(dateKey)) {
@@ -2155,7 +2136,7 @@
         const day = getDay(dateKey);
         day.active = true;
         day.manual = true;
-        day.label = String(label || '').trim().slice(0, 64) || 'Тренировка';
+        day.label = weekdayName(dateKey);
         day.exercises = Array.isArray(day.exercises) ? day.exercises : [];
         openDateKey = dateKey;
         showAddDayForm = false;
@@ -2189,6 +2170,7 @@
         const targetWeek = getWeek(weekStartKeyForDate(toDateKey));
         const targetSlot = slotForDate(toDateKey);
         targetWeek.days[targetSlot] = cloneDay(sourceDay);
+        targetWeek.days[targetSlot].label = weekdayName(toDateKey);
         sourceWeek.days[sourceSlot] = emptyDay();
 
         if (state.sessions[fromDateKey]) {
@@ -2377,29 +2359,22 @@
 
       function handleSubmit(form) {
         if (form.dataset.form !== 'add-day') return;
-        const input = form.elements.dayLabel;
         const dateInput = form.elements.dayDate;
-        const label = String(input?.value || '').trim();
         const dateKey = String(dateInput?.value || '').trim();
-        if (!label) {
-          input?.focus();
-          toast('Введи название дня');
-          return;
-        }
         if (!isDateKey(dateKey)) {
           dateInput?.focus();
           toast('Выбери дату дня');
           return;
         }
-        addCustomDay(dateKey, label);
+        addCustomDay(dateKey);
       }
 
       function handleAction(target) {
         const action = target.dataset.action;
         if (action === 'view-week') { view = 'week'; showAddDayForm = false; render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
-        if (action === 'prev') { weekOffset -= 1; openDateKey = ''; showAddDayForm = false; render(); return; }
-        if (action === 'next') { weekOffset += 1; openDateKey = ''; showAddDayForm = false; render(); return; }
+        if (action === 'prev') { weekOffset -= 1; openDateKey = null; showAddDayForm = false; render(); return; }
+        if (action === 'next') { weekOffset += 1; openDateKey = null; showAddDayForm = false; render(); return; }
         if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
         if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
         if (action === 'hide-add-day') {
@@ -2416,9 +2391,7 @@
         if (action === 'copy-json') { copyJson(); return; }
         if (action === 'export-json') { exportJson(); return; }
         if (action === 'import-json') { importJson(); return; }
-        if (action === 'delete-day') { setDayActive(target.dataset.date, false); return; }
         if (action === 'add-exercise') { addExercise(target.dataset.date); return; }
-        if (action === 'remove-exercise') { removeExercise(target.dataset.date, Number(target.dataset.ex)); return; }
         if (action === 'toggle') { toggleSet(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set)); return; }
         if (action === 'add-set' || action === 'remove-set') {
           updateLineSetCount(target.dataset.date, Number(target.dataset.ex), action === 'add-set' ? 1 : -1);
@@ -2542,7 +2515,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.12', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.13', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -2566,9 +2539,31 @@
         longPressTarget = null;
       }
 
+      function longPressAction(target) {
+        if (target.matches('.set[data-action="toggle"]')) return () => editSetValue(target);
+        if (target.matches('.exercise[data-date][data-ex]')) {
+          const name = getDay(target.dataset.date).exercises[Number(target.dataset.ex)]?.name || 'упражнение';
+          return () => {
+            removeExercise(target.dataset.date, Number(target.dataset.ex));
+            toast(`Удалено: ${name}`);
+          };
+        }
+        if (target.matches('.day[data-date]')) {
+          const title = weekdayName(target.dataset.date);
+          return () => {
+            setDayActive(target.dataset.date, false);
+            toast(`День удалён: ${title}`);
+          };
+        }
+        return null;
+      }
+
       function startLongPress(event) {
-        const target = event.target.closest('.set[data-action="toggle"]');
+        if (event.button !== undefined && event.button !== 0) return;
+        const target = event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]');
         if (!target) return;
+        if (target.classList.contains('exercise') && event.target.closest('.set, .set-control, input, button, textarea, select, label')) return;
+        if (target.classList.contains('day') && event.target.closest('.exercise, .day-date-wrap, [data-action="add-exercise"], input, textarea, select, label')) return;
         clearLongPress();
         longPressTarget = target;
         longPressStartX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
@@ -2576,9 +2571,10 @@
         longPressTimer = setTimeout(() => {
           if (!longPressTarget) return;
           ignoreNextClick = true;
-          editSetValue(longPressTarget);
+          const action = longPressAction(longPressTarget);
           clearLongPress();
-        }, 520);
+          action?.();
+        }, 620);
       }
 
       function moveLongPress(event) {
@@ -2594,7 +2590,7 @@
       document.addEventListener('pointerup', clearLongPress);
       document.addEventListener('pointercancel', clearLongPress);
       document.addEventListener('contextmenu', event => {
-        if (!event.target.closest('.set[data-action="toggle"]')) return;
+        if (!event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]')) return;
         event.preventDefault();
       });
 
@@ -2602,7 +2598,7 @@
         const target = event.target.closest('[data-action]');
         if (!target) return;
         event.preventDefault();
-        if (ignoreNextClick && target.dataset.action === 'toggle') {
+        if (ignoreNextClick) {
           ignoreNextClick = false;
           return;
         }
