@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.16">
-  <link rel="icon" href="icon.svg?v=1.0.16" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.16" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.16">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.17">
+  <link rel="icon" href="icon.svg?v=1.0.17" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.17" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.17">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -38,6 +38,8 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --top-clock-size: clamp(2.34rem, 10.4vw, 3.9rem);
       --floating-nav-size: 54px;
+      --swipe-action-size: 48px;
+      --swipe-action-width: calc(var(--swipe-action-size) * 2 + 18px);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
     }
@@ -78,7 +80,7 @@
 
     body {
       min-height: 100dvh;
-      padding: 12px 10px calc(88px + var(--safe-bottom));
+      padding: 12px 10px calc(16px + var(--safe-bottom));
     }
 
     button, textarea, input, select { font: inherit; }
@@ -250,37 +252,36 @@
     }
 
     .top-period {
+      position: relative;
       min-width: 0;
-      display: inline-grid;
-      grid-template-columns: 24px minmax(0, max-content) 24px;
+      display: inline-flex;
       align-items: center;
-      gap: 3px;
     }
 
-    .top-week-button {
-      min-width: 24px;
-      min-height: 34px;
-      width: 24px;
-      height: 34px;
+    .week-picker-button {
+      min-width: 0;
+      min-height: calc(var(--top-clock-size) * 0.92);
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
       padding: 0;
       border: 0;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
-      color: var(--muted);
-      font-size: 1.5rem;
-      line-height: 1;
+      color: var(--accent-ink);
+      text-align: left;
+      overflow: hidden;
     }
 
-    .top-week-button:active {
-      transform: scale(0.94);
+    .week-picker-button:active {
+      transform: scale(0.98);
     }
 
-    .top-week-button:hover {
+    .week-picker-button:hover {
       border: 0;
       background: transparent;
       box-shadow: none;
-      color: var(--ink);
     }
 
     .top-subtitle {
@@ -297,6 +298,24 @@
       font-weight: 650;
       font-variant-numeric: tabular-nums;
       text-shadow: 0 0 18px var(--glow);
+    }
+
+    .week-picker-button .top-subtitle {
+      min-height: auto;
+      font-size: var(--top-clock-size);
+      line-height: 0.92;
+      letter-spacing: -0.075em;
+      font-weight: 700;
+      text-shadow: 0 0 22px var(--glow);
+    }
+
+    .week-picker-input {
+      position: absolute;
+      inset: auto 0 0 auto;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .muted { color: var(--muted); }
@@ -384,7 +403,7 @@
     }
 
     .swipe-open > .swipe-content {
-      transform: translateX(calc(-1 * var(--swipe-action-width, 154px)));
+      transform: translateX(calc(-1 * var(--swipe-action-width, 114px)));
     }
 
     .swiping > .swipe-content {
@@ -398,9 +417,10 @@
       right: 0;
       bottom: 0;
       z-index: 1;
-      width: var(--swipe-action-width, 154px);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      width: var(--swipe-action-width, 114px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
       padding: 6px;
       pointer-events: none;
@@ -413,12 +433,28 @@
     }
 
     .swipe-action {
-      min-height: 100%;
-      height: 100%;
-      padding: 0 8px;
+      width: var(--swipe-action-size);
+      min-width: var(--swipe-action-size);
+      height: var(--swipe-action-size);
+      min-height: var(--swipe-action-size);
+      padding: 0;
       border-radius: 12px;
-      font-size: 0.86rem;
+      display: grid;
+      place-items: center;
+      font-size: 1.18rem;
       font-weight: 650;
+      line-height: 1;
+    }
+
+    .swipe-action svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
     }
 
     .swipe-delete {
@@ -825,20 +861,26 @@
     .toolbar { justify-content: flex-start; }
 
     .add-exercise,
-    .make-training,
     .add-day-button {
+      width: min(50%, 220px);
+      justify-self: end;
+      margin-left: auto;
+      background: var(--field);
+    }
+
+    .make-training {
       width: 100%;
       background: var(--field);
     }
 
     .bottom-menu {
-      position: fixed;
-      left: 12px;
-      bottom: calc(12px + var(--safe-bottom));
-      z-index: 30;
+      justify-self: start;
+      align-self: end;
       display: grid;
       gap: 8px;
       width: var(--floating-nav-size);
+      margin-top: 8px;
+      padding-bottom: var(--safe-bottom);
       pointer-events: none;
     }
 
@@ -1216,7 +1258,7 @@
       position: fixed;
       left: 14px;
       right: 14px;
-      bottom: calc(78px + var(--safe-bottom));
+      bottom: calc(16px + var(--safe-bottom));
       z-index: 50;
       padding: 12px 14px;
       border-radius: 16px;
@@ -1268,7 +1310,6 @@
       body { padding-inline: 6px; }
       h1 { font-size: 0.78rem; }
       .top { margin-inline: 0; padding-inline: 0; }
-      .top-subtitle { font-size: clamp(0.92rem, 4.5vw, 1.08rem); }
       .timer-bar { min-width: 82px; }
       .top-actions button { min-height: 38px; padding-inline: 12px; }
       .day-toggle { padding: 8px 10px; }
@@ -1292,7 +1333,7 @@
 
     @media (max-width: 340px) {
       :root { --floating-nav-size: 50px; }
-      .bottom-menu { left: 8px; gap: 6px; }
+      .bottom-menu { gap: 6px; }
       .bottom-menu-items { gap: 6px; }
       .summary-grid { grid-template-columns: 1fr; }
     }
@@ -1807,11 +1848,12 @@
       }
 
       function renderTop(title, subtitle, options = {}) {
-        const weekControls = options.weekControls ? `
+        const weekPicker = options.weekPicker ? `
           <span class="top-period" aria-label="Неделя ${escapeHtml(subtitle)}">
-            <button class="top-week-button" data-action="prev" type="button" aria-label="Предыдущая неделя">‹</button>
-            <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
-            <button class="top-week-button" data-action="next" type="button" aria-label="Следующая неделя">›</button>
+            <button class="week-picker-button" data-action="open-week-picker" type="button" aria-label="Выбрать неделю">
+              <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
+            </button>
+            <input id="weekPicker" class="week-picker-input" data-field="week-picker" type="date" value="${escapeHtml(options.weekStart || todayKey())}" aria-label="Выбрать понедельник недели" tabindex="-1">
           </span>
         ` : `<strong class="top-subtitle">${escapeHtml(subtitle)}</strong>`;
         const heading = title ? `<h1>${escapeHtml(title)}</h1>` : '';
@@ -1820,7 +1862,7 @@
             <div class="top-inner">
               <div class="top-title">
                 ${heading}
-                ${weekControls}
+                ${weekPicker}
               </div>
               <div class="timer-bar" aria-live="polite">
                 <span>Секундомер</span>
@@ -1829,6 +1871,10 @@
             </div>
           </header>
         `;
+      }
+
+      function trashIcon() {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg>';
       }
 
       function renderBottomNav() {
@@ -1863,7 +1909,7 @@
         }
 
         document.getElementById('app').innerHTML = `
-          ${renderTop('', formatWeekRange(weekKey), { weekControls: true })}
+          ${renderTop('', formatWeekRange(weekKey), { weekPicker: true, weekStart: weekKey })}
           <section class="week-days">
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
             ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderAddDayButton()}
@@ -1874,7 +1920,7 @@
 
       function renderAddDayButton() {
         return `
-          <button class="add-day-button" data-action="show-add-day" type="button">+ Добавить день</button>
+          <button class="add-day-button" data-action="show-add-day" type="button">+ День</button>
         `;
       }
 
@@ -1919,12 +1965,11 @@
         const complete = Boolean(progress.total && progress.checked === progress.total);
         const title = weekdayName(dateKey);
         const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
-        const status = complete ? 'готово' : '';
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${complete ? 'complete' : ''} ${isOpen ? 'open' : 'collapsed'}" data-swipe="day" data-date="${dateKey}" data-slot="${slot}" title="Смахни влево, чтобы удалить">
             <div class="swipe-actions">
-              <button class="swipe-action swipe-delete" data-action="delete-day" data-date="${dateKey}" type="button" aria-label="Удалить день">🗑</button>
-              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button">Отмена</button>
+              <button class="swipe-action swipe-delete" data-action="delete-day" data-date="${dateKey}" type="button" aria-label="Удалить день">${trashIcon()}</button>
+              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button" aria-label="Закрыть свайп">×</button>
             </div>
             <div class="swipe-content">
               <div class="day-toggle" aria-label="${escapeHtml(title)}">
@@ -1941,7 +1986,6 @@
                       <span class="day-meta">${escapeHtml(meta)}</span>
                     </span>
                   </button>
-                  ${status ? `<span class="pill day-status done">${escapeHtml(status)}</span>` : ''}
                 </span>
               </div>
               ${isOpen ? `
@@ -1964,8 +2008,8 @@
         return `
           <div class="exercise ${allDone ? 'done' : ''}" data-swipe="exercise" data-date="${dateKey}" data-ex="${exIndex}" title="Смахни влево, чтобы удалить">
             <div class="swipe-actions">
-              <button class="swipe-action swipe-delete" data-action="delete-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Удалить упражнение">🗑</button>
-              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button">Отмена</button>
+              <button class="swipe-action swipe-delete" data-action="delete-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Удалить упражнение">${trashIcon()}</button>
+              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button" aria-label="Закрыть свайп">×</button>
             </div>
             <div class="swipe-content">
               <div class="exercise-head">
@@ -2725,8 +2769,7 @@
         }
         if (action === 'view-week') { view = 'week'; showAddDayForm = false; render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
-        if (action === 'prev') { weekOffset -= 1; openDateKey = null; showAddDayForm = false; render(); return; }
-        if (action === 'next') { weekOffset += 1; openDateKey = null; showAddDayForm = false; render(); return; }
+        if (action === 'open-week-picker') { openWeekPicker(); return; }
         if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
         if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
         if (action === 'hide-add-day') {
@@ -2774,6 +2817,10 @@
           addCustomDay(target.value);
           return;
         }
+        if (field === 'week-picker') {
+          selectWeek(target.value);
+          return;
+        }
         if (field === 'day-date') {
           moveDayDate(target.dataset.date, target.value);
           return;
@@ -2783,6 +2830,28 @@
       function handleBlur(target) {
         if (target.dataset.field !== 'exercise-name') return;
         flushSave();
+        render();
+      }
+
+      function openWeekPicker() {
+        const picker = document.getElementById('weekPicker');
+        if (!picker) return;
+        picker.focus({ preventScroll: true });
+        if (typeof picker.showPicker === 'function') {
+          picker.showPicker();
+        } else {
+          picker.click();
+        }
+      }
+
+      function selectWeek(value) {
+        if (!isDateKey(value)) {
+          toast('Выбери дату недели');
+          return;
+        }
+        weekOffset = weekOffsetForDate(value);
+        openDateKey = null;
+        showAddDayForm = false;
         render();
       }
 
@@ -2892,7 +2961,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.16', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.17', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
