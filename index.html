@@ -252,6 +252,18 @@
       flex: 0 0 auto;
     }
 
+    .top-title h1.top-date-title {
+      min-height: calc(var(--top-clock-size) * 0.92);
+      display: inline-flex;
+      align-items: center;
+      color: var(--accent);
+      font-size: var(--top-clock-size);
+      line-height: 0.92;
+      letter-spacing: -0.075em;
+      font-weight: 300;
+      text-shadow: 0 0 22px var(--glow);
+    }
+
     .top-period {
       position: relative;
       min-width: 0;
@@ -713,7 +725,7 @@
       display: block;
       height: 100%;
       width: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2) 56%, var(--done));
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 42%, var(--done) 58%, var(--done) 100%);
       border-radius: inherit;
       box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
       clip-path: inset(0 calc(100% - var(--value, 0%)) 0 0 round 999px);
@@ -1834,6 +1846,10 @@
         updateTimerDisplay();
       }
 
+      function resetScrollPosition() {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      }
+
       function renderTop(title, subtitle, options = {}) {
         const weekPicker = options.weekPicker ? `
           <span class="top-period" aria-label="Неделя ${escapeHtml(subtitle)}">
@@ -1842,8 +1858,14 @@
             </button>
             <input id="weekPicker" class="week-picker-input" data-field="week-picker" type="date" value="${escapeHtml(options.weekStart || todayKey())}" aria-label="Выбрать понедельник недели" tabindex="-1">
           </span>
-        ` : `<strong class="top-subtitle">${escapeHtml(subtitle)}</strong>`;
-        const heading = title ? `<h1>${escapeHtml(title)}</h1>` : '';
+        ` : subtitle ? `<strong class="top-subtitle">${escapeHtml(subtitle)}</strong>` : '';
+        const headingClass = options.titleAsDate ? ' class="top-date-title"' : '';
+        const heading = title ? `<h1${headingClass}>${escapeHtml(title)}</h1>` : '';
+        const timer = options.showTimer === false ? '' : `
+              <div class="timer-bar" aria-live="polite">
+                <span>Секундомер</span>
+                <strong id="timerDisplay">${formatTimer(timerSeconds())}</strong>
+              </div>`;
         return `
           <header class="top">
             <div class="top-inner">
@@ -1851,10 +1873,7 @@
                 ${heading}
                 ${weekPicker}
               </div>
-              <div class="timer-bar" aria-live="polite">
-                <span>Секундомер</span>
-                <strong id="timerDisplay">${formatTimer(timerSeconds())}</strong>
-              </div>
+              ${timer}
             </div>
           </header>
         `;
@@ -2040,7 +2059,7 @@
       function renderSummary() {
         const stats = buildSummaryStats();
         document.getElementById('app').innerHTML = `
-          ${renderTop('Статистика', 'весь период')}
+          ${renderTop('Статистика', '', { showTimer: false, titleAsDate: true })}
           <section class="summary">
             ${stats.sets ? renderStatsDashboard(stats) : renderEmptyStats()}
           </section>
@@ -2753,8 +2772,19 @@
           menu?.classList.remove('open');
           menu?.querySelector('.bottom-menu-toggle')?.setAttribute('aria-expanded', 'false');
         }
-        if (action === 'view-week') { view = 'week'; showAddDayForm = false; render(); return; }
-        if (action === 'view-summary') { view = 'summary'; render(); return; }
+        if (action === 'view-week') {
+          view = 'week';
+          showAddDayForm = false;
+          render();
+          resetScrollPosition();
+          return;
+        }
+        if (action === 'view-summary') {
+          view = 'summary';
+          render();
+          resetScrollPosition();
+          return;
+        }
         if (action === 'open-week-picker') { openWeekPicker(); return; }
         if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
         if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
