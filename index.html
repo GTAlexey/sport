@@ -37,7 +37,8 @@
       --overlay: rgba(0, 0, 0, 0.62);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --top-clock-size: clamp(2.34rem, 10.4vw, 3.9rem);
-      --floating-nav-size: 54px;
+      --bottom-action-height: 44px;
+      --bottom-menu-item-size: 42px;
       --swipe-action-size: 48px;
       --swipe-action-width: calc(var(--swipe-action-size) * 2 + 18px);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
@@ -866,12 +867,18 @@
       width: min(50%, 220px);
       justify-self: end;
       margin-left: auto;
-      background: var(--field);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
+      color: var(--accent-ink);
+      border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+      box-shadow: 0 7px 18px var(--glow);
     }
 
     .week-bottom-row .add-day-button {
-      flex: 0 1 min(50%, 220px);
+      flex: 1 1 0;
       width: auto;
+      max-width: 220px;
+      height: var(--bottom-action-height);
+      min-height: var(--bottom-action-height);
       margin-left: 0;
     }
 
@@ -891,25 +898,22 @@
 
     .bottom-menu {
       position: relative;
-      flex: 0 0 var(--floating-nav-size);
+      flex: 1 1 0;
       display: grid;
-      width: var(--floating-nav-size);
-      height: var(--floating-nav-size);
-      pointer-events: none;
+      width: auto;
+      max-width: 220px;
+      height: var(--bottom-action-height);
+      min-width: 0;
     }
 
     .bottom-menu button {
-      width: var(--floating-nav-size);
       min-width: 0;
-      height: var(--floating-nav-size);
-      min-height: var(--floating-nav-size);
+      height: var(--bottom-action-height);
+      min-height: var(--bottom-action-height);
       padding: 0;
-      border-radius: 16px;
       display: grid;
       place-items: center;
-      font-size: 1.2rem;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.34), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-      pointer-events: auto;
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
     }
 
     .bottom-menu svg {
@@ -925,37 +929,57 @@
 
     .bottom-menu-toggle {
       grid-area: 1 / 1;
-      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
-      color: var(--accent-ink);
-      border-color: color-mix(in srgb, var(--accent) 58%, transparent);
-      font-size: 1.35rem;
+      width: 100%;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--field) 88%, black);
+      color: var(--ink);
+      border-color: color-mix(in srgb, var(--line) 86%, white);
+      font-size: 1.16rem;
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+      transition: opacity 0.14s ease, transform 0.14s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .bottom-menu.open .bottom-menu-toggle {
+      opacity: 0;
+      transform: scale(0.98);
+      pointer-events: none;
     }
 
     .bottom-menu-items {
-      position: absolute;
-      left: 0;
-      bottom: calc(100% + 8px);
-      display: grid;
-      gap: 8px;
+      grid-area: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3px;
+      width: 100%;
+      height: var(--bottom-action-height);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(10px) scale(0.96);
+      transform: scale(0.96);
       pointer-events: none;
-      transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
+      transition: opacity 0.14s ease, transform 0.14s ease, visibility 0s linear 0.14s;
     }
 
     .bottom-menu.open .bottom-menu-items {
       opacity: 1;
       visibility: visible;
-      transform: translateY(0) scale(1);
+      transform: scale(1);
       pointer-events: auto;
       transition-delay: 0s;
     }
 
     .bottom-menu-items button {
+      flex: 0 0 var(--bottom-menu-item-size);
+      width: var(--bottom-menu-item-size);
+      height: var(--bottom-menu-item-size);
+      min-height: var(--bottom-menu-item-size);
+      border-radius: 12px;
       background: color-mix(in srgb, var(--field) 88%, black);
       color: var(--ink);
       border-color: color-mix(in srgb, var(--line) 86%, white);
+      font-size: 1.06rem;
     }
 
     .bottom-menu-items button.dark {
@@ -1312,7 +1336,11 @@
 
     @supports not (color: color-mix(in srgb, white, black)) {
       .top { background: var(--bg); }
-      .bottom-menu button { background: var(--bg); }
+      .bottom-menu-toggle,
+      .bottom-menu-items button { background: var(--field); }
+      .add-exercise,
+      .add-day-button,
+      .bottom-menu-items button.dark { background: var(--accent); }
       .exercise { background: var(--soft); }
     }
 
@@ -1348,8 +1376,8 @@
     }
 
     @media (max-width: 340px) {
-      :root { --floating-nav-size: 50px; }
-      .bottom-menu-items { gap: 6px; }
+      :root { --bottom-menu-item-size: 40px; }
+      .bottom-menu-items { gap: 2px; }
       .summary-grid { grid-template-columns: 1fr; }
     }
 
@@ -2776,12 +2804,21 @@
         addCustomDay(dateKey);
       }
 
+      function closeBottomMenus(exceptMenu) {
+        document.querySelectorAll('.bottom-menu.open').forEach(menu => {
+          if (exceptMenu && menu === exceptMenu) return;
+          menu.classList.remove('open');
+          menu.querySelector('.bottom-menu-toggle')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+
       function handleAction(target) {
         const action = target.dataset.action;
         if (action === 'toggle-menu') {
           const menu = target.closest('.bottom-menu');
           const isOpen = menu?.classList.toggle('open');
           target.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          closeBottomMenus(menu);
           return;
         }
         const menuItem = target.closest('.bottom-menu-items');
@@ -3145,7 +3182,9 @@
           event.preventDefault();
           return;
         }
+        const menu = event.target.closest('.bottom-menu');
         const target = event.target.closest('[data-action]');
+        if (!menu) closeBottomMenus();
         if (!target) return;
         event.preventDefault();
         handleAction(target);
