@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.9">
-  <link rel="icon" href="icon.svg?v=1.0.9" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.9" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.9">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.10">
+  <link rel="icon" href="icon.svg?v=1.0.10" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.10" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.10">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -1020,9 +1020,8 @@
     (() => {
       'use strict';
 
-      const STORAGE_KEY = 'sport-notes.state.v5';
-      const OLD_KEYS = ['sport-notes.state.v4', 'sport-notes.state.v3', 'sport-notes.state.v2'];
-      const OLD_KEY = 'sport-week-planner.state.v1';
+      const STORAGE_KEY = 'sport-notes.state.v6';
+      const OLD_KEYS = [];
       const SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
       let state;
       let view = 'week';
@@ -1149,7 +1148,7 @@
       }
 
       function emptyDay() {
-        return { active: false, label: '', exercises: [] };
+        return { active: false, manual: false, label: '', exercises: [] };
       }
 
       function emptyWeekDays() {
@@ -1157,12 +1156,11 @@
       }
 
       function defaultState() {
-        const startKey = weekStartKeyForDate(todayKey());
         return {
-          version: 5,
+          version: 6,
           id: uid(),
           theme: 'dark',
-          weeks: { [startKey]: makeWeek(emptyWeekDays()) },
+          weeks: {},
           sessions: {},
           updatedAt: new Date().toISOString()
         };
@@ -1181,9 +1179,6 @@
           } catch (_) {}
         }
 
-        const migrated = migrateOldState();
-        if (migrated) return migrated;
-
         return defaultState();
       }
 
@@ -1193,12 +1188,12 @@
         const currentWeek = weekStartKeyForDate(todayKey());
         const weeks = cleanWeeks(next.weeks);
 
-        if (!Object.keys(weeks).length) {
-          weeks[currentWeek] = makeWeek(next.days || emptyWeekDays());
+        if (!Object.keys(weeks).length && Array.isArray(next.days)) {
+          weeks[currentWeek] = makeWeek(next.days);
         }
 
         return {
-          version: 5,
+          version: 6,
           id: next.id || uid(),
           theme: 'dark',
           weeks,
@@ -1236,13 +1231,14 @@
       function cleanDay(day) {
         if (typeof day === 'string') {
           const exercises = textToExercises(day);
-          return { active: exercises.length > 0, label: '', exercises };
+          return { active: exercises.length > 0, manual: exercises.length > 0, label: '', exercises };
         }
         if (!day || typeof day !== 'object') return emptyDay();
         const exercises = (Array.isArray(day.exercises) ? day.exercises : []).map(cleanExercise).filter(Boolean);
-        const active = typeof day.active === 'boolean' ? day.active : exercises.length > 0;
         const label = String(day.label ?? '').trim().slice(0, 64);
-        return { active, label, exercises };
+        const manual = Boolean(day.manual || label || exercises.length);
+        const active = manual && (typeof day.active === 'boolean' ? day.active : true);
+        return { active, manual, label, exercises };
       }
 
       function cleanExercise(exercise) {
@@ -1339,47 +1335,6 @@
         return sessions;
       }
 
-      function migrateOldState() {
-        try {
-          const saved = localStorage.getItem(OLD_KEY);
-          if (!saved) return null;
-          const old = JSON.parse(saved);
-          const days = cleanDays(old?.program?.days?.map(oldDayToText));
-          const sessions = {};
-          Object.entries(old?.sessionsByDateKey || {}).forEach(([dateKey, session]) => {
-            const done = {};
-            (session?.exercises || []).forEach((ex, exIndex) => {
-              (ex?.sets || []).forEach((set, setIndex) => {
-                if (set?.completed) {
-                  const label = oldSetLabel(set);
-                  const unit = /сек|мин/.test(label) ? 'seconds' : 'reps';
-                  done[`${exIndex}:${setIndex}`] = makeDonePayload({ name: ex?.name || 'Упражнение', unit }, label);
-                }
-              });
-            });
-            if (Object.keys(done).length) sessions[dateKey] = { done, updatedAt: new Date().toISOString() };
-          });
-          return normalize({ days, sessions });
-        } catch (_) {
-          return null;
-        }
-      }
-
-      function oldDayToText(day) {
-        if (!day || day.kind !== 'workout') return '';
-        return (day.exercises || []).map(ex => {
-          const sets = (ex.sets || []).map(oldSetLabel).join('-');
-          return `${ex.name || 'Упражнение'}${sets ? ` — ${sets}` : ''}`;
-        }).join('\n');
-      }
-
-      function oldSetLabel(set) {
-        if (set?.targetReps !== null && set?.targetReps !== undefined) return String(set.targetReps);
-        if (set?.targetDurationMin !== null && set?.targetDurationMin !== undefined) return `${set.targetDurationMin * 60} сек`;
-        if (set?.targetDistanceKm !== null && set?.targetDistanceKm !== undefined) return `${set.targetDistanceKm} км`;
-        return '10';
-      }
-
       function applyTheme() {
         document.documentElement.dataset.theme = 'dark';
         document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0b0b0d');
@@ -1430,8 +1385,12 @@
         return state.sessions[dateKey] || { done: {} };
       }
 
+      function isManualDay(day) {
+        return Boolean(day?.manual && (day?.active || day?.exercises?.length || String(day?.label || '').trim()));
+      }
+
       function hasDayContent(day) {
-        return Boolean(day?.active || day?.exercises?.length || String(day?.label || '').trim());
+        return isManualDay(day);
       }
 
       function dayProgress(dateKey) {
@@ -1535,40 +1494,28 @@
 
       function renderWeek() {
         const weekKey = weekStartKeyForOffset(weekOffset);
-        const week = getWeek(weekKey);
+        const week = getExistingWeek(weekKey) || makeWeek(emptyWeekDays());
         const dates = weekDates(weekKey);
         const start = dates[0];
         const end = dates[6];
         const visibleDates = [...dates]
           .reverse()
-          .filter(dateKey => hasDayContent(week.days[slotForDate(dateKey)]));
+          .filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
+        const isEmpty = visibleDates.length === 0;
+        if (isEmpty) showAddDayForm = true;
 
         if (openDateKey && visibleDates.length && !visibleDates.includes(openDateKey)) {
           openDateKey = visibleDates[0];
         }
-        if (!visibleDates.length && !dates.includes(openDateKey)) {
-          openDateKey = weekOffset === 0 && dates.includes(todayKey()) ? todayKey() : dates[6];
-        }
+        if (!visibleDates.length) openDateKey = '';
 
         document.getElementById('app').innerHTML = `
           ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
           <section class="week-days">
-            ${visibleDates.length ? visibleDates.map(dateKey => renderDay(dateKey, week)).join('') : renderEmptyWeek(!showAddDayForm)}
-            ${showAddDayForm ? renderAddDayForm(dates, week) : (visibleDates.length ? renderAddDayButton() : '')}
+            ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
+            ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderAddDayButton()}
           </section>
           ${renderBottomNav()}
-        `;
-      }
-
-      function renderEmptyWeek(showButton = true) {
-        return `
-          <article class="card empty-week-card">
-            <div>
-              <h2>Пока нет тренировочных дней</h2>
-              <p>Неделя не забита пустыми карточками. Нажми «Добавить день» и введи название тренировки вручную.</p>
-            </div>
-            ${showButton ? '<button class="dark" data-action="show-add-day" type="button">+ Добавить день</button>' : ''}
-          </article>
         `;
       }
 
@@ -1578,27 +1525,27 @@
         `;
       }
 
-      function renderAddDayForm(dates, week) {
-        const availableCount = dates.filter(dateKey => !hasDayContent(week.days[slotForDate(dateKey)])).length;
+      function renderAddDayForm(dates, week, isFirstDay = false) {
+        const availableCount = dates.filter(dateKey => !isManualDay(week.days[slotForDate(dateKey)])).length;
 
         return `
           <article class="card add-day-card">
             <div class="add-day-head">
-              <h2>Новый тренировочный день</h2>
-              <span class="muted tiny">Назови день вручную: «Спина», «Ноги», «День A». Пустые дни останутся скрытыми.</span>
+              <h2>${isFirstDay ? 'Назначь первый тренировочный день' : 'Новый тренировочный день'}</h2>
+              <span class="muted tiny">Введи название вручную: «Спина», «Ноги», «День A». Никакие другие дни не появятся сами.</span>
             </div>
             ${availableCount ? `
               <form class="add-day-form" data-form="add-day">
                 <label class="visually-hidden" for="addDayLabel">Название тренировочного дня</label>
                 <input id="addDayLabel" class="add-day-field" name="dayLabel" autocomplete="off" enterkeyhint="done" maxlength="64" placeholder="Например: Спина" aria-describedby="addDayHelp" required autofocus>
                 <div class="add-day-actions">
-                  <button class="dark" type="submit">Добавить день</button>
-                  <button data-action="hide-add-day" type="button">Отмена</button>
+                  <button class="dark" type="submit">${isFirstDay ? 'Создать первый день' : 'Добавить день'}</button>
+                  ${isFirstDay ? '' : '<button data-action="hide-add-day" type="button">Отмена</button>'}
                 </div>
-                <small id="addDayHelp" class="add-day-help muted tiny">Создам ближайший свободный слот этой недели и открою его для упражнений.</small>
+                <small id="addDayHelp" class="add-day-help muted tiny">После создания откроется только этот день — сразу добавь упражнения кнопкой «+ упражнение».</small>
               </form>
             ` : `
-              <div class="empty">Все семь дней этой недели уже добавлены.</div>
+              <div class="empty">Все семь ручных дней этой недели уже добавлены.</div>
               <button data-action="hide-add-day" type="button">Закрыть</button>
             `}
           </article>
@@ -1874,7 +1821,7 @@
 
         Object.entries(state.weeks || {}).forEach(([, week]) => {
           (week?.days || []).forEach(day => {
-            if (!day?.active) return;
+            if (!isManualDay(day)) return;
             activeDays += 1;
             (day.exercises || []).forEach(exercise => { plannedSets += exercise.sets?.length || 0; });
           });
@@ -1883,6 +1830,7 @@
         Object.entries(state.sessions || {}).forEach(([dateKey, session]) => {
           const week = getExistingWeek(weekStartKeyForDate(dateKey));
           const day = week?.days?.[slotForDate(dateKey)] || emptyDay();
+          if (!isManualDay(day)) return;
           const exercises = day.exercises || [];
           let dayDone = false;
 
@@ -2087,12 +2035,14 @@
         const day = getDay(dateKey);
         day.active = Boolean(active);
         if (!day.active) {
+          day.manual = false;
           day.label = '';
           day.exercises = [];
           delete state.sessions[dateKey];
           stopTimer();
           if (openDateKey === dateKey) openDateKey = '';
         } else {
+          day.manual = true;
           openDateKey = dateKey;
           showAddDayForm = false;
         }
@@ -2118,6 +2068,7 @@
 
         const day = getDay(dateKey);
         day.active = true;
+        day.manual = true;
         day.label = String(label || '').trim().slice(0, 64) || 'Тренировка';
         day.exercises = Array.isArray(day.exercises) ? day.exercises : [];
         openDateKey = dateKey;
@@ -2190,6 +2141,7 @@
       function addExercise(dateKey) {
         const day = getDay(dateKey);
         day.active = true;
+        day.manual = true;
         day.exercises.push({ name: '', unit: 'reps', sets: ['10'] });
         openDateKey = dateKey;
         touchWeek(dateKey);
@@ -2324,15 +2276,21 @@
 
       function handleAction(target) {
         const action = target.dataset.action;
-        if (action === 'view-week') { view = 'week'; showAddDayForm = false; if (weekOffset === 0) openDateKey = todayKey(); render(); return; }
+        if (action === 'view-week') { view = 'week'; showAddDayForm = false; render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
         if (action === 'prev') { weekOffset -= 1; openDateKey = ''; showAddDayForm = false; render(); return; }
         if (action === 'next') { weekOffset += 1; openDateKey = ''; showAddDayForm = false; render(); return; }
         if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
         if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
-        if (action === 'hide-add-day') { showAddDayForm = false; render(); return; }
-        if (action === 'add-day') { setDayActive(target.dataset.date, true); return; }
-        if (action === 'set-day-active') { setDayActive(target.dataset.date, target.dataset.active === 'true'); return; }
+        if (action === 'hide-add-day') {
+          const weekKey = weekStartKeyForOffset(weekOffset);
+          const dates = weekDates(weekKey);
+          const week = getExistingWeek(weekKey) || makeWeek(emptyWeekDays());
+          const hasVisibleDays = dates.some(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
+          showAddDayForm = !hasVisibleDays;
+          render();
+          return;
+        }
         if (action === 'data') { openDataSheet(); return; }
         if (action === 'close-sheet') { closeSheet(); return; }
         if (action === 'copy-json') { copyJson(); return; }
@@ -2460,7 +2418,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.9', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.10', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -2542,7 +2500,6 @@
       registerServiceWorker();
       state = loadState();
       applyTheme();
-      getWeek(weekStartKeyForOffset(0));
       saveNow();
       render();
     })();

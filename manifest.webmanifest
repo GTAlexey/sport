@@ -9,7 +9,7 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#080607",
-  "theme_color": "#0f0f0e",
+  "theme_color": "#0b0b0d",
   "categories": ["health", "fitness", "productivity"],
   "icons": [
     {
