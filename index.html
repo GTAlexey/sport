@@ -868,19 +868,32 @@
       background: var(--field);
     }
 
+    .week-bottom-row .add-day-button {
+      flex: 0 1 min(50%, 220px);
+      width: auto;
+      margin-left: 0;
+    }
+
     .make-training {
       width: 100%;
       background: var(--field);
     }
 
+    .week-bottom-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      max-width: 100%;
+      min-width: 0;
+    }
+
     .bottom-menu {
-      justify-self: start;
-      align-self: end;
+      position: relative;
+      flex: 0 0 var(--floating-nav-size);
       display: grid;
-      gap: 8px;
       width: var(--floating-nav-size);
-      margin-top: 8px;
-      padding-bottom: var(--safe-bottom);
+      height: var(--floating-nav-size);
       pointer-events: none;
     }
 
@@ -910,7 +923,7 @@
     }
 
     .bottom-menu-toggle {
-      grid-row: 4;
+      grid-area: 1 / 1;
       background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
       color: var(--accent-ink);
       border-color: color-mix(in srgb, var(--accent) 58%, transparent);
@@ -918,7 +931,9 @@
     }
 
     .bottom-menu-items {
-      grid-row: 1 / 4;
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
       display: grid;
       gap: 8px;
       opacity: 0;
@@ -1333,7 +1348,6 @@
 
     @media (max-width: 340px) {
       :root { --floating-nav-size: 50px; }
-      .bottom-menu { gap: 6px; }
       .bottom-menu-items { gap: 6px; }
       .summary-grid { grid-template-columns: 1fr; }
     }
@@ -1912,9 +1926,17 @@
           ${renderTop('', formatWeekRange(weekKey), { weekPicker: true, weekStart: weekKey })}
           <section class="week-days">
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
-            ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderAddDayButton()}
+            ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderWeekBottomRow()}
           </section>
-          ${renderBottomNav()}
+        `;
+      }
+
+      function renderWeekBottomRow() {
+        return `
+          <div class="week-bottom-row">
+            ${renderBottomNav()}
+            ${renderAddDayButton()}
+          </div>
         `;
       }
 
