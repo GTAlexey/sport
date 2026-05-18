@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.10">
-  <link rel="icon" href="icon.svg?v=1.0.10" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.10" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.10">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.11">
+  <link rel="icon" href="icon.svg?v=1.0.11" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.11" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.11">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -172,8 +172,7 @@
     }
 
     .top-inner,
-    .bottom-inner,
-    .bottom-week {
+    .bottom-inner {
       width: min(100%, 760px);
       margin: 0 auto;
     }
@@ -189,7 +188,7 @@
     .title-row,
     .top-actions,
     .week-row,
-    .day-toggle,
+    .day-head,
     .exercise-head,
     .toolbar,
     .stat-head,
@@ -205,11 +204,11 @@
 
     h1, h2, h3, p { margin: 0; }
     h1 {
-      color: var(--muted);
-      font-size: 0.82rem;
-      letter-spacing: 0.02em;
-      font-weight: 500;
-      text-transform: uppercase;
+      color: var(--ink);
+      font-size: clamp(1.3rem, 6vw, 2.1rem);
+      line-height: 0.96;
+      letter-spacing: -0.065em;
+      font-weight: 700;
     }
     h2 { font-size: 1rem; letter-spacing: -0.02em; font-weight: 600; }
     h3 { font-size: 0.96rem; letter-spacing: -0.02em; font-weight: 600; }
@@ -217,8 +216,8 @@
     .top-title {
       min-width: 0;
       display: flex;
-      align-items: baseline;
-      gap: 8px;
+      align-items: center;
+      gap: 10px;
       white-space: nowrap;
       overflow: hidden;
     }
@@ -227,15 +226,35 @@
       flex: 0 0 auto;
     }
 
+    .top-period {
+      min-width: 0;
+      display: inline-grid;
+      grid-template-columns: 36px minmax(0, max-content) 36px;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .top-week-button {
+      min-width: 36px;
+      min-height: 36px;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 999px;
+      font-size: 1.1rem;
+      line-height: 1;
+      background: color-mix(in srgb, var(--field) 70%, transparent);
+    }
+
     .top-subtitle {
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--accent-ink);
-      font-size: clamp(1rem, 4.8vw, 1.42rem);
+      font-size: clamp(0.98rem, 4.7vw, 1.42rem);
       line-height: 1;
       letter-spacing: -0.045em;
-      font-weight: 550;
+      font-weight: 650;
       font-variant-numeric: tabular-nums;
       text-shadow: 0 0 18px var(--glow);
     }
@@ -259,29 +278,25 @@
       flex: 0 0 auto;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      min-width: 132px;
-      padding: 8px 10px;
-      border-radius: 16px;
-      background:
-        linear-gradient(135deg, color-mix(in srgb, var(--card-strong) 88%, var(--accent)), var(--card));
-      border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
-      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+      justify-content: flex-end;
+      min-width: 94px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
     }
 
     .timer-bar span {
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 500;
+      display: none;
     }
 
     .timer-bar strong {
-      font-size: 1.28rem;
-      letter-spacing: -0.04em;
+      font-size: clamp(1.8rem, 8vw, 3rem);
+      line-height: 0.92;
+      letter-spacing: -0.075em;
       font-variant-numeric: tabular-nums;
       color: var(--accent);
-      text-shadow: 0 0 16px var(--glow);
+      text-shadow: 0 0 22px var(--glow);
     }
 
     .pill {
@@ -299,12 +314,12 @@
     .pill.done { background: color-mix(in srgb, var(--done) 17%, var(--card)); color: var(--done); }
 
     .card {
-      border: 1px solid color-mix(in srgb, var(--line) 92%, white);
-      border-radius: 18px;
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white);
+      border-radius: 16px;
       background:
         linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card));
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255, 255, 255, 0.035) inset;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.035) inset;
     }
 
     .day {
@@ -312,34 +327,76 @@
     }
 
     .day.current {
-      border-color: color-mix(in srgb, var(--accent) 72%, var(--line));
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32), 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent) inset;
+      border-color: color-mix(in srgb, var(--accent) 68%, var(--line));
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent) inset;
     }
 
     .day-toggle {
       width: 100%;
-      min-height: 64px;
-      padding: 14px;
+      min-height: 58px;
+      padding: 9px 11px;
       border: 0;
       border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       background: transparent;
       text-align: left;
     }
 
     .day-toggle:active { transform: none; }
 
+    .day .day-head {
+      width: 100%;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      gap: 10px;
+    }
+
+    .day-date {
+      flex: 0 0 46px;
+      width: 46px;
+      min-height: 48px;
+      display: grid;
+      place-items: center;
+      gap: 1px;
+      padding: 5px 4px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--field) 72%, black);
+      border: 1px solid color-mix(in srgb, var(--line) 82%, white);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.035) inset;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .day-date b,
+    .day-date em {
+      color: var(--muted);
+      font-size: 0.62rem;
+      line-height: 1;
+      font-style: normal;
+      font-weight: 650;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .day-date strong {
+      color: var(--accent-ink);
+      font-size: 1.12rem;
+      line-height: 0.95;
+      letter-spacing: -0.045em;
+      font-weight: 700;
+    }
+
     .day-title {
       flex: 1 1 auto;
       min-width: 0;
       display: grid;
-      gap: 4px;
+      gap: 3px;
     }
 
-    .day-toggle h2 {
+    .day-title h2 {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -347,8 +404,25 @@
 
     .day-meta {
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .day-status {
+      flex: 0 0 auto;
+      min-width: 44px;
+      justify-content: center;
+      color: var(--accent-ink);
+      background: color-mix(in srgb, var(--accent) 17%, var(--soft));
+      font-variant-numeric: tabular-nums;
+    }
+
+    .day-status.done {
+      background: color-mix(in srgb, var(--done) 17%, var(--card));
+      color: var(--done);
     }
 
     .add-day-card {
@@ -413,19 +487,19 @@
 
     .day-body {
       display: grid;
-      gap: 10px;
-      padding: 0 14px 14px;
-      border-top: 1px solid var(--line);
+      gap: 9px;
+      padding: 0 11px 11px;
+      border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     }
 
     .day-body-top {
       display: grid;
-      gap: 8px;
-      padding-top: 12px;
+      gap: 7px;
+      padding-top: 9px;
     }
 
     .progress {
-      height: 8px;
+      height: 6px;
       border-radius: 999px;
       background: var(--soft);
       overflow: hidden;
@@ -580,18 +654,6 @@
       -webkit-backdrop-filter: blur(18px) saturate(1.16);
       border-top: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
       box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.36);
-    }
-
-    .bottom-week {
-      display: grid;
-      grid-template-columns: 46px minmax(0, 1fr) 46px;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .bottom-week .pill {
-      justify-content: center;
-      min-height: 42px;
     }
 
     .bottom-inner {
@@ -940,15 +1002,6 @@
       .top-inner {
         gap: 8px;
       }
-
-      .timer-bar {
-        min-width: 116px;
-        padding-inline: 8px;
-      }
-
-      .timer-bar span {
-        display: none;
-      }
     }
 
     @media (max-width: 420px) {
@@ -956,10 +1009,9 @@
       h1 { font-size: 0.78rem; }
       .top { margin-inline: -6px; padding-inline: 6px; }
       .top-subtitle { font-size: clamp(0.92rem, 4.5vw, 1.08rem); }
-      .timer-bar { min-width: 92px; }
-      .timer-bar strong { font-size: 1.05rem; }
+      .timer-bar { min-width: 82px; }
       .top-actions button { min-height: 38px; padding-inline: 12px; }
-      .day-toggle { padding: 13px 12px; }
+      .day-toggle { padding: 8px 10px; }
       .day-body,
       .add-day-card,
       .empty-week-card { padding-inline: 12px; }
@@ -982,9 +1034,7 @@
 
     @media (max-width: 340px) {
       .bottom-tabs { padding-inline: 8px; }
-      .bottom-inner,
-      .bottom-week { gap: 6px; }
-      .bottom-week { grid-template-columns: 42px minmax(0, 1fr) 42px; }
+      .bottom-inner { gap: 6px; }
       .bottom-tabs button { font-size: 0.9rem; padding-inline: 6px; }
       .bottom-inner { grid-template-columns: 1fr; }
       .bottom-tabs button { min-height: 42px; }
@@ -1135,16 +1185,18 @@
 
       function formatDurationShort(value) {
         const total = Math.max(0, Math.round(Number(value) || 0));
-        const hours = Math.floor(total / 3600);
-        const minutes = Math.floor((total % 3600) / 60);
-        const seconds = total % 60;
+        if (!total) return '0 мин';
+        if (total < 60) return '< 1 мин';
+        let hours = Math.floor(total / 3600);
+        let minutes = Math.round((total % 3600) / 60);
+        if (minutes === 60) {
+          hours += 1;
+          minutes = 0;
+        }
         if (hours) {
           return `${formatCount(hours, ['час', 'часа', 'часов'])}${minutes ? ` ${formatCount(minutes, ['минута', 'минуты', 'минут'])}` : ''}`;
         }
-        if (minutes) {
-          return `${formatCount(minutes, ['минута', 'минуты', 'минут'])}${seconds ? ` ${formatCount(seconds, ['секунда', 'секунды', 'секунд'])}` : ''}`;
-        }
-        return formatCount(seconds, ['секунда', 'секунды', 'секунд']);
+        return formatCount(minutes, ['минута', 'минуты', 'минут']);
       }
 
       function emptyDay() {
@@ -1446,13 +1498,20 @@
         updateTimerDisplay();
       }
 
-      function renderTop(title, subtitle) {
+      function renderTop(title, subtitle, options = {}) {
+        const weekControls = options.weekControls ? `
+          <span class="top-period">
+            <button class="top-week-button" data-action="prev" type="button" aria-label="Предыдущая неделя">←</button>
+            <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
+            <button class="top-week-button" data-action="next" type="button" aria-label="Следующая неделя">→</button>
+          </span>
+        ` : `<strong class="top-subtitle">${escapeHtml(subtitle)}</strong>`;
         return `
           <header class="top">
             <div class="top-inner">
               <div class="top-title">
                 <h1>${escapeHtml(title)}</h1>
-                <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
+                ${weekControls}
               </div>
               <div class="timer-bar" aria-live="polite">
                 <span>Секундомер</span>
@@ -1481,12 +1540,7 @@
         }
 
         return `
-          <nav class="bottom-tabs" aria-label="Неделя и разделы">
-            <div class="bottom-week">
-              <button data-action="prev" type="button" aria-label="Предыдущая неделя">←</button>
-              <span class="pill" aria-live="polite">${escapeHtml(formatWeekRange(weekStartKeyForOffset(weekOffset)))}</span>
-              <button data-action="next" type="button" aria-label="Следующая неделя">→</button>
-            </div>
+          <nav class="bottom-tabs" aria-label="Разделы">
             ${tabs}
           </nav>
         `;
@@ -1510,7 +1564,7 @@
         if (!visibleDates.length) openDateKey = '';
 
         document.getElementById('app').innerHTML = `
-          ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`)}
+          ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`, { weekControls: true })}
           <section class="week-days">
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
             ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderAddDayButton()}
@@ -1556,22 +1610,35 @@
         const slot = slotForDate(dateKey);
         const day = week.days[slot] || emptyDay();
         const progress = dayProgress(dateKey);
+        const date = parseDateKey(dateKey);
+        const dayNumber = String(date.getDate()).padStart(2, '0');
+        const monthLabel = new Intl.DateTimeFormat('ru-RU', { month: 'short' }).format(date).replace('.', '');
         const isCurrent = dateKey === todayKey();
         const isOpen = Boolean(openDateKey && dateKey === openDateKey);
-        const complete = progress.total && progress.checked === progress.total;
+        const complete = Boolean(progress.total && progress.checked === progress.total);
+        const title = day.label || 'Тренировка';
+        const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
+        const status = complete ? 'готово' : `${progress.percent}%`;
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}">
             <button class="day-toggle" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
-              <span class="day-title">
-                <h2>${escapeHtml(day.label || `${SHORT[slot]} · ${formatDate(dateKey, true)}`)}</h2>
-                <span class="day-meta">${progress.checked}/${progress.total || 0} подходов${complete ? ' · готово' : ''}</span>
+              <span class="day-head">
+                <span class="day-date" aria-label="${escapeHtml(formatDate(dateKey, true))}">
+                  <b>${escapeHtml(SHORT[slot])}</b>
+                  <strong>${escapeHtml(dayNumber)}</strong>
+                  <em>${escapeHtml(monthLabel)}</em>
+                </span>
+                <span class="day-title">
+                  <h2>${escapeHtml(title)}</h2>
+                  <span class="day-meta">${escapeHtml(meta)}</span>
+                </span>
+                <span class="pill day-status ${complete ? 'done' : ''}">${escapeHtml(status)}</span>
               </span>
             </button>
             ${isOpen ? `
               <div class="day-body">
                 <div class="day-body-top">
                   <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
-                  ${complete ? '<div class="title-row"><span class="pill done">готово</span></div>' : ''}
                 </div>
                 ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
                 <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ упражнение</button>
@@ -1591,7 +1658,7 @@
               <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
               <select class="unit-select" data-field="exercise-unit" data-date="${dateKey}" data-ex="${exIndex}" aria-label="Единица">
                 <option value="reps" ${exercise.unit === 'reps' ? 'selected' : ''}>повторения</option>
-                <option value="seconds" ${exercise.unit === 'seconds' ? 'selected' : ''}>секунды</option>
+                <option value="seconds" ${exercise.unit === 'seconds' ? 'selected' : ''}>время</option>
               </select>
               <button class="small danger remove-exercise" data-action="remove-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button">Удалить</button>
             </div>
@@ -1631,7 +1698,9 @@
 
       function formatSetLabel(exercise, label) {
         const text = String(label || defaultSetValue(exercise.unit, exercise.name));
-        return exercise.unit === 'seconds' ? `${text} секунд` : text;
+        if (exercise.unit !== 'seconds') return text;
+        const value = Number(text.replace(',', '.').match(/\d+(?:\.\d+)?/)?.[0] || 0);
+        return formatDurationShort(value);
       }
 
       function renderSummary() {
@@ -1670,7 +1739,7 @@
             ${renderMetricCard('Тренировки', formatNumber(stats.workouts), `${formatCount(stats.activeDays, ['активный день', 'активных дня', 'активных дней'])} в плане`, stats.activeDays ? stats.workouts / stats.activeDays * 100 : 100)}
             ${renderMetricCard('Подходы', formatNumber(stats.sets), `${formatNumber(stats.plannedSets)} в плане`, stats.completionPercent)}
             ${renderMetricCard('Повторения', formatNumber(stats.reps), 'только выполненный объём', stats.maxUnitValue ? stats.reps / stats.maxUnitValue * 100 : 0)}
-            ${renderMetricCard('Секунды', formatDurationShort(stats.seconds), 'планка и статические упражнения', stats.maxUnitValue ? stats.seconds / stats.maxUnitValue * 100 : 0)}
+            ${renderMetricCard('Время', formatDurationShort(stats.seconds), 'планка и статические упражнения', stats.maxUnitValue ? stats.seconds / stats.maxUnitValue * 100 : 0)}
           </div>
 
           <div class="chart-grid">
@@ -1944,7 +2013,7 @@
       function buildUnitRows(stats) {
         const rows = [];
         if (stats.reps) rows.push({ label: 'Повторения', value: stats.reps, text: formatCount(stats.reps, ['повторение', 'повторения', 'повторений']) });
-        if (stats.seconds) rows.push({ label: 'Секунды', value: stats.seconds, text: formatDurationShort(stats.seconds) });
+        if (stats.seconds) rows.push({ label: 'Время', value: stats.seconds, text: formatDurationShort(stats.seconds) });
         rows.push({ label: 'Подходы', value: stats.sets, text: formatCount(stats.sets, ['подход', 'подхода', 'подходов']) });
         return rows;
       }
@@ -1985,7 +2054,7 @@
         const order = ['повт', 'сек', 'км', 'м'];
         const parts = order
           .filter(unit => units[unit])
-          .map(unit => `${formatNumber(units[unit])} ${unitName(unit, units[unit])}`);
+          .map(unit => unit === 'сек' ? formatDurationShort(units[unit]) : `${formatNumber(units[unit])} ${unitName(unit, units[unit])}`);
         return parts.length ? parts.join(' + ') : formatCount(fallbackSets, ['подход', 'подхода', 'подходов']);
       }
 
@@ -2217,7 +2286,7 @@
         const setIndex = Number(target.dataset.set);
         const exercise = getDay(dateKey).exercises[exIndex];
         if (!exercise || !(setIndex in exercise.sets)) return;
-        const unitLabel = exercise.unit === 'seconds' ? 'секунды' : 'повторения';
+        const unitLabel = exercise.unit === 'seconds' ? 'времени' : 'повторений';
         const current = String(exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name));
         const next = prompt(`Сколько ${unitLabel}?`, current);
         if (next === null) return;
@@ -2418,7 +2487,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.10', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.11', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
