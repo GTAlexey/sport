@@ -307,6 +307,7 @@
       line-height: 0.92;
       letter-spacing: -0.075em;
       font-weight: 300;
+      color: var(--accent);
       text-shadow: 0 0 22px var(--glow);
     }
 
@@ -355,8 +356,8 @@
       line-height: 0.92;
       letter-spacing: -0.075em;
       font-variant-numeric: tabular-nums;
-      color: var(--accent);
-      text-shadow: 0 0 22px var(--glow);
+      color: var(--done);
+      text-shadow: 0 0 22px color-mix(in srgb, var(--done) 28%, transparent);
     }
 
     .pill {
@@ -1341,6 +1342,7 @@
       .add-exercise,
       .add-day-button,
       .bottom-menu-items button.dark { background: var(--accent); }
+      .timer-bar strong { text-shadow: 0 0 22px rgba(52, 199, 89, 0.28); }
       .exercise { background: var(--soft); }
     }
 
@@ -1946,7 +1948,9 @@
         } else if (visibleDates.length) {
           const today = todayKey();
           const defaultOpenDate = visibleDates.includes(today) ? today : visibleDates[0];
-          if (openDateKey === null || (openDateKey && !visibleDates.includes(openDateKey))) openDateKey = defaultOpenDate;
+          if (openDateKey === null || (openDateKey && !visibleDates.includes(openDateKey))) {
+            openDateKey = isDayComplete(defaultOpenDate) ? '' : defaultOpenDate;
+          }
         } else {
           openDateKey = '';
         }
@@ -2783,6 +2787,7 @@
         saveNow();
 
         if (!wasDone && isDayComplete(dateKey)) {
+          openDateKey = '';
           stopTimer();
           render();
           return;
