@@ -994,7 +994,6 @@
       gap: 14px;
     }
 
-    .summary-hero,
     .metric-card,
     .chart-card,
     .empty-hero {
@@ -1007,49 +1006,6 @@
       box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
     }
 
-    .summary-hero {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 16px;
-      align-items: center;
-      min-height: 186px;
-      padding: 16px;
-      border-radius: 28px;
-    }
-
-    .activity-ring {
-      --value: 0;
-      width: 138px;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      padding: 12px;
-      background:
-        conic-gradient(var(--done) calc(var(--value) * 1%), color-mix(in srgb, var(--line) 68%, black) 0),
-        radial-gradient(circle, color-mix(in srgb, var(--accent) 24%, transparent), transparent 64%);
-      box-shadow: 0 0 34px color-mix(in srgb, var(--done) 20%, transparent);
-    }
-
-    .ring-core {
-      width: 100%;
-      height: 100%;
-      border-radius: inherit;
-      display: grid;
-      place-items: center;
-      align-content: center;
-      gap: 2px;
-      background: linear-gradient(180deg, var(--card), var(--bg));
-      border: 1px solid color-mix(in srgb, var(--line) 70%, white);
-    }
-
-    .ring-core strong {
-      font-size: 2rem;
-      letter-spacing: -0.06em;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .ring-core span,
     .chart-label,
     .bar-note {
       color: var(--muted);
@@ -1057,30 +1013,6 @@
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-    }
-
-    .summary-hero-copy {
-      display: grid;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .impact-number {
-      display: block;
-      color: var(--accent-ink);
-      font-size: clamp(2.25rem, 13vw, 4.6rem);
-      line-height: 0.92;
-      letter-spacing: -0.08em;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      text-shadow: 0 0 28px var(--glow);
-    }
-
-    .hero-caption {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
     }
 
     .summary-grid {
@@ -1105,7 +1037,7 @@
     }
 
     .metric-meter,
-    .rank-meter,
+    .exercise-stat-meter,
     .unit-meter {
       height: 8px;
       overflow: hidden;
@@ -1114,7 +1046,7 @@
     }
 
     .metric-meter i,
-    .rank-meter i,
+    .exercise-stat-meter i,
     .unit-meter i {
       display: block;
       width: var(--value, 0%);
@@ -1186,19 +1118,26 @@
       white-space: nowrap;
     }
 
-    .rank-list,
+    .exercise-stat-list,
     .unit-list {
       display: grid;
       gap: 10px;
     }
 
-    .rank-row,
+    .exercise-stat-row,
     .unit-row {
       display: grid;
       gap: 7px;
     }
 
-    .rank-top,
+    .exercise-stat-row {
+      padding: 11px;
+      border: 1px solid color-mix(in srgb, var(--line) 78%, var(--accent));
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--field) 54%, transparent);
+    }
+
+    .exercise-stat-top,
     .unit-top {
       display: flex;
       justify-content: space-between;
@@ -1206,7 +1145,7 @@
       gap: 10px;
     }
 
-    .rank-top strong,
+    .exercise-stat-top strong,
     .unit-top strong {
       min-width: 0;
       overflow: hidden;
@@ -1214,13 +1153,19 @@
       white-space: nowrap;
     }
 
-    .rank-top span,
+    .exercise-stat-top span,
     .unit-top span {
       color: var(--muted);
       font-weight: 500;
       font-size: 0.86rem;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
+    }
+
+    .exercise-stat-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.35;
     }
 
     .weekday-bars {
@@ -1243,7 +1188,7 @@
       width: 100%;
       min-height: 8px;
       height: var(--value, 0%);
-      border-radius: 999px 999px 7px 7px;
+      border-radius: 14px 14px 7px 7px;
       background: linear-gradient(180deg, var(--done), color-mix(in srgb, var(--done) 48%, var(--accent)));
       opacity: var(--alpha, 1);
       transition: height 0.22s ease, opacity 0.22s ease;
@@ -1372,10 +1317,6 @@
       .set-row { gap: 3px; }
       .set { min-height: 38px; }
       .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .summary-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 12px; }
-      .summary-hero-copy { justify-items: center; }
-      .hero-caption { justify-content: center; }
-      .activity-ring { width: 116px; }
     }
 
     @media (max-width: 340px) {
@@ -1389,7 +1330,7 @@
       .day-body { padding: 0 16px 16px; }
       .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .day.open { grid-column: 1 / -1; }
-      .summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chart-card.wide { grid-column: 1 / -1; }
     }
@@ -2108,36 +2049,16 @@
       }
 
       function renderStatsDashboard(stats) {
-        const topExercise = stats.rows[0]?.name || 'пока нет лидера';
         return `
-          <article class="summary-hero">
-            <div class="activity-ring" role="img" aria-label="Выполнено ${stats.completionPercent}% запланированных подходов" style="--value:${clamp(stats.completionPercent, 0, 100)}">
-              <div class="ring-core">
-                <strong>${stats.completionPercent}%</strong>
-                <span>выполнено</span>
-              </div>
-            </div>
-            <div class="summary-hero-copy">
-              <span class="chart-label">${escapeHtml(stats.periodLabel)}</span>
-              <strong class="impact-number">${formatNumber(stats.sets)}</strong>
-              <h2>${formatCount(stats.sets, ['выполненный подход', 'выполненных подхода', 'выполненных подходов'])}</h2>
-              <div class="hero-caption">
-                <span class="pill">${formatCount(stats.workouts, ['тренировка', 'тренировки', 'тренировок'])}</span>
-                <span class="pill">лидер: ${escapeHtml(topExercise)}</span>
-              </div>
-            </div>
-          </article>
-
-            <div class="summary-grid">
-              ${renderMetricCard('Тренировки', formatNumber(stats.workouts), `${formatCount(stats.activeDays, ['активный день', 'активных дня', 'активных дней'])} в плане`, stats.activeDays ? stats.workouts / stats.activeDays * 100 : 100)}
-              ${renderMetricCard('Подходы', formatNumber(stats.sets), `${formatNumber(stats.plannedSets)} в плане`, stats.completionPercent)}
-              ${renderMetricCard('Повторения', formatNumber(stats.reps), 'только выполненный объём', stats.maxUnitValue ? stats.reps / stats.maxUnitValue * 100 : 0)}
-            </div>
-
+          <div class="summary-grid">
+            ${renderMetricCard('Все тренировки', formatNumber(stats.workouts), stats.periodLabel, stats.activeDays ? stats.workouts / stats.activeDays * 100 : 100)}
+            ${renderMetricCard('Все подходы', formatNumber(stats.sets), `${formatNumber(stats.plannedSets)} в плане`, stats.completionPercent)}
+            ${renderMetricCard('Все повторения', formatNumber(stats.reps), 'только выполненный объём', stats.maxUnitValue ? stats.reps / stats.maxUnitValue * 100 : 0)}
+          </div>
 
           <div class="chart-grid">
+            ${renderExerciseStats(stats.rows)}
             ${renderMonthBars(stats.months)}
-            ${renderRankList(stats.rows)}
             ${renderUnitList(stats.unitRows)}
             ${renderWeekdayBars(stats.weekdays)}
           </div>
@@ -2189,29 +2110,29 @@
         `;
       }
 
-      function renderRankList(rows) {
-        const topRows = rows.slice(0, 7);
-        if (!topRows.length) return '';
-        const max = Math.max(...topRows.map(primaryVolume), 1);
+      function renderExerciseStats(rows) {
+        if (!rows.length) return '';
+        const max = Math.max(...rows.map(primaryVolume), 1);
         return `
-          <article class="chart-card">
+          <article class="chart-card wide">
             <div class="chart-title">
               <div>
-                <span class="chart-label">Рейтинг</span>
-                <h2>Топ упражнений</h2>
+                <span class="chart-label">Упражнения</span>
+                <h2>Статистика по упражнениям</h2>
               </div>
+              <span class="bar-note">отдельные строки</span>
             </div>
-            <div class="rank-list">
-              ${topRows.map(row => {
+            <div class="exercise-stat-list">
+              ${rows.map(row => {
                 const percent = primaryVolume(row) / max * 100;
-                const variants = row.variants?.size > 1 ? ` · ${row.variants.size} варианта` : '';
                 return `
-                  <div class="rank-row">
-                    <div class="rank-top">
+                  <div class="exercise-stat-row">
+                    <div class="exercise-stat-top">
                       <strong>${escapeHtml(row.name)}</strong>
-                      <span>${escapeHtml(`${formatUnits(row.units, row.sets)}${variants}`)}</span>
+                      <span>${escapeHtml(formatUnits(row.units, row.sets))}</span>
                     </div>
-                    <div class="rank-meter" role="presentation"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
+                    <div class="exercise-stat-meta">${escapeHtml(formatCount(row.sets, ['подход', 'подхода', 'подходов']))}</div>
+                    <div class="exercise-stat-meter" role="presentation"><i style="--value:${clamp(percent, 0, 100)}%"></i></div>
                   </div>
                 `;
               }).join('')}
@@ -2304,15 +2225,14 @@
             const fallbackLabel = fallbackExercise?.sets?.[setIndex] || defaultSetValue('reps', exerciseName);
             const label = payload?.label || fallbackLabel;
             const metric = normalizeMetric(payload?.metric || setMetric(label));
-            const groupName = payload?.group || groupExerciseName(exerciseName);
-            const rowKey = groupName.toLowerCase();
-            const row = rows.get(rowKey) || makeSummaryRow(groupName);
+            const rowName = exerciseName || payload?.group || groupExerciseName(exerciseName);
+            const rowKey = rowName.toLowerCase();
+            const row = rows.get(rowKey) || makeSummaryRow(rowName);
             const monthKey = dateKey.slice(0, 7);
             const month = months.get(monthKey) || makeMonthRow(monthKey);
             const weekday = weekdays[slotForDate(dateKey)];
 
             row.sets += 1;
-            row.variants.add(exerciseName);
             addMetric(row.units, metric);
             rows.set(rowKey, row);
 
@@ -2356,7 +2276,7 @@
       }
 
       function makeSummaryRow(name) {
-        return { name, sets: 0, units: {}, variants: new Set() };
+        return { name, sets: 0, units: {} };
       }
 
       function makeMonthRow(monthKey) {
