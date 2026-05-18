@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.15">
-  <link rel="icon" href="icon.svg?v=1.0.15" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.15" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.15">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.16">
+  <link rel="icon" href="icon.svg?v=1.0.16" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.16" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.16">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -36,6 +36,8 @@
       --glow: rgba(255, 106, 0, 0.18);
       --overlay: rgba(0, 0, 0, 0.62);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --top-clock-size: clamp(2.34rem, 10.4vw, 3.9rem);
+      --floating-nav-size: 54px;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
     }
@@ -62,7 +64,10 @@
 
     html, body {
       margin: 0;
+      width: 100%;
+      max-width: 100%;
       min-height: 100%;
+      overflow-x: hidden;
       background:
         radial-gradient(circle at 20% -14%, rgba(255, 106, 0, 0.16), transparent 30rem),
         radial-gradient(circle at 100% 4%, rgba(255, 138, 31, 0.1), transparent 24rem),
@@ -73,7 +78,7 @@
 
     body {
       min-height: 100dvh;
-      padding: 12px 10px calc(136px + var(--safe-bottom));
+      padding: 12px 10px calc(88px + var(--safe-bottom));
     }
 
     button, textarea, input, select { font: inherit; }
@@ -145,6 +150,8 @@
     }
 
     input, textarea, select {
+      min-width: 0;
+      max-width: 100%;
       border: 1px solid var(--line);
       outline: 0;
       background: var(--field);
@@ -158,14 +165,17 @@
 
     .app {
       width: min(100%, 760px);
+      max-width: 100%;
       margin: 0 auto;
       display: grid;
       gap: 10px;
+      min-width: 0;
     }
 
     .week-days {
       display: grid;
       gap: 10px;
+      min-width: 0;
     }
 
     .top {
@@ -182,8 +192,7 @@
       border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     }
 
-    .top-inner,
-    .bottom-inner {
+    .top-inner {
       width: min(100%, 760px);
       margin: 0 auto;
     }
@@ -276,6 +285,9 @@
 
     .top-subtitle {
       min-width: 0;
+      min-height: calc(var(--top-clock-size) * 0.92);
+      display: inline-flex;
+      align-items: center;
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--accent-ink);
@@ -319,7 +331,7 @@
     }
 
     .timer-bar strong {
-      font-size: clamp(1.8rem, 8vw, 3rem);
+      font-size: var(--top-clock-size);
       line-height: 0.92;
       letter-spacing: -0.075em;
       font-variant-numeric: tabular-nums;
@@ -342,6 +354,8 @@
     .pill.done { background: color-mix(in srgb, var(--done) 17%, var(--card)); color: var(--done); }
 
     .card {
+      max-width: 100%;
+      min-width: 0;
       border: 1px solid color-mix(in srgb, var(--line) 88%, white);
       border-radius: 16px;
       background:
@@ -353,6 +367,8 @@
     .day {
       position: relative;
       display: grid;
+      max-width: 100%;
+      min-width: 0;
       overflow: hidden;
       touch-action: pan-y;
     }
@@ -360,6 +376,8 @@
     .swipe-content {
       position: relative;
       z-index: 2;
+      max-width: 100%;
+      min-width: 0;
       background: inherit;
       transition: transform 0.18s ease;
       will-change: transform;
@@ -448,6 +466,7 @@
     .day-open-button {
       flex: 1 1 auto;
       min-width: 0;
+      max-width: 100%;
       min-height: 48px;
       padding: 0;
       border: 0;
@@ -512,11 +531,15 @@
     }
 
     .day-date strong {
-      color: var(--accent-ink);
+      color: var(--accent);
       font-size: 1.34rem;
       line-height: 0.95;
       letter-spacing: -0.055em;
       font-weight: 750;
+    }
+
+    .day.complete .day-date strong {
+      color: var(--done);
     }
 
     .day-title {
@@ -526,9 +549,14 @@
     }
 
     .day-title h2 {
+      color: var(--accent);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .day.complete .day-title h2 {
+      color: var(--done);
     }
 
     .day-meta {
@@ -660,6 +688,8 @@
 
     .exercise {
       position: relative;
+      max-width: 100%;
+      min-width: 0;
       overflow: hidden;
       border-radius: 15px;
       touch-action: pan-y;
@@ -680,6 +710,7 @@
 
     .exercise-name {
       flex: 1 1 160px;
+      width: 100%;
       min-width: 0;
       min-height: 34px;
       border: 0;
@@ -707,6 +738,7 @@
       gap: var(--set-gap);
       overflow: visible;
       padding-bottom: 0;
+      max-width: 100%;
       min-width: 0;
     }
 
@@ -763,14 +795,14 @@
       border-radius: 999px;
       border: 1px solid color-mix(in srgb, var(--line) 84%, white);
       background: linear-gradient(180deg, color-mix(in srgb, var(--field) 92%, white), var(--field));
-      color: var(--ink);
+      color: var(--accent);
       padding: 0 clamp(4px, 1.8vw, 12px);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      font-size: clamp(0.78rem, 3.35vw, 0.96rem);
-      font-weight: 500;
+      font-size: clamp(0.98rem, 4.2vw, 1.2rem);
+      font-weight: 650;
       font-variant-numeric: tabular-nums;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -799,33 +831,79 @@
       background: var(--field);
     }
 
-    .bottom-tabs {
+    .bottom-menu {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: 12px;
+      bottom: calc(12px + var(--safe-bottom));
       z-index: 30;
       display: grid;
       gap: 8px;
-      padding: 10px 12px calc(10px + var(--safe-bottom));
-      background:
-        radial-gradient(circle at 50% 0, rgba(255, 106, 0, 0.14), transparent 18rem),
-        color-mix(in srgb, var(--bg) 94%, transparent);
-      backdrop-filter: blur(18px) saturate(1.16);
-      -webkit-backdrop-filter: blur(18px) saturate(1.16);
-      border-top: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
-      box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.36);
+      width: var(--floating-nav-size);
+      pointer-events: none;
     }
 
-    .bottom-inner {
+    .bottom-menu button {
+      width: var(--floating-nav-size);
+      min-width: 0;
+      height: var(--floating-nav-size);
+      min-height: var(--floating-nav-size);
+      padding: 0;
+      border-radius: 16px;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      place-items: center;
+      font-size: 1.2rem;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.34), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+      pointer-events: auto;
     }
 
-    .bottom-tabs button {
-      min-height: 46px;
-      font-size: 1rem;
+    .bottom-menu svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .bottom-menu-toggle {
+      grid-row: 4;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
+      color: var(--accent-ink);
+      border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+      font-size: 1.35rem;
+    }
+
+    .bottom-menu-items {
+      grid-row: 1 / 4;
+      display: grid;
+      gap: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px) scale(0.96);
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
+    }
+
+    .bottom-menu.open .bottom-menu-items {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      transition-delay: 0s;
+    }
+
+    .bottom-menu-items button {
+      background: color-mix(in srgb, var(--field) 88%, black);
+      color: var(--ink);
+      border-color: color-mix(in srgb, var(--line) 86%, white);
+    }
+
+    .bottom-menu-items button.dark {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
+      color: var(--accent-ink);
+      border-color: color-mix(in srgb, var(--accent) 58%, transparent);
     }
 
     .summary {
@@ -1138,7 +1216,7 @@
       position: fixed;
       left: 14px;
       right: 14px;
-      bottom: calc(142px + var(--safe-bottom));
+      bottom: calc(78px + var(--safe-bottom));
       z-index: 50;
       padding: 12px 14px;
       border-radius: 16px;
@@ -1175,7 +1253,8 @@
     }
 
     @supports not (color: color-mix(in srgb, white, black)) {
-      .top, .bottom-tabs { background: var(--bg); }
+      .top { background: var(--bg); }
+      .bottom-menu button { background: var(--bg); }
       .exercise { background: var(--soft); }
     }
 
@@ -1212,11 +1291,9 @@
     }
 
     @media (max-width: 340px) {
-      .bottom-tabs { padding-inline: 8px; }
-      .bottom-inner { gap: 6px; }
-      .bottom-tabs button { font-size: 0.9rem; padding-inline: 6px; }
-      .bottom-inner { grid-template-columns: 1fr; }
-      .bottom-tabs button { min-height: 42px; }
+      :root { --floating-nav-size: 50px; }
+      .bottom-menu { left: 8px; gap: 6px; }
+      .bottom-menu-items { gap: 6px; }
       .summary-grid { grid-template-columns: 1fr; }
     }
 
@@ -1261,6 +1338,8 @@
       let toastTimer = null;
       let timerStartedAt = null;
       let timerInterval = null;
+      let wakeLock = null;
+      let wakeLockRequest = null;
       let longPressTimer = null;
       let longPressTarget = null;
       let longPressStartX = 0;
@@ -1682,17 +1761,42 @@
         if (node) node.textContent = formatTimer(timerSeconds());
       }
 
+      async function requestWakeLock() {
+        if (!timerStartedAt || document.visibilityState !== 'visible' || !navigator.wakeLock?.request) return;
+        if (wakeLock || wakeLockRequest) return;
+        wakeLockRequest = navigator.wakeLock.request('screen')
+          .then(lock => {
+            wakeLock = lock;
+            lock.addEventListener('release', () => {
+              if (wakeLock === lock) wakeLock = null;
+            });
+          })
+          .catch(() => {})
+          .finally(() => {
+            wakeLockRequest = null;
+          });
+        await wakeLockRequest;
+      }
+
+      function releaseWakeLock() {
+        const lock = wakeLock;
+        wakeLock = null;
+        lock?.release?.().catch(() => {});
+      }
+
       function startTimer() {
         timerStartedAt = Date.now();
         clearInterval(timerInterval);
         timerInterval = setInterval(updateTimerDisplay, 1000);
         updateTimerDisplay();
+        requestWakeLock();
       }
 
       function stopTimer() {
         timerStartedAt = null;
         clearInterval(timerInterval);
         timerInterval = null;
+        releaseWakeLock();
         updateTimerDisplay();
       }
 
@@ -1728,25 +1832,14 @@
       }
 
       function renderBottomNav() {
-        const tabs = `
-          <div class="bottom-inner">
-            <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button" aria-current="${view === 'week' ? 'page' : 'false'}">Неделя</button>
-            <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button" aria-current="${view === 'summary' ? 'page' : 'false'}">Статистика</button>
-            <button data-action="data" type="button" aria-haspopup="dialog">Настройки</button>
-          </div>
-        `;
-
-        if (view === 'summary') {
-          return `
-            <nav class="bottom-tabs" aria-label="Разделы">
-              ${tabs}
-            </nav>
-          `;
-        }
-
         return `
-          <nav class="bottom-tabs" aria-label="Разделы">
-            ${tabs}
+          <nav class="bottom-menu" aria-label="Разделы">
+            <div class="bottom-menu-items" id="bottomMenuItems">
+              <button class="${view === 'week' ? 'dark' : ''}" data-action="view-week" type="button" aria-current="${view === 'week' ? 'page' : 'false'}" aria-label="Неделя" title="Неделя">📅</button>
+              <button class="${view === 'summary' ? 'dark' : ''}" data-action="view-summary" type="button" aria-current="${view === 'summary' ? 'page' : 'false'}" aria-label="Статистика" title="Статистика">📊</button>
+              <button data-action="data" type="button" aria-haspopup="dialog" aria-label="Настройки" title="Настройки">⚙️</button>
+            </div>
+            <button class="bottom-menu-toggle" data-action="toggle-menu" type="button" aria-expanded="false" aria-controls="bottomMenuItems" aria-label="Меню">☰</button>
           </nav>
         `;
       }
@@ -1759,7 +1852,9 @@
         const isEmpty = visibleDates.length === 0;
         if (isEmpty) showAddDayForm = true;
 
-        if (visibleDates.length) {
+        if (weekOffset < 0) {
+          openDateKey = '';
+        } else if (visibleDates.length) {
           const today = todayKey();
           const defaultOpenDate = visibleDates.includes(today) ? today : visibleDates[0];
           if (openDateKey === null || (openDateKey && !visibleDates.includes(openDateKey))) openDateKey = defaultOpenDate;
@@ -1779,7 +1874,7 @@
 
       function renderAddDayButton() {
         return `
-          <button class="add-day-button dark" data-action="show-add-day" type="button">Добавить тренировочный день</button>
+          <button class="add-day-button" data-action="show-add-day" type="button">+ Добавить день</button>
         `;
       }
 
@@ -1798,7 +1893,7 @@
               <form class="add-day-form" data-form="add-day">
                 <div class="add-day-fields">
                   <label class="visually-hidden" for="addDayDate">Дата тренировочного дня</label>
-                  <input id="addDayDate" class="add-day-date" name="dayDate" type="date" min="${dates[0]}" max="${dates[6]}" value="${defaultDate}" required autofocus>
+                  <input id="addDayDate" class="add-day-date" data-field="add-day-date" name="dayDate" type="date" min="${dates[0]}" max="${dates[6]}" value="${defaultDate}" required autofocus>
                 </div>
                 <div class="add-day-actions">
                   <button class="dark" type="submit">${isFirstDay ? 'Создать первый день' : 'Добавить день'}</button>
@@ -1826,7 +1921,7 @@
         const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
         const status = complete ? 'готово' : '';
         return `
-          <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-swipe="day" data-date="${dateKey}" data-slot="${slot}" title="Смахни влево, чтобы удалить">
+          <article class="card day ${isCurrent ? 'current' : ''} ${complete ? 'complete' : ''} ${isOpen ? 'open' : 'collapsed'}" data-swipe="day" data-date="${dateKey}" data-slot="${slot}" title="Смахни влево, чтобы удалить">
             <div class="swipe-actions">
               <button class="swipe-action swipe-delete" data-action="delete-day" data-date="${dateKey}" type="button" aria-label="Удалить день">🗑</button>
               <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button">Отмена</button>
@@ -1855,7 +1950,7 @@
                     <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
                   </div>
                   ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
-                  <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">Добавить упражнение</button>
+                  <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ Упражнение</button>
                 </div>
               ` : ''}
             </div>
@@ -2616,6 +2711,18 @@
 
       function handleAction(target) {
         const action = target.dataset.action;
+        if (action === 'toggle-menu') {
+          const menu = target.closest('.bottom-menu');
+          const isOpen = menu?.classList.toggle('open');
+          target.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          return;
+        }
+        const menuItem = target.closest('.bottom-menu-items');
+        if (menuItem) {
+          const menu = target.closest('.bottom-menu');
+          menu?.classList.remove('open');
+          menu?.querySelector('.bottom-menu-toggle')?.setAttribute('aria-expanded', 'false');
+        }
         if (action === 'view-week') { view = 'week'; showAddDayForm = false; render(); return; }
         if (action === 'view-summary') { view = 'summary'; render(); return; }
         if (action === 'prev') { weekOffset -= 1; openDateKey = null; showAddDayForm = false; render(); return; }
@@ -2663,6 +2770,10 @@
 
       function handleChange(target) {
         const field = target.dataset.field;
+        if (field === 'add-day-date') {
+          addCustomDay(target.value);
+          return;
+        }
         if (field === 'day-date') {
           moveDayDate(target.dataset.date, target.value);
           return;
@@ -2781,7 +2892,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.15', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.16', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -2958,7 +3069,13 @@
       document.addEventListener('change', event => handleChange(event.target));
       document.addEventListener('blur', event => handleBlur(event.target), true);
       window.addEventListener('pagehide', flushSave);
-      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          flushSave();
+        } else {
+          requestWakeLock();
+        }
+      });
 
       registerServiceWorker();
       state = loadState();
