@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.14">
-  <link rel="icon" href="icon.svg?v=1.0.14" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.14" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.14">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.15">
+  <link rel="icon" href="icon.svg?v=1.0.15" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.15" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.15">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -230,6 +230,7 @@
       min-width: 0;
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       gap: 10px;
       white-space: nowrap;
       overflow: hidden;
@@ -350,7 +351,73 @@
     }
 
     .day {
+      position: relative;
       display: grid;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    .swipe-content {
+      position: relative;
+      z-index: 2;
+      background: inherit;
+      transition: transform 0.18s ease;
+      will-change: transform;
+    }
+
+    .swipe-open > .swipe-content {
+      transform: translateX(calc(-1 * var(--swipe-action-width, 154px)));
+    }
+
+    .swiping > .swipe-content {
+      transform: translateX(var(--swipe-x, 0px));
+      transition: none;
+    }
+
+    .swipe-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      width: var(--swipe-action-width, 154px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 6px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--danger) 20%, var(--soft)));
+    }
+
+    .swipe-open > .swipe-actions,
+    .swiping > .swipe-actions {
+      pointer-events: auto;
+    }
+
+    .swipe-action {
+      min-height: 100%;
+      height: 100%;
+      padding: 0 8px;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      font-weight: 650;
+    }
+
+    .swipe-delete {
+      border-color: color-mix(in srgb, var(--danger) 64%, var(--line));
+      background: color-mix(in srgb, var(--danger) 78%, black);
+      color: #fff;
+    }
+
+    .swipe-cancel {
+      border-color: color-mix(in srgb, var(--line) 78%, white);
+      background: color-mix(in srgb, var(--field) 88%, black);
+      color: var(--muted);
+    }
+
+    .day > .swipe-content {
+      display: grid;
+      border-radius: inherit;
     }
 
     .day.current {
@@ -592,17 +659,24 @@
     }
 
     .exercise {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+      touch-action: pan-y;
+    }
+
+    .exercise > .swipe-content {
       display: grid;
       gap: 7px;
       padding: 8px;
-      border-radius: 15px;
+      border-radius: inherit;
       background:
         linear-gradient(180deg, color-mix(in srgb, var(--field) 84%, white), color-mix(in srgb, var(--field) 72%, var(--soft)));
       border: 1px solid color-mix(in srgb, var(--line) 86%, white);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     }
 
-    .exercise.done { background: linear-gradient(180deg, color-mix(in srgb, var(--done) 16%, var(--card)), color-mix(in srgb, var(--done) 10%, var(--card))); border-color: color-mix(in srgb, var(--done) 42%, var(--line)); }
+    .exercise.done > .swipe-content { background: linear-gradient(180deg, color-mix(in srgb, var(--done) 16%, var(--card)), color-mix(in srgb, var(--done) 10%, var(--card))); border-color: color-mix(in srgb, var(--done) 42%, var(--line)); }
 
     .exercise-name {
       flex: 1 1 160px;
@@ -1074,11 +1148,31 @@
       transform: translateY(14px);
       pointer-events: none;
       transition: 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       text-align: center;
       font-weight: 600;
     }
 
-    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+    .toast button {
+      min-height: 34px;
+      flex: 0 0 auto;
+      padding: 0 10px;
+      border-color: color-mix(in srgb, var(--accent-ink) 44%, transparent);
+      background: color-mix(in srgb, var(--accent) 72%, black);
+      color: var(--accent-ink);
+      font-size: 0.86rem;
+    }
 
     @supports not (color: color-mix(in srgb, white, black)) {
       .top, .bottom-tabs { background: var(--bg); }
@@ -1171,6 +1265,7 @@
       let longPressTarget = null;
       let longPressStartX = 0;
       let longPressStartY = 0;
+      let swipeState = null;
       let ignoreNextClick = false;
 
       function uid() {
@@ -1487,6 +1582,38 @@
         return state.weeks[startKey] || null;
       }
 
+      function weekHasManualDays(week) {
+        return Boolean(week?.days?.some(isManualDay));
+      }
+
+      function getRenderableWeek(startKey) {
+        const existing = getExistingWeek(startKey);
+        if (existing) return existing;
+        return copyPreviousWeek(startKey) || makeWeek(emptyWeekDays());
+      }
+
+      function copyPreviousWeek(startKey) {
+        const previousKey = toDateKey(addDays(parseDateKey(startKey), -7));
+        const previousWeek = getExistingWeek(previousKey);
+        if (!weekHasManualDays(previousWeek)) return null;
+
+        const dates = weekDates(startKey);
+        const copiedDays = dates.map((dateKey, index) => {
+          const sourceDay = previousWeek.days?.[index];
+          if (!isManualDay(sourceDay)) return emptyDay();
+          const day = cloneDay(sourceDay);
+          day.active = true;
+          day.manual = true;
+          day.label = weekdayName(dateKey);
+          return day;
+        });
+
+        const week = makeWeek(copiedDays);
+        state.weeks[startKey] = week;
+        scheduleSave();
+        return week;
+      }
+
       function getDay(dateKey) {
         const week = getWeek(weekStartKeyForDate(dateKey));
         const slot = slotForDate(dateKey);
@@ -1577,17 +1704,18 @@
 
       function renderTop(title, subtitle, options = {}) {
         const weekControls = options.weekControls ? `
-          <span class="top-period">
+          <span class="top-period" aria-label="Неделя ${escapeHtml(subtitle)}">
             <button class="top-week-button" data-action="prev" type="button" aria-label="Предыдущая неделя">‹</button>
             <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
             <button class="top-week-button" data-action="next" type="button" aria-label="Следующая неделя">›</button>
           </span>
         ` : `<strong class="top-subtitle">${escapeHtml(subtitle)}</strong>`;
+        const heading = title ? `<h1>${escapeHtml(title)}</h1>` : '';
         return `
           <header class="top">
             <div class="top-inner">
               <div class="top-title">
-                <h1>${escapeHtml(title)}</h1>
+                ${heading}
                 ${weekControls}
               </div>
               <div class="timer-bar" aria-live="polite">
@@ -1625,7 +1753,7 @@
 
       function renderWeek() {
         const weekKey = weekStartKeyForOffset(weekOffset);
-        const week = getExistingWeek(weekKey) || makeWeek(emptyWeekDays());
+        const week = getRenderableWeek(weekKey);
         const dates = weekDates(weekKey);
         const visibleDates = dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
         const isEmpty = visibleDates.length === 0;
@@ -1640,7 +1768,7 @@
         }
 
         document.getElementById('app').innerHTML = `
-          ${renderTop('🏆 Спорт', formatWeekRange(weekKey), { weekControls: true })}
+          ${renderTop('', formatWeekRange(weekKey), { weekControls: true })}
           <section class="week-days">
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
             ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderAddDayButton()}
@@ -1651,7 +1779,7 @@
 
       function renderAddDayButton() {
         return `
-          <button class="add-day-button dark" data-action="show-add-day" type="button">+ Добавить день</button>
+          <button class="add-day-button dark" data-action="show-add-day" type="button">Добавить тренировочный день</button>
         `;
       }
 
@@ -1698,33 +1826,39 @@
         const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
         const status = complete ? 'готово' : '';
         return `
-          <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}" title="Удерживай карточку дня, чтобы удалить">
-            <div class="day-toggle" aria-label="${escapeHtml(title)}">
-              <span class="day-head">
-                <label class="day-date-wrap" aria-label="Изменить дату: ${escapeHtml(formatDate(dateKey, true))}">
-                  <span class="day-date" aria-hidden="true">
-                    <strong>${escapeHtml(dayNumber)}</strong>
-                  </span>
-                  <input class="day-date-input" data-field="day-date" data-date="${dateKey}" type="date" value="${dateKey}" aria-label="Перенести день на другую дату">
-                </label>
-                <button class="day-open-button" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
-                  <span class="day-title">
-                    <h2>${escapeHtml(title)}</h2>
-                    <span class="day-meta">${escapeHtml(meta)}</span>
-                  </span>
-                </button>
-                ${status ? `<span class="pill day-status done">${escapeHtml(status)}</span>` : ''}
-              </span>
+          <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-swipe="day" data-date="${dateKey}" data-slot="${slot}" title="Смахни влево, чтобы удалить">
+            <div class="swipe-actions">
+              <button class="swipe-action swipe-delete" data-action="delete-day" data-date="${dateKey}" type="button" aria-label="Удалить день">🗑</button>
+              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button">Отмена</button>
             </div>
-            ${isOpen ? `
-              <div class="day-body">
-                <div class="day-body-top">
-                  <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
-                </div>
-                ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
-                <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ упражнение</button>
+            <div class="swipe-content">
+              <div class="day-toggle" aria-label="${escapeHtml(title)}">
+                <span class="day-head">
+                  <label class="day-date-wrap" aria-label="Изменить дату: ${escapeHtml(formatDate(dateKey, true))}">
+                    <span class="day-date" aria-hidden="true">
+                      <strong>${escapeHtml(dayNumber)}</strong>
+                    </span>
+                    <input class="day-date-input" data-field="day-date" data-date="${dateKey}" type="date" value="${dateKey}" aria-label="Перенести день на другую дату">
+                  </label>
+                  <button class="day-open-button" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
+                    <span class="day-title">
+                      <h2>${escapeHtml(title)}</h2>
+                      <span class="day-meta">${escapeHtml(meta)}</span>
+                    </span>
+                  </button>
+                  ${status ? `<span class="pill day-status done">${escapeHtml(status)}</span>` : ''}
+                </span>
               </div>
-            ` : ''}
+              ${isOpen ? `
+                <div class="day-body">
+                  <div class="day-body-top">
+                    <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
+                  </div>
+                  ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
+                  <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">Добавить упражнение</button>
+                </div>
+              ` : ''}
+            </div>
           </article>
         `;
       }
@@ -1733,14 +1867,20 @@
         const session = readSession(dateKey);
         const allDone = exercise.sets.length > 0 && exercise.sets.every((_, setIndex) => session.done[`${exIndex}:${setIndex}`]);
         return `
-          <div class="exercise ${allDone ? 'done' : ''}" data-date="${dateKey}" data-ex="${exIndex}" title="Удерживай карточку упражнения, чтобы удалить">
-            <div class="exercise-head">
-              <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
+          <div class="exercise ${allDone ? 'done' : ''}" data-swipe="exercise" data-date="${dateKey}" data-ex="${exIndex}" title="Смахни влево, чтобы удалить">
+            <div class="swipe-actions">
+              <button class="swipe-action swipe-delete" data-action="delete-exercise" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Удалить упражнение">🗑</button>
+              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button">Отмена</button>
             </div>
-            <div class="set-row">
-              <button class="small set-control" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Убрать подход" ${exercise.sets.length <= 1 ? 'disabled' : ''}>−</button>
-              ${exercise.sets.map((label, setIndex) => renderSet(dateKey, exercise, label, exIndex, setIndex)).join('')}
-              <button class="small set-control dark" data-action="add-set" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Добавить подход">+</button>
+            <div class="swipe-content">
+              <div class="exercise-head">
+                <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
+              </div>
+              <div class="set-row">
+                <button class="small set-control" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Убрать подход" ${exercise.sets.length <= 1 ? 'disabled' : ''}>−</button>
+                ${exercise.sets.map((label, setIndex) => renderSet(dateKey, exercise, label, exIndex, setIndex)).join('')}
+                <button class="small set-control dark" data-action="add-set" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Добавить подход">+</button>
+              </div>
             </div>
           </div>
         `;
@@ -2160,6 +2300,10 @@
         return cleanDay(JSON.parse(JSON.stringify(day || emptyDay())));
       }
 
+      function cloneData(value) {
+        return value == null ? null : JSON.parse(JSON.stringify(value));
+      }
+
       function addCustomDay(dateKey) {
         const weekKey = weekStartKeyForOffset(weekOffset);
         const dates = weekDates(weekKey);
@@ -2297,6 +2441,67 @@
         render();
       }
 
+      function deleteExerciseWithUndo(dateKey, exIndex) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise) return;
+        const snapshot = cloneData(exercise);
+        const sessionSnapshot = cloneData(state.sessions[dateKey]);
+        const name = snapshot.name || 'упражнение';
+        removeExercise(dateKey, exIndex);
+        toast(`Удалено: ${name}`, {
+          label: 'Вернуть',
+          onClick: () => restoreExercise(dateKey, exIndex, snapshot, sessionSnapshot)
+        });
+      }
+
+      function restoreExercise(dateKey, exIndex, exerciseSnapshot, sessionSnapshot) {
+        const day = getDay(dateKey);
+        const index = clamp(exIndex, 0, day.exercises.length);
+        day.active = true;
+        day.manual = true;
+        day.label = weekdayName(dateKey);
+        day.exercises.splice(index, 0, cleanExercise(exerciseSnapshot));
+        if (sessionSnapshot) state.sessions[dateKey] = sessionSnapshot;
+        else delete state.sessions[dateKey];
+        openDateKey = dateKey;
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
+      function deleteDayWithUndo(dateKey) {
+        const week = getExistingWeek(weekStartKeyForDate(dateKey));
+        const slot = slotForDate(dateKey);
+        const day = week?.days?.[slot];
+        if (!isManualDay(day)) return;
+        const daySnapshot = cloneDay(day);
+        const sessionSnapshot = cloneData(state.sessions[dateKey]);
+        const title = weekdayName(dateKey);
+        setDayActive(dateKey, false);
+        toast(`День удалён: ${title}`, {
+          label: 'Вернуть',
+          onClick: () => restoreDay(dateKey, daySnapshot, sessionSnapshot)
+        });
+      }
+
+      function restoreDay(dateKey, daySnapshot, sessionSnapshot) {
+        const week = getWeek(weekStartKeyForDate(dateKey));
+        const slot = slotForDate(dateKey);
+        week.days[slot] = cloneDay(daySnapshot);
+        week.days[slot].active = true;
+        week.days[slot].manual = true;
+        week.days[slot].label = weekdayName(dateKey);
+        if (sessionSnapshot) state.sessions[dateKey] = sessionSnapshot;
+        else delete state.sessions[dateKey];
+        openDateKey = dateKey;
+        weekOffset = weekOffsetForDate(dateKey);
+        showAddDayForm = false;
+        week.updatedAt = new Date().toISOString();
+        saveNow();
+        render();
+      }
+
       function shiftSessionAfterExerciseRemoval(dateKey, removedExIndex) {
         const session = state.sessions[dateKey];
         if (!session?.done) return;
@@ -2420,7 +2625,7 @@
         if (action === 'hide-add-day') {
           const weekKey = weekStartKeyForOffset(weekOffset);
           const dates = weekDates(weekKey);
-          const week = getExistingWeek(weekKey) || makeWeek(emptyWeekDays());
+          const week = getRenderableWeek(weekKey);
           const hasVisibleDays = dates.some(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
           showAddDayForm = !hasVisibleDays;
           render();
@@ -2431,6 +2636,9 @@
         if (action === 'copy-json') { copyJson(); return; }
         if (action === 'export-json') { exportJson(); return; }
         if (action === 'import-json') { importJson(); return; }
+        if (action === 'close-swipe') { closeSwipe(target.closest('[data-swipe]')); return; }
+        if (action === 'delete-day') { closeSwipe(target.closest('[data-swipe]')); deleteDayWithUndo(target.dataset.date); return; }
+        if (action === 'delete-exercise') { closeSwipe(target.closest('[data-swipe]')); deleteExerciseWithUndo(target.dataset.date, Number(target.dataset.ex)); return; }
         if (action === 'add-exercise') { addExercise(target.dataset.date); return; }
         if (action === 'toggle') { toggleSet(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set)); return; }
         if (action === 'add-set' || action === 'remove-set') {
@@ -2535,12 +2743,30 @@
         }
       }
 
-      function toast(message) {
+      function toast(message, action = null) {
         const node = document.getElementById('toast');
-        node.textContent = message;
+        node.textContent = '';
+
+        const text = document.createElement('span');
+        text.textContent = message;
+        node.appendChild(text);
+
+        if (action?.label && typeof action.onClick === 'function') {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = action.label;
+          button.addEventListener('click', event => {
+            event.preventDefault();
+            clearTimeout(toastTimer);
+            node.classList.remove('show');
+            action.onClick();
+          });
+          node.appendChild(button);
+        }
+
         node.classList.add('show');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => node.classList.remove('show'), 1600);
+        toastTimer = setTimeout(() => node.classList.remove('show'), action ? 4200 : 1600);
       }
 
       function registerServiceWorker() {
@@ -2555,7 +2781,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.14', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.15', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -2579,21 +2805,97 @@
         longPressTarget = null;
       }
 
+      function swipePoint(event) {
+        return { x: event.clientX ?? 0, y: event.clientY ?? 0 };
+      }
+
+      function swipeWidth(node) {
+        const actions = node?.querySelector(':scope > .swipe-actions');
+        return actions?.offsetWidth || 154;
+      }
+
+      function closeSwipe(node = null) {
+        const targets = node ? [node] : Array.from(document.querySelectorAll('.swipe-open, .swiping'));
+        targets.forEach(target => {
+          target.classList.remove('swipe-open', 'swiping');
+          target.style.removeProperty('--swipe-x');
+        });
+      }
+
+      function closeOtherSwipes(node) {
+        document.querySelectorAll('.swipe-open, .swiping').forEach(openNode => {
+          if (openNode !== node) closeSwipe(openNode);
+        });
+      }
+
+      function startSwipe(event) {
+        if (event.button !== undefined && event.button !== 0) return;
+        const node = event.target.closest('[data-swipe][data-date]');
+        if (!node) {
+          if (!event.target.closest('.toast')) closeSwipe();
+          return;
+        }
+        if (event.target.closest('.swipe-actions')) return;
+        const focusedField = event.target.closest('input, textarea, select');
+        if (event.target.closest('label') || (focusedField && focusedField === document.activeElement)) return;
+        const point = swipePoint(event);
+        closeOtherSwipes(node);
+        swipeState = {
+          node,
+          pointerId: event.pointerId,
+          startX: point.x,
+          startY: point.y,
+          dx: 0,
+          width: swipeWidth(node),
+          swiping: false,
+          wasOpen: node.classList.contains('swipe-open')
+        };
+      }
+
+      function moveSwipe(event) {
+        if (!swipeState || (event.pointerId !== undefined && event.pointerId !== swipeState.pointerId)) return;
+        const point = swipePoint(event);
+        const dx = point.x - swipeState.startX;
+        const dy = point.y - swipeState.startY;
+        if (!swipeState.swiping) {
+          if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) {
+            swipeState = null;
+            return;
+          }
+          if (Math.abs(dx) < 10) return;
+          swipeState.swiping = true;
+          clearLongPress();
+          swipeState.node.classList.add('swiping');
+          swipeState.node.classList.remove('swipe-open');
+          swipeState.node.setPointerCapture?.(swipeState.pointerId);
+        }
+        event.preventDefault();
+        swipeState.dx = dx;
+        const base = swipeState.wasOpen ? -swipeState.width : 0;
+        const offset = clamp(base + dx, -swipeState.width, 0);
+        swipeState.node.style.setProperty('--swipe-x', `${offset}px`);
+      }
+
+      function endSwipe(event) {
+        if (!swipeState || (event.pointerId !== undefined && event.pointerId !== swipeState.pointerId)) return;
+        const { node, dx, width, swiping, wasOpen } = swipeState;
+        swipeState = null;
+        if (!swiping) return;
+        node.releasePointerCapture?.(event.pointerId);
+        node.classList.remove('swiping');
+        node.style.removeProperty('--swipe-x');
+        const shouldOpen = wasOpen ? dx <= width * 0.35 : dx < -width * 0.35;
+        node.classList.toggle('swipe-open', shouldOpen);
+        if (Math.abs(dx) > 12) ignoreNextClick = true;
+      }
+
       function longPressAction(target) {
         if (target.matches('.set[data-action="toggle"]')) return () => editSetValue(target);
         if (target.matches('.exercise[data-date][data-ex]')) {
-          const name = getDay(target.dataset.date).exercises[Number(target.dataset.ex)]?.name || 'упражнение';
-          return () => {
-            removeExercise(target.dataset.date, Number(target.dataset.ex));
-            toast(`Удалено: ${name}`);
-          };
+          return () => deleteExerciseWithUndo(target.dataset.date, Number(target.dataset.ex));
         }
         if (target.matches('.day[data-date]')) {
-          const title = weekdayName(target.dataset.date);
-          return () => {
-            setDayActive(target.dataset.date, false);
-            toast(`День удалён: ${title}`);
-          };
+          return () => deleteDayWithUndo(target.dataset.date);
         }
         return null;
       }
@@ -2603,7 +2905,7 @@
         const target = event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]');
         if (!target) return;
         if (target.classList.contains('exercise') && event.target.closest('.set, .set-control, input, button, textarea, select, label')) return;
-        if (target.classList.contains('day') && event.target.closest('.exercise, .day-date-wrap, [data-action="add-exercise"], input, textarea, select, label')) return;
+        if (target.classList.contains('day') && event.target.closest('.exercise, .day-date-wrap, [data-action="add-exercise"], input, textarea, select, button, label')) return;
         clearLongPress();
         longPressTarget = target;
         longPressStartX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
@@ -2625,23 +2927,24 @@
         if (Math.abs(x - longPressStartX) > 12 || Math.abs(y - longPressStartY) > 12) clearLongPress();
       }
 
-      document.addEventListener('pointerdown', startLongPress);
-      document.addEventListener('pointermove', moveLongPress);
-      document.addEventListener('pointerup', clearLongPress);
-      document.addEventListener('pointercancel', clearLongPress);
+      document.addEventListener('pointerdown', event => { startSwipe(event); startLongPress(event); });
+      document.addEventListener('pointermove', event => { moveSwipe(event); moveLongPress(event); });
+      document.addEventListener('pointerup', event => { endSwipe(event); clearLongPress(); });
+      document.addEventListener('pointercancel', event => { endSwipe(event); clearLongPress(); });
       document.addEventListener('contextmenu', event => {
         if (!event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]')) return;
         event.preventDefault();
       });
 
       document.addEventListener('click', event => {
+        if (ignoreNextClick) {
+          ignoreNextClick = false;
+          event.preventDefault();
+          return;
+        }
         const target = event.target.closest('[data-action]');
         if (!target) return;
         event.preventDefault();
-        if (ignoreNextClick) {
-          ignoreNextClick = false;
-          return;
-        }
         handleAction(target);
       });
 
