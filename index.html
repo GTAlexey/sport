@@ -710,11 +710,12 @@
     .progress > i {
       display: block;
       height: 100%;
-      width: var(--value, 0%);
-      background: linear-gradient(90deg, var(--done), color-mix(in srgb, var(--done) 68%, var(--accent)));
+      width: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2) 56%, var(--done));
       border-radius: inherit;
-      box-shadow: 0 0 16px color-mix(in srgb, var(--done) 34%, transparent);
-      transition: width 0.22s ease;
+      box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
+      clip-path: inset(0 calc(100% - var(--value, 0%)) 0 0 round 999px);
+      transition: clip-path 0.22s ease;
     }
 
     .exercises {
