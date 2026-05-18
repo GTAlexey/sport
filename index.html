@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.13">
-  <link rel="icon" href="icon.svg?v=1.0.13" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.13" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.13">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.14">
+  <link rel="icon" href="icon.svg?v=1.0.14" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.14" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.14">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -43,6 +43,17 @@
     * { box-sizing: border-box; }
 
     * { -webkit-tap-highlight-color: transparent; }
+
+    * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    *::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
 
     ::selection {
       background: color-mix(in srgb, var(--accent) 35%, transparent);
@@ -206,10 +217,11 @@
     h1, h2, h3, p { margin: 0; }
     h1 {
       color: var(--ink);
-      font-size: clamp(1rem, 5vw, 1.45rem);
-      line-height: 1;
-      letter-spacing: -0.055em;
+      font-size: clamp(1.75rem, 7.8vw, 2.9rem);
+      line-height: 0.92;
+      letter-spacing: -0.075em;
       font-weight: 700;
+      text-shadow: 0 0 22px var(--glow);
     }
     h2 { font-size: 1rem; letter-spacing: -0.02em; font-weight: 600; }
     h3 { font-size: 0.96rem; letter-spacing: -0.02em; font-weight: 600; }
@@ -230,21 +242,35 @@
     .top-period {
       min-width: 0;
       display: inline-grid;
-      grid-template-columns: 36px minmax(0, max-content) 36px;
+      grid-template-columns: 24px minmax(0, max-content) 24px;
       align-items: center;
-      gap: 5px;
+      gap: 3px;
     }
 
     .top-week-button {
-      min-width: 36px;
-      min-height: 36px;
-      width: 36px;
-      height: 36px;
+      min-width: 24px;
+      min-height: 34px;
+      width: 24px;
+      height: 34px;
       padding: 0;
-      border-radius: 999px;
-      font-size: 1.1rem;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--muted);
+      font-size: 1.5rem;
       line-height: 1;
-      background: color-mix(in srgb, var(--field) 70%, transparent);
+    }
+
+    .top-week-button:active {
+      transform: scale(0.94);
+    }
+
+    .top-week-button:hover {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--ink);
     }
 
     .top-subtitle {
@@ -252,7 +278,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--accent-ink);
-      font-size: clamp(0.98rem, 4.7vw, 1.42rem);
+      font-size: clamp(1rem, 4.3vw, 1.36rem);
       line-height: 1;
       letter-spacing: -0.045em;
       font-weight: 650;
@@ -562,14 +588,14 @@
 
     .exercises {
       display: grid;
-      gap: 10px;
+      gap: 7px;
     }
 
     .exercise {
       display: grid;
-      gap: 10px;
-      padding: 11px;
-      border-radius: 18px;
+      gap: 7px;
+      padding: 8px;
+      border-radius: 15px;
       background:
         linear-gradient(180deg, color-mix(in srgb, var(--field) 84%, white), color-mix(in srgb, var(--field) 72%, var(--soft)));
       border: 1px solid color-mix(in srgb, var(--line) 86%, white);
@@ -581,12 +607,13 @@
     .exercise-name {
       flex: 1 1 160px;
       min-width: 0;
-      min-height: 44px;
+      min-height: 34px;
       border: 0;
-      border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
       border-radius: 0;
       background: transparent;
       padding: 0 2px;
+      font-size: 0.95rem;
       font-weight: 500;
       letter-spacing: -0.015em;
       box-shadow: none;
@@ -599,7 +626,7 @@
 
     .set-row {
       --set-gap: clamp(3px, 1.15vw, 7px);
-      --set-control-size: clamp(30px, 8.8vw, 40px);
+      --set-control-size: clamp(28px, 8.2vw, 36px);
       display: flex;
       flex-wrap: nowrap;
       align-items: center;
@@ -630,13 +657,28 @@
       min-height: var(--set-control-size);
       height: var(--set-control-size);
       padding: 0;
-      border-radius: 999px;
-      font-size: clamp(0.92rem, 4.5vw, 1.12rem);
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--muted);
+      font-size: clamp(1rem, 4.7vw, 1.25rem);
       line-height: 1;
     }
 
+    .set-control.dark,
+    .set-control.dark:hover,
+    .set-control:hover,
+    .set-control:focus-visible {
+      outline: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      color: var(--muted);
+    }
+
     .set-control:disabled {
-      opacity: 0.42;
+      opacity: 0.32;
       cursor: default;
     }
 
@@ -1060,7 +1102,7 @@
       .day-body,
       .add-day-card,
       .empty-week-card { padding-inline: 12px; }
-      .exercise { padding: 10px; border-radius: 16px; }
+      .exercise { padding: 7px; border-radius: 14px; }
       .exercise-head { flex-wrap: nowrap; }
       .exercise-name { width: 100%; }
       .toolbar button { flex: 1 1 120px; min-height: 38px; }
@@ -1536,9 +1578,9 @@
       function renderTop(title, subtitle, options = {}) {
         const weekControls = options.weekControls ? `
           <span class="top-period">
-            <button class="top-week-button" data-action="prev" type="button" aria-label="Предыдущая неделя">←</button>
+            <button class="top-week-button" data-action="prev" type="button" aria-label="Предыдущая неделя">‹</button>
             <strong class="top-subtitle">${escapeHtml(subtitle)}</strong>
-            <button class="top-week-button" data-action="next" type="button" aria-label="Следующая неделя">→</button>
+            <button class="top-week-button" data-action="next" type="button" aria-label="Следующая неделя">›</button>
           </span>
         ` : `<strong class="top-subtitle">${escapeHtml(subtitle)}</strong>`;
         return `
@@ -1585,8 +1627,6 @@
         const weekKey = weekStartKeyForOffset(weekOffset);
         const week = getExistingWeek(weekKey) || makeWeek(emptyWeekDays());
         const dates = weekDates(weekKey);
-        const start = dates[0];
-        const end = dates[6];
         const visibleDates = dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
         const isEmpty = visibleDates.length === 0;
         if (isEmpty) showAddDayForm = true;
@@ -1600,7 +1640,7 @@
         }
 
         document.getElementById('app').innerHTML = `
-          ${renderTop('🏆 Спорт', `${formatDate(start)} — ${formatDate(end)}`, { weekControls: true })}
+          ${renderTop('🏆 Спорт', formatWeekRange(weekKey), { weekControls: true })}
           <section class="week-days">
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
             ${showAddDayForm ? renderAddDayForm(dates, week, isEmpty) : renderAddDayButton()}
@@ -1656,7 +1696,7 @@
         const complete = Boolean(progress.total && progress.checked === progress.total);
         const title = weekdayName(dateKey);
         const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
-        const status = complete ? 'готово' : 'в работе';
+        const status = complete ? 'готово' : '';
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${isOpen ? 'open' : 'collapsed'}" data-date="${dateKey}" data-slot="${slot}" title="Удерживай карточку дня, чтобы удалить">
             <div class="day-toggle" aria-label="${escapeHtml(title)}">
@@ -1673,7 +1713,7 @@
                     <span class="day-meta">${escapeHtml(meta)}</span>
                   </span>
                 </button>
-                <span class="pill day-status ${complete ? 'done' : ''}">${escapeHtml(status)}</span>
+                ${status ? `<span class="pill day-status done">${escapeHtml(status)}</span>` : ''}
               </span>
             </div>
             ${isOpen ? `
@@ -2515,7 +2555,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.13', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.14', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
