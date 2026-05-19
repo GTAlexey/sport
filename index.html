@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.22">
-  <link rel="icon" href="icon.svg?v=1.0.22" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.22" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.22">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.23">
+  <link rel="icon" href="icon.svg?v=1.0.23" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.23" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.23">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -2020,13 +2020,15 @@
         if (!weekHasManualDays(previousWeek)) return null;
 
         const dates = weekDates(startKey);
+        const sourceDates = weekDates(previousKey);
         const copiedDays = dates.map((dateKey, index) => {
           const sourceDay = previousWeek.days?.[index];
           if (!isManualDay(sourceDay)) return emptyDay();
+          const customTitle = customDayTitle(sourceDates[index], sourceDay);
           const day = cloneDay(sourceDay);
           day.active = true;
           day.manual = true;
-          day.label = weekdayName(dateKey);
+          day.label = customTitle || weekdayName(dateKey);
           return day;
         });
 
@@ -2051,6 +2053,15 @@
 
       function readSession(dateKey) {
         return state.sessions[dateKey] || { done: {} };
+      }
+
+      function customDayTitle(dateKey, day) {
+        const label = String(day?.label || '').trim();
+        return label && label !== weekdayName(dateKey) ? label : '';
+      }
+
+      function dayTitle(dateKey, day) {
+        return customDayTitle(dateKey, day) || weekdayName(dateKey);
       }
 
       function isManualDay(day) {
@@ -2292,7 +2303,7 @@
         const isCurrent = dateKey === todayKey();
         const isOpen = Boolean(openDateKey && dateKey === openDateKey);
         const complete = Boolean(progress.total && progress.checked === progress.total);
-        const title = weekdayName(dateKey);
+        const title = dayTitle(dateKey, day);
         const meta = progress.total ? `${progress.checked}/${progress.total} подходов` : 'нет подходов';
         return `
           <article class="card day ${isCurrent ? 'current' : ''} ${complete ? 'complete' : ''} ${isOpen ? 'open' : 'collapsed'}" data-swipe="day" data-date="${dateKey}" data-slot="${slot}" title="Смахни влево, чтобы удалить">
@@ -2311,7 +2322,7 @@
                   </label>
                   <button class="day-open-button" data-action="open-day" data-date="${dateKey}" type="button" aria-expanded="${isOpen ? 'true' : 'false'}">
                     <span class="day-title">
-                      <h2>${escapeHtml(title)}</h2>
+                      <h2 data-day-title data-date="${dateKey}">${escapeHtml(title)}</h2>
                       <span class="day-meta">${escapeHtml(meta)}</span>
                     </span>
                   </button>
@@ -2826,8 +2837,9 @@
 
         const targetWeek = getWeek(weekStartKeyForDate(toDateKey));
         const targetSlot = slotForDate(toDateKey);
-        targetWeek.days[targetSlot] = cloneDay(sourceDay);
-        targetWeek.days[targetSlot].label = weekdayName(toDateKey);
+        const targetDay = cloneDay(sourceDay);
+        targetDay.label = customDayTitle(fromDateKey, sourceDay) || weekdayName(toDateKey);
+        targetWeek.days[targetSlot] = targetDay;
         sourceWeek.days[sourceSlot] = emptyDay();
 
         if (state.sessions[fromDateKey]) {
@@ -2933,7 +2945,7 @@
         const index = clamp(exIndex, 0, day.exercises.length);
         day.active = true;
         day.manual = true;
-        day.label = weekdayName(dateKey);
+        if (!day.label) day.label = weekdayName(dateKey);
         day.exercises.splice(index, 0, cleanExercise(exerciseSnapshot));
         if (sessionSnapshot) state.sessions[dateKey] = sessionSnapshot;
         else delete state.sessions[dateKey];
@@ -2950,7 +2962,7 @@
         if (!isManualDay(day)) return;
         const daySnapshot = cloneDay(day);
         const sessionSnapshot = cloneData(state.sessions[dateKey]);
-        const title = weekdayName(dateKey);
+        const title = dayTitle(dateKey, day);
         setDayActive(dateKey, false);
         toast(`День удалён: ${title}`, {
           label: 'Вернуть',
@@ -2964,7 +2976,7 @@
         week.days[slot] = cloneDay(daySnapshot);
         week.days[slot].active = true;
         week.days[slot].manual = true;
-        week.days[slot].label = weekdayName(dateKey);
+        week.days[slot].label = week.days[slot].label || weekdayName(dateKey);
         if (sessionSnapshot) state.sessions[dateKey] = sessionSnapshot;
         else delete state.sessions[dateKey];
         openDateKey = dateKey;
@@ -3035,6 +3047,22 @@
         const next = prompt('Сколько повторений?', current);
         if (next === null) return;
         setSetValue(dateKey, exIndex, setIndex, next);
+      }
+
+      function editDayTitle(dateKey) {
+        if (!isDateKey(dateKey)) return;
+        const day = getDay(dateKey);
+        if (!isManualDay(day)) return;
+        const current = dayTitle(dateKey, day);
+        const next = prompt('Название дня. Оставь пустым, чтобы вернуть день недели.', current);
+        if (next === null) return;
+        const title = String(next).trim().slice(0, 64);
+        day.label = title && title !== weekdayName(dateKey) ? title : weekdayName(dateKey);
+        day.manual = true;
+        day.active = true;
+        touchWeek(dateKey);
+        saveNow();
+        render();
       }
 
       function cleanupSessionForDay(dateKey) {
@@ -3316,7 +3344,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.22', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.23', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -3426,6 +3454,7 @@
 
       function longPressAction(target) {
         if (target.matches('.set[data-action="toggle"]')) return () => editSetValue(target);
+        if (target.matches('[data-day-title][data-date]')) return () => editDayTitle(target.dataset.date);
         if (target.matches('.exercise[data-date][data-ex]')) {
           return () => deleteExerciseWithUndo(target.dataset.date, Number(target.dataset.ex));
         }
@@ -3437,8 +3466,9 @@
 
       function startLongPress(event) {
         if (event.button !== undefined && event.button !== 0) return;
-        const target = event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]');
+        const target = event.target.closest('.set[data-action="toggle"], [data-day-title][data-date], .exercise[data-date][data-ex], .day[data-date]');
         if (!target) return;
+        if (target.matches('[data-day-title][data-date]') && event.target.closest('input, textarea, select, label')) return;
         if (target.classList.contains('exercise') && event.target.closest('.set, .set-control, input, button, textarea, select, label')) return;
         if (target.classList.contains('day') && event.target.closest('.exercise, .day-date-wrap, [data-action="add-exercise"], input, textarea, select, button, label')) return;
         clearLongPress();
