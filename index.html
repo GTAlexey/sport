@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.24">
-  <link rel="icon" href="icon.svg?v=1.0.24" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.24" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.24">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.25">
+  <link rel="icon" href="icon.svg?v=1.0.25" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.25" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.25">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -682,13 +682,18 @@
 
     .add-day-actions {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
       align-items: center;
     }
 
     .add-day-actions button {
       width: 100%;
+    }
+
+    .add-day-card > button {
+      width: 50%;
+      justify-self: end;
     }
 
     .empty-week-card {
@@ -882,7 +887,7 @@
 
     .add-exercise,
     .add-day-button {
-      width: min(50%, 220px);
+      width: 50%;
       justify-self: end;
       margin-left: auto;
       background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
@@ -891,10 +896,17 @@
       box-shadow: 0 7px 18px var(--glow);
     }
 
+    .add-exercise {
+      min-height: 38px;
+      padding: 0 10px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+    }
+
     .week-bottom-row .add-day-button {
       flex: 1 1 0;
       width: auto;
-      max-width: 220px;
+      max-width: none;
       height: var(--bottom-action-height);
       min-height: var(--bottom-action-height);
       margin-left: 0;
@@ -919,7 +931,7 @@
       flex: 1 1 0;
       display: grid;
       width: auto;
-      max-width: 220px;
+      max-width: none;
       height: var(--bottom-action-height);
       min-width: 0;
     }
@@ -1131,6 +1143,8 @@
       font-size: 0.72rem;
       text-transform: none;
       letter-spacing: 0;
+      white-space: nowrap;
+      overflow-wrap: normal;
     }
 
     .stats-hero-score {
@@ -1618,8 +1632,7 @@
       .exercise-head { flex-wrap: nowrap; }
       .exercise-name { width: 100%; }
       .toolbar button { flex: 1 1 120px; min-height: 38px; }
-      .add-day-fields,
-      .add-day-actions { grid-template-columns: 1fr; }
+      .add-day-fields { grid-template-columns: 1fr; }
       .set-row { gap: 3px; }
       .set { min-height: 38px; }
       .stats-overview { padding: 12px; }
@@ -1765,9 +1778,12 @@
         return name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Тренировка';
       }
 
-      function formatCompactDate(dateKey) {
+      function formatCompactDate(dateKey, includeYear = false) {
         const date = parseDateKey(dateKey);
-        return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        if (!includeYear) return `${day}.${month}`;
+        return `${day}.${month}.${String(date.getFullYear()).slice(-2)}`;
       }
 
       function formatWeekRange(startKey) {
@@ -2635,7 +2651,7 @@
           plannedSets,
           activeDays,
           completionPercent: plannedSets ? Math.min(100, Math.round(sets / plannedSets * 100)) : (sets ? 100 : 0),
-          periodLabel: firstDate && lastDate ? `с ${formatDate(firstDate)} по ${formatDate(lastDate)}` : 'нет выполненных подходов',
+          periodLabel: firstDate && lastDate ? `${formatCompactDate(firstDate, true)}-${formatCompactDate(lastDate, true)}` : 'нет выполненных подходов',
           rows: sortedRows,
           months: monthRows,
           weekdays,
@@ -3344,7 +3360,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.24', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.25', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
