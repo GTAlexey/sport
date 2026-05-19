@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.29">
-  <link rel="icon" href="icon.svg?v=1.0.29" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.29" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.29">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.30">
+  <link rel="icon" href="icon.svg?v=1.0.30" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.30" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.30">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -952,12 +952,28 @@
     }
 
     .week-bottom-row .add-day-button {
-      flex: 1 1 0;
-      width: auto;
-      max-width: none;
+      flex: none;
+      justify-self: end;
+      width: var(--bottom-action-height);
+      max-width: var(--bottom-action-height);
       height: var(--bottom-action-height);
       min-height: var(--bottom-action-height);
+      padding: 0;
       margin-left: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-indent: -999px;
+    }
+
+    .week-bottom-row .add-day-button::before {
+      content: '+';
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      text-indent: 0;
+      font-size: 1.4rem;
+      line-height: 1;
     }
 
     .make-training {
@@ -3598,7 +3614,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.29', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.30', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
