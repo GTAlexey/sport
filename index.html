@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.28">
-  <link rel="icon" href="icon.svg?v=1.0.28" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.28" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.28">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.29">
+  <link rel="icon" href="icon.svg?v=1.0.29" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.29" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.29">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -2077,20 +2077,30 @@
         return Boolean(week?.days?.some(isManualDay));
       }
 
+      function previousWeekKey(startKey) {
+        return toDateKey(addDays(parseDateKey(startKey), -7));
+      }
+
+      function canCopyPreviousWeek(startKey) {
+        return weekHasManualDays(getExistingWeek(previousWeekKey(startKey)));
+      }
+
       function getRenderableWeek(startKey) {
-        const existing = getExistingWeek(startKey);
-        if (existing) return existing;
-        return copyPreviousWeek(startKey) || makeWeek(emptyWeekDays());
+        return getExistingWeek(startKey) || makeWeek(emptyWeekDays());
       }
 
       function copyPreviousWeek(startKey) {
-        const previousKey = toDateKey(addDays(parseDateKey(startKey), -7));
+        const currentWeek = getExistingWeek(startKey);
+        if (weekHasManualDays(currentWeek)) return null;
+
+        const previousKey = previousWeekKey(startKey);
         const previousWeek = getExistingWeek(previousKey);
         if (!weekHasManualDays(previousWeek)) return null;
 
         const dates = weekDates(startKey);
         const sourceDates = weekDates(previousKey);
         const copiedDays = dates.map((dateKey, index) => {
+          delete state.sessions[dateKey];
           const sourceDay = previousWeek.days?.[index];
           if (!isManualDay(sourceDay)) return emptyDay();
           const customTitle = customDayTitle(sourceDates[index], sourceDay);
@@ -2105,6 +2115,33 @@
         state.weeks[startKey] = week;
         scheduleSave();
         return week;
+      }
+
+      function copyPreviousWeekIntoCurrent() {
+        const weekKey = weekStartKeyForOffset(weekOffset);
+        const existing = getExistingWeek(weekKey);
+        if (weekHasManualDays(existing)) {
+          toast('В этой неделе уже есть дни');
+          render();
+          return;
+        }
+
+        const week = copyPreviousWeek(weekKey);
+        if (!week) {
+          toast('В прошлой неделе нет дней');
+          render();
+          return;
+        }
+
+        const dates = weekDates(weekKey);
+        const visibleDates = dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
+        const today = todayKey();
+        const defaultOpenDate = visibleDates.includes(today) ? today : visibleDates[0];
+        openDateKey = defaultOpenDate ? (isDayComplete(defaultOpenDate) ? '' : defaultOpenDate) : '';
+        showAddDayForm = false;
+        saveNow();
+        render();
+        toast('Прошлая неделя скопирована');
       }
 
       function getDay(dateKey) {
@@ -2295,6 +2332,7 @@
         const dates = weekDates(weekKey);
         const visibleDates = dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
         const isEmpty = visibleDates.length === 0;
+        const canCopyPrevious = isEmpty && canCopyPreviousWeek(weekKey);
         if (isEmpty) showAddDayForm = true;
 
         if (weekOffset < 0) {
@@ -2313,7 +2351,7 @@
           ${renderTop('', formatWeekRange(weekKey), { weekPicker: true, weekStart: weekKey })}
           <section class="week-days">
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
-            ${showAddDayForm ? `${renderInstallCard()}${renderAddDayForm(dates, week, isEmpty)}` : renderWeekBottomRow()}
+            ${showAddDayForm ? `${renderInstallCard()}${renderAddDayForm(dates, week, isEmpty, canCopyPrevious)}` : renderWeekBottomRow()}
           </section>
         `;
       }
@@ -2350,16 +2388,19 @@
         `;
       }
 
-      function renderAddDayForm(dates, week, isFirstDay = false) {
+      function renderAddDayForm(dates, week, isFirstDay = false, canCopyPrevious = false) {
         const availableDates = dates.filter(dateKey => !isManualDay(week.days[slotForDate(dateKey)]));
         const today = todayKey();
         const defaultDate = availableDates.includes(today) ? today : availableDates[0];
+        const copyPreviousButton = isFirstDay && canCopyPrevious
+          ? '<button data-action="copy-previous-week" type="button">Скопировать прошлую неделю</button>'
+          : '';
 
         return `
           <article class="card add-day-card">
             <div class="add-day-head">
-              <h2>${isFirstDay ? 'Назначь первый тренировочный день' : 'Новый тренировочный день'}</h2>
-              <span class="muted tiny">Выбери дату — название подставится по календарю. Никакие другие дни не появятся сами.</span>
+              <h2>${isFirstDay ? 'Пустая неделя' : 'Новый тренировочный день'}</h2>
+              <span class="muted tiny">${isFirstDay ? 'Неделя начинается пустой. Добавь день вручную или скопируй прошлую неделю.' : 'Выбери дату — название подставится по календарю. Никакие другие дни не появятся сами.'}</span>
             </div>
             ${availableDates.length ? `
               <form class="add-day-form" data-form="add-day">
@@ -2369,7 +2410,7 @@
                 </div>
                 <div class="add-day-actions">
                   <button class="dark" type="submit">${isFirstDay ? 'Создать первый день' : 'Добавить день'}</button>
-                  ${isFirstDay ? '' : '<button data-action="hide-add-day" type="button">Отмена</button>'}
+                  ${isFirstDay ? copyPreviousButton : '<button data-action="hide-add-day" type="button">Отмена</button>'}
                 </div>
               </form>
             ` : `
@@ -3242,6 +3283,7 @@
         if (action === 'open-week-picker') { openWeekPicker(); return; }
         if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
         if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
+        if (action === 'copy-previous-week') { copyPreviousWeekIntoCurrent(); return; }
         if (action === 'hide-add-day') {
           const weekKey = weekStartKeyForOffset(weekOffset);
           const dates = weekDates(weekKey);
@@ -3556,7 +3598,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.28', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.29', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
