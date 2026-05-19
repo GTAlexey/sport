@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.20">
-  <link rel="icon" href="icon.svg?v=1.0.20" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.20" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.20">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.21">
+  <link rel="icon" href="icon.svg?v=1.0.21" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.21" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.21">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -969,8 +969,8 @@
       grid-area: 1 / 1;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 3px;
+      justify-content: stretch;
+      gap: 6px;
       width: 100%;
       height: var(--bottom-action-height);
       opacity: 0;
@@ -989,10 +989,10 @@
     }
 
     .bottom-menu-items button {
-      flex: 0 0 var(--bottom-menu-item-size);
-      width: var(--bottom-menu-item-size);
-      height: var(--bottom-menu-item-size);
-      min-height: var(--bottom-menu-item-size);
+      flex: 1 1 0;
+      width: auto;
+      height: var(--bottom-action-height);
+      min-height: var(--bottom-action-height);
       border-radius: 12px;
       background: color-mix(in srgb, var(--field) 88%, black);
       color: var(--ink);
@@ -1124,6 +1124,10 @@
     }
 
     .stats-period {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
       font-size: 0.72rem;
       text-transform: none;
       letter-spacing: 0;
@@ -1630,8 +1634,7 @@
     }
 
     @media (max-width: 340px) {
-      :root { --bottom-menu-item-size: 40px; }
-      .bottom-menu-items { gap: 2px; }
+      .bottom-menu-items { gap: 4px; }
       .stats-overview-grid { grid-template-columns: 1fr; }
       .stats-overview-head,
       .chart-title { display: grid; }
@@ -3303,7 +3306,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.20', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.21', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
