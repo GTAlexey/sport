@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.17">
-  <link rel="icon" href="icon.svg?v=1.0.17" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.17" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.17">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.18">
+  <link rel="icon" href="icon.svg?v=1.0.18" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.18" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.18">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -36,7 +36,10 @@
       --glow: rgba(255, 106, 0, 0.18);
       --overlay: rgba(0, 0, 0, 0.62);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --top-safe: env(safe-area-inset-top, 0px);
       --top-clock-size: clamp(2.34rem, 10.4vw, 3.9rem);
+      --top-height: calc(var(--top-clock-size) * 0.92 + var(--top-safe) + 15px);
+      --top-offset: 0px;
       --bottom-action-height: 44px;
       --bottom-menu-item-size: 42px;
       --swipe-action-size: 48px;
@@ -81,7 +84,7 @@
 
     body {
       min-height: 100dvh;
-      padding: 12px 10px calc(16px + var(--safe-bottom));
+      padding: var(--top-height) 10px calc(16px + var(--safe-bottom));
     }
 
     button, textarea, input, select { font: inherit; }
@@ -182,11 +185,13 @@
     }
 
     .top {
-      position: sticky;
-      top: 0;
+      position: fixed;
+      top: var(--top-offset);
+      left: 0;
+      right: 0;
       z-index: 10;
-      margin: -8px 0 0;
-      padding: calc(7px + env(safe-area-inset-top, 0px)) 0 7px;
+      margin: 0;
+      padding: calc(7px + var(--top-safe)) 10px 7px;
       background:
         radial-gradient(circle at 50% -30%, var(--glow), transparent 24rem),
         linear-gradient(180deg, color-mix(in srgb, var(--bg-2) 97%, transparent), color-mix(in srgb, var(--bg-2) 82%, transparent));
@@ -703,15 +708,15 @@
 
     .day-body {
       display: grid;
-      gap: 9px;
-      padding: 0 11px 11px;
+      gap: 8px;
+      padding: 0 10px 10px;
       border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     }
 
     .day-body-top {
       display: grid;
-      gap: 7px;
-      padding-top: 9px;
+      gap: 6px;
+      padding-top: 8px;
     }
 
     .progress {
@@ -734,7 +739,7 @@
 
     .exercises {
       display: grid;
-      gap: 7px;
+      gap: 6px;
     }
 
     .exercise {
@@ -748,8 +753,8 @@
 
     .exercise > .swipe-content {
       display: grid;
-      gap: 7px;
-      padding: 8px;
+      gap: 6px;
+      padding: 7px;
       border-radius: inherit;
       background:
         linear-gradient(180deg, color-mix(in srgb, var(--field) 84%, white), color-mix(in srgb, var(--field) 72%, var(--soft)));
@@ -763,7 +768,7 @@
       flex: 1 1 160px;
       width: 100%;
       min-width: 0;
-      min-height: 34px;
+      min-height: 32px;
       border: 0;
       border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
       border-radius: 0;
@@ -1313,14 +1318,14 @@
     @media (max-width: 420px) {
       body { padding-inline: 6px; }
       h1 { font-size: 0.78rem; }
-      .top { margin-inline: 0; padding-inline: 0; }
+      .top { margin-inline: 0; padding-inline: 6px; }
       .timer-bar { min-width: 82px; }
       .top-actions button { min-height: 38px; padding-inline: 12px; }
       .day-toggle { padding: 8px 10px; }
       .day-body,
       .add-day-card,
       .empty-week-card { padding-inline: 12px; }
-      .exercise { padding: 7px; border-radius: 14px; }
+      .exercise { border-radius: 14px; }
       .exercise-head { flex-wrap: nowrap; }
       .exercise-name { width: 100%; }
       .toolbar button { flex: 1 1 120px; min-height: 38px; }
@@ -1338,8 +1343,8 @@
     }
 
     @media (min-width: 720px) {
-      body { padding-top: 18px; }
-      .day-body { padding: 0 16px 16px; }
+      body { padding-top: var(--top-height); }
+      .day-body { padding: 0 15px 15px; }
       .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .day.open { grid-column: 1 / -1; }
       .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -2977,7 +2982,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.17', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.18', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
