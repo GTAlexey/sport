@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.21">
-  <link rel="icon" href="icon.svg?v=1.0.21" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.21" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.21">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.22">
+  <link rel="icon" href="icon.svg?v=1.0.22" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.22" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.22">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -2104,14 +2104,24 @@
         if (node) node.textContent = formatTimer(timerSeconds());
       }
 
+      function shouldKeepScreenAwake() {
+        return Boolean(timerStartedAt && document.visibilityState === 'visible' && navigator.wakeLock?.request);
+      }
+
       async function requestWakeLock() {
-        if (!timerStartedAt || document.visibilityState !== 'visible' || !navigator.wakeLock?.request) return;
+        if (!shouldKeepScreenAwake()) return;
         if (wakeLock || wakeLockRequest) return;
         wakeLockRequest = navigator.wakeLock.request('screen')
           .then(lock => {
+            if (!shouldKeepScreenAwake()) {
+              lock.release?.().catch(() => {});
+              return;
+            }
             wakeLock = lock;
             lock.addEventListener('release', () => {
-              if (wakeLock === lock) wakeLock = null;
+              if (wakeLock !== lock) return;
+              wakeLock = null;
+              if (shouldKeepScreenAwake()) window.setTimeout(requestWakeLock, 250);
             });
           })
           .catch(() => {})
@@ -3306,7 +3316,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.21', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.22', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -3484,10 +3494,15 @@
       document.addEventListener('input', event => handleInput(event.target));
       document.addEventListener('change', event => handleChange(event.target));
       document.addEventListener('blur', event => handleBlur(event.target), true);
-      window.addEventListener('pagehide', flushSave);
+      window.addEventListener('pagehide', () => {
+        flushSave();
+        releaseWakeLock();
+      });
+      window.addEventListener('pageshow', requestWakeLock);
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
           flushSave();
+          releaseWakeLock();
         } else {
           requestWakeLock();
         }
