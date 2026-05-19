@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.32">
-  <link rel="icon" href="icon.svg?v=1.0.32" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.32" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.32">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.33">
+  <link rel="icon" href="icon.svg?v=1.0.33" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.33" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.33">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -121,6 +121,12 @@
         box-shadow: 0 9px 24px var(--glow);
       }
 
+      button.success:hover {
+        border-color: color-mix(in srgb, var(--done) 78%, white);
+        background: linear-gradient(135deg, color-mix(in srgb, var(--done) 88%, black), color-mix(in srgb, var(--done) 86%, white));
+        box-shadow: 0 9px 24px color-mix(in srgb, var(--done) 28%, transparent);
+      }
+
       button.danger:hover {
         border-color: color-mix(in srgb, var(--danger) 46%, var(--line));
         background: color-mix(in srgb, var(--field) 86%, var(--danger));
@@ -138,6 +144,12 @@
       color: var(--accent-ink);
       border-color: color-mix(in srgb, var(--accent) 60%, transparent);
       box-shadow: 0 7px 18px var(--glow);
+    }
+    button.success {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--done) 88%, black), color-mix(in srgb, var(--done) 82%, white));
+      color: #06140a;
+      border-color: color-mix(in srgb, var(--done) 62%, transparent);
+      box-shadow: 0 7px 18px color-mix(in srgb, var(--done) 22%, transparent);
     }
     button.danger { color: var(--danger); }
     button.small { min-height: 44px; padding: 0 12px; font-size: 0.86rem; }
@@ -737,6 +749,10 @@
 
     .add-day-actions button:only-child {
       grid-column: 1 / -1;
+    }
+
+    .add-day-actions.is-first-day {
+      grid-template-columns: 1fr;
     }
 
     .add-day-card > button {
@@ -2396,7 +2412,7 @@
         const today = todayKey();
         const defaultDate = availableDates.includes(today) ? today : availableDates[0];
         const copyPreviousButton = isFirstDay && canCopyPrevious
-          ? '<button data-action="copy-previous-week" type="button">Скопировать прошлую неделю</button>'
+          ? '<button class="success" data-action="copy-previous-week" type="button">Скопировать прошлую неделю</button>'
           : '';
 
         return `
@@ -2411,7 +2427,7 @@
                   <label class="visually-hidden" for="addDayDate">Дата тренировочного дня</label>
                   <input id="addDayDate" class="add-day-date" data-field="add-day-date" name="dayDate" type="date" min="${dates[0]}" max="${dates[6]}" value="${defaultDate}" required autofocus>
                 </div>
-                <div class="add-day-actions">
+                <div class="add-day-actions ${isFirstDay ? 'is-first-day' : ''}">
                   <button class="dark" type="submit">${isFirstDay ? 'Создать первый день' : 'Добавить день'}</button>
                   ${isFirstDay ? copyPreviousButton : '<button data-action="hide-add-day" type="button">Отмена</button>'}
                 </div>
@@ -3601,7 +3617,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.32', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.33', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
