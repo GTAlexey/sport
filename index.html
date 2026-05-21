@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.38">
-  <link rel="icon" href="icon.svg?v=1.0.38" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.38" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.38">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.39">
+  <link rel="icon" href="icon.svg?v=1.0.39" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.39" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.39">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -931,6 +931,29 @@
     .exercise-name:focus {
       border-color: var(--accent);
       box-shadow: none;
+    }
+
+    .exercise-unit-toggle {
+      flex: 0 0 auto;
+      align-self: center;
+      min-width: 48px;
+      min-height: 32px;
+      padding: 0 9px;
+      border-radius: 999px;
+      border-color: color-mix(in srgb, var(--accent) 66%, var(--line));
+      background: color-mix(in srgb, var(--field) 76%, transparent);
+      color: var(--accent-2);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.035em;
+      box-shadow: none;
+      touch-action: manipulation;
+    }
+
+    .exercise-unit-toggle.is-seconds {
+      color: var(--done);
+      border-color: color-mix(in srgb, var(--done) 62%, var(--line));
+      background: color-mix(in srgb, var(--done) 14%, var(--field));
     }
 
     .set-row {
@@ -1980,6 +2003,27 @@
         return `${formatNumber(value)} ${plural(value, forms)}`;
       }
 
+      function cleanExerciseUnit(unit) {
+        const value = String(unit || '').trim().toLowerCase();
+        return ['seconds', 'second', 'sec', 'secs', 's', 'сек', 'сек.', 'секунды', 'секунд'].includes(value) ? 'seconds' : 'reps';
+      }
+
+      function exerciseUnitLabel(unit) {
+        return cleanExerciseUnit(unit) === 'seconds' ? 'СЕК' : 'ПВТ';
+      }
+
+      function exerciseUnitText(unit) {
+        return cleanExerciseUnit(unit) === 'seconds' ? 'секунды' : 'повторения';
+      }
+
+      function exerciseUnitPrompt(unit) {
+        return cleanExerciseUnit(unit) === 'seconds' ? 'Сколько секунд?' : 'Сколько повторений?';
+      }
+
+      function nextExerciseUnit(unit) {
+        return cleanExerciseUnit(unit) === 'seconds' ? 'reps' : 'seconds';
+      }
+
       function emptyDay() {
         return { active: false, manual: false, label: '', exercises: [] };
       }
@@ -2078,7 +2122,7 @@
         if (typeof exercise === 'string') return parseLineToExercise(exercise);
         if (!exercise || typeof exercise !== 'object') return null;
         const name = String(exercise.name ?? '').trim();
-        const unit = 'reps';
+        const unit = cleanExerciseUnit(exercise.unit);
         let sets = Array.isArray(exercise.sets) ? exercise.sets : [];
         sets = sets.map(value => normalizeSetLabel(value, unit)).filter(Boolean);
         if (!sets.length) sets = [defaultSetValue(unit, name)];
@@ -2097,7 +2141,7 @@
         const match = String(line).match(/^(.*?)(?:\s+[—–-]\s+)(.+)$/);
         const name = (match ? match[1] : line).trim();
         const tail = (match ? match[2] : '').trim();
-        const unit = 'reps';
+        const unit = inferUnit(tail);
         const sets = tail ? splitSets(tail).map(value => normalizeSetLabel(value, unit)).filter(Boolean) : [defaultSetValue(unit, name)];
         return { name, unit, sets: sets.length ? sets : [defaultSetValue(unit, name)] };
       }
@@ -2110,8 +2154,9 @@
         return parts.length ? parts : [tail.trim()];
       }
 
-      function inferUnit() {
-        return 'reps';
+      function inferUnit(text = '') {
+        const value = String(text || '');
+        return /сек/i.test(value) || /\b(?:s|sec|secs|second|seconds)\b/i.test(value) ? 'seconds' : 'reps';
       }
 
       function normalizeSetLabel(value, unit) {
@@ -2122,8 +2167,8 @@
         return defaultSetValue(unit, '');
       }
 
-      function defaultSetValue() {
-        return '10';
+      function defaultSetValue(unit = 'reps') {
+        return cleanExerciseUnit(unit) === 'seconds' ? '30' : '10';
       }
 
       function cleanSessions(rawSessions) {
@@ -2573,6 +2618,8 @@
 
       function renderExercise(dateKey, exercise, exIndex) {
         const session = readSession(dateKey);
+        const unit = cleanExerciseUnit(exercise.unit);
+        const unitLabel = exerciseUnitLabel(unit);
         const allDone = exercise.sets.length > 0 && exercise.sets.every((_, setIndex) => session.done[`${exIndex}:${setIndex}`]);
         return `
           <div class="exercise ${allDone ? 'done' : ''}" data-swipe="exercise" data-date="${dateKey}" data-ex="${exIndex}" title="Смахни влево, чтобы удалить">
@@ -2584,6 +2631,7 @@
               <div class="exercise-head">
                 <span class="exercise-grip" data-drag-handle="exercise" aria-label="Перетащить упражнение" role="button"></span>
                 <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
+                <button class="exercise-unit-toggle ${unit === 'seconds' ? 'is-seconds' : ''}" data-action="toggle-unit" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Переключить единицу: ${escapeHtml(exerciseUnitText(unit))}" title="${escapeHtml(exerciseUnitText(unit))}">${unitLabel}</button>
               </div>
               <div class="set-row">
                 <button class="small set-control" data-action="remove-set" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Убрать подход" ${exercise.sets.length <= 1 ? 'disabled' : ''}>−</button>
@@ -2628,6 +2676,7 @@
 
           <div class="chart-grid">
             ${renderExerciseStats(stats.rows)}
+            ${renderDurationStats(stats.durationRows, stats.seconds)}
             ${renderUnitList(stats.unitRows)}
             ${renderWeekdayBars(stats.weekdays)}
             ${renderMonthBars(stats.months)}
@@ -2679,6 +2728,7 @@
               ${renderNumberCard('Тренировки', formatNumber(stats.workouts), `${formatNumber(stats.activeDays)} ${plural(stats.activeDays, ['день', 'дня', 'дней'])} в плане`)}
               ${renderNumberCard('Подходы', formatNumber(stats.sets), `${formatNumber(stats.plannedSets)} запланировано`)}
               ${renderNumberCard('Повторения', formatNumber(stats.reps), 'выполненный объём')}
+              ${stats.seconds ? renderNumberCard('Длительность', formatDuration(stats.seconds), 'время под нагрузкой') : ''}
             </div>
           </article>
         `;
@@ -2759,11 +2809,40 @@
               ${unitRows.map(row => `
                 <div class="unit-row">
                   <span>${escapeHtml(row.label)}</span>
-                  <strong class="unit-value">${escapeHtml(formatNumber(row.value))}</strong>
+                  <strong class="unit-value">${escapeHtml(row.valueLabel || formatNumber(row.value))}</strong>
                   <span>${escapeHtml(row.text)}</span>
                 </div>
               `).join('')}
             </div>
+          </article>
+        `;
+      }
+
+      function renderDurationStats(durationRows, seconds) {
+        if (!seconds) return '';
+        return `
+          <article class="chart-card wide">
+            <div class="chart-title">
+              <div>
+                <span class="chart-label">Длительность</span>
+                <h2>Время под нагрузкой</h2>
+              </div>
+              <span class="bar-note">${escapeHtml(formatDuration(seconds))}</span>
+            </div>
+            ${durationRows.length ? `
+              <div class="exercise-stat-list">
+                ${durationRows.map((row, index) => `
+                  <div class="exercise-stat-row rank-${index + 1}">
+                    <div class="exercise-rank">#${index + 1}</div>
+                    <div class="exercise-stat-text">
+                      <strong>${escapeHtml(row.name)}</strong>
+                      <span class="exercise-stat-meta">${escapeHtml(formatCount(row.sets, ['подход', 'подхода', 'подходов']))}</span>
+                    </div>
+                    <div class="exercise-stat-value">${escapeHtml(formatDuration(row.seconds))}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
           </article>
         `;
       }
@@ -2792,11 +2871,13 @@
 
       function buildSummaryStats() {
         const rows = new Map();
+        const durationRows = new Map();
         const workouts = new Set();
         const months = new Map();
         const weekdays = SHORT.map(short => ({ short, label: short, sets: 0 }));
         let sets = 0;
         let reps = 0;
+        let seconds = 0;
         let plannedSets = 0;
         let activeDays = 0;
         let firstDate = null;
@@ -2822,20 +2903,30 @@
             const [exIndex, setIndex] = key.split(':').map(Number);
             const fallbackExercise = exercises[exIndex];
             const payload = typeof value === 'object' ? value : null;
+            const fallbackUnit = cleanExerciseUnit(fallbackExercise?.unit);
             const exerciseName = payload?.exercise || fallbackExercise?.name || 'Упражнение';
-            const fallbackLabel = fallbackExercise?.sets?.[setIndex] || defaultSetValue('reps', exerciseName);
+            const fallbackLabel = fallbackExercise?.sets?.[setIndex] || defaultSetValue(fallbackUnit, exerciseName);
             const label = payload?.label || fallbackLabel;
-            const metric = normalizeMetric(payload?.metric || setMetric(label));
+            const metric = normalizeMetric(payload?.metric || setMetric(label, fallbackUnit), fallbackUnit);
             const rowName = exerciseName || payload?.group || groupExerciseName(exerciseName);
             const rowKey = rowName.toLowerCase();
-            const row = rows.get(rowKey) || makeSummaryRow(rowName);
             const monthKey = dateKey.slice(0, 7);
             const month = months.get(monthKey) || makeMonthRow(monthKey);
             const weekday = weekdays[slotForDate(dateKey)];
 
-            row.sets += 1;
-            addMetric(row.units, metric);
-            rows.set(rowKey, row);
+            if (metric.unit === 'сек') {
+              const row = durationRows.get(rowKey) || makeDurationRow(rowName);
+              row.sets += 1;
+              row.seconds += metric.value;
+              durationRows.set(rowKey, row);
+              seconds += metric.value;
+            } else {
+              const row = rows.get(rowKey) || makeSummaryRow(rowName);
+              row.sets += 1;
+              addMetric(row.units, metric);
+              rows.set(rowKey, row);
+              if (metric.unit === 'повт') reps += metric.value;
+            }
 
             month.sets += 1;
             addMetric(month.units, metric);
@@ -2843,7 +2934,6 @@
 
             weekday.sets += 1;
             sets += 1;
-            if (metric.unit === 'повт') reps += metric.value;
             dayDone = true;
           });
 
@@ -2855,14 +2945,16 @@
         });
 
         const sortedRows = Array.from(rows.values()).sort((a, b) => primaryVolume(b) - primaryVolume(a) || b.sets - a.sets || a.name.localeCompare(b.name, 'ru'));
+        const sortedDurationRows = Array.from(durationRows.values()).sort((a, b) => b.seconds - a.seconds || b.sets - a.sets || a.name.localeCompare(b.name, 'ru'));
         const monthRows = buildMonthSeries(months, firstDate, lastDate);
         const maxMonthSets = Math.max(...monthRows.map(month => month.sets), 1);
         monthRows.forEach(month => { month.percent = month.sets / maxMonthSets * 100; });
-        const maxUnitValue = Math.max(reps, sets, 1);
+        const maxUnitValue = Math.max(reps, seconds, sets, 1);
 
         return {
           sets,
           reps,
+          seconds,
           workouts: workouts.size,
           plannedSets,
           activeDays,
@@ -2870,10 +2962,11 @@
           completionPercent: plannedSets ? Math.min(100, Math.round(sets / plannedSets * 100)) : (sets ? 100 : 0),
           periodLabel: firstDate && lastDate ? `${formatCompactDate(firstDate, true)}-${formatCompactDate(lastDate, true)}` : 'нет выполненных подходов',
           rows: sortedRows,
+          durationRows: sortedDurationRows,
           months: monthRows,
           weekdays,
           maxUnitValue,
-          unitRows: buildUnitRows({ sets, reps })
+          unitRows: buildUnitRows({ sets, reps, seconds })
         };
       }
 
@@ -2924,21 +3017,40 @@
       function buildUnitRows(stats) {
         const rows = [];
         if (stats.reps) rows.push({ label: 'Повторения', value: stats.reps, text: formatCount(stats.reps, ['повторение', 'повторения', 'повторений']) });
+        if (stats.seconds) rows.push({ label: 'Секунды', value: stats.seconds, valueLabel: formatDuration(stats.seconds), text: 'время под нагрузкой' });
         rows.push({ label: 'Подходы', value: stats.sets, text: formatCount(stats.sets, ['подход', 'подхода', 'подходов']) });
         return rows;
       }
 
-      function setMetric(label) {
+      function setMetric(label, fallbackUnit = 'reps') {
         const text = String(label || '').toLowerCase().replace(',', '.');
         const match = text.match(/\d+(?:\.\d+)?/);
         const value = match ? Number(match[0]) : 0;
-        return { unit: 'повт', value };
+        return { unit: cleanExerciseUnit(fallbackUnit) === 'seconds' ? 'сек' : 'повт', value };
       }
 
-      function normalizeMetric(metric) {
+      function normalizeMetric(metric, fallbackUnit = 'reps') {
         const value = Number(metric?.value || 0);
         const safeValue = Number.isFinite(value) ? value : 0;
-        return { unit: 'повт', value: safeValue };
+        const rawUnit = String(metric?.unit || '').trim().toLowerCase();
+        const fallback = cleanExerciseUnit(fallbackUnit) === 'seconds' ? 'сек' : 'повт';
+        const unit = ['сек', 'сек.', 'seconds', 'second', 'sec', 'secs', 's'].includes(rawUnit) ? 'сек' : (rawUnit === 'повт' || rawUnit === 'reps' || rawUnit === 'rep' ? 'повт' : fallback);
+        return { unit, value: safeValue };
+      }
+
+      function makeDurationRow(name) {
+        return { name, sets: 0, seconds: 0 };
+      }
+
+      function formatDuration(totalSeconds) {
+        const seconds = Math.max(0, Number(totalSeconds || 0));
+        if (seconds < 60) return `${formatNumber(seconds)} ${plural(seconds, ['секунда', 'секунды', 'секунд'])}`;
+        const minutes = seconds / 60;
+        if (minutes < 60) return `${formatNumber(minutes)} ${plural(Math.round(minutes), ['минута', 'минуты', 'минут'])}`;
+        const hours = minutes / 60;
+        if (hours < 24) return `${formatNumber(hours)} ${plural(Math.round(hours), ['час', 'часа', 'часов'])}`;
+        const days = hours / 24;
+        return `${formatNumber(days)} ${plural(Math.round(days), ['день', 'дня', 'дней'])}`;
       }
 
       function addMetric(units, metric) {
@@ -2972,11 +3084,14 @@
       }
 
       function makeDonePayload(exercise, label) {
+        const unit = cleanExerciseUnit(exercise?.unit);
+        const safeLabel = label || defaultSetValue(unit, exercise?.name);
         return {
           exercise: exercise?.name || 'Упражнение',
           group: groupExerciseName(exercise?.name),
-          label: label || defaultSetValue(exercise?.unit || 'reps', exercise?.name),
-          metric: setMetric(label),
+          label: safeLabel,
+          unit,
+          metric: setMetric(safeLabel, unit),
           completedAt: new Date().toISOString()
         };
       }
@@ -3098,7 +3213,7 @@
         const exercise = day.exercises[exIndex];
         if (!exercise) return;
         exercise.name = String(name ?? '');
-        exercise.unit = 'reps';
+        exercise.unit = cleanExerciseUnit(exercise.unit);
         updateDoneExercise(dateKey, exIndex);
         touchWeek(dateKey);
         scheduleSave();
@@ -3108,14 +3223,16 @@
         const session = state.sessions[dateKey];
         const exercise = getDay(dateKey).exercises[exIndex];
         if (!session?.done || !exercise) return;
+        const unit = cleanExerciseUnit(exercise.unit);
         Object.entries(session.done).forEach(([key, value]) => {
           const [currentEx, setIndex] = key.split(':').map(Number);
           if (currentEx !== exIndex || !value || typeof value !== 'object') return;
-          const label = exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name);
+          const label = exercise.sets[setIndex] || defaultSetValue(unit, exercise.name);
           value.exercise = exercise.name || 'Упражнение';
           value.group = groupExerciseName(exercise.name);
           value.label = label;
-          value.metric = setMetric(label);
+          value.unit = unit;
+          value.metric = setMetric(label, unit);
         });
         session.updatedAt = new Date().toISOString();
       }
@@ -3126,11 +3243,13 @@
         const value = session?.done?.[key];
         const exercise = getDay(dateKey).exercises[exIndex];
         if (!value || typeof value !== 'object' || !exercise) return;
-        const label = exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name);
+        const unit = cleanExerciseUnit(exercise.unit);
+        const label = exercise.sets[setIndex] || defaultSetValue(unit, exercise.name);
         value.exercise = exercise.name || 'Упражнение';
         value.group = groupExerciseName(exercise.name);
         value.label = label;
-        value.metric = setMetric(label);
+        value.unit = unit;
+        value.metric = setMetric(label, unit);
         session.updatedAt = new Date().toISOString();
       }
 
@@ -3270,12 +3389,29 @@
         return true;
       }
 
+      function toggleExerciseUnit(dateKey, exIndex) {
+        const day = getDay(dateKey);
+        const exercise = day.exercises[exIndex];
+        if (!exercise) return;
+        const unit = nextExerciseUnit(exercise.unit);
+        exercise.unit = unit;
+        exercise.sets = (Array.isArray(exercise.sets) ? exercise.sets : [])
+          .map(value => normalizeSetLabel(value, unit))
+          .filter(Boolean);
+        if (!exercise.sets.length) exercise.sets = [defaultSetValue(unit, exercise.name)];
+        updateDoneExercise(dateKey, exIndex);
+        touchWeek(dateKey);
+        saveNow();
+        render();
+      }
+
       function updateLineSetCount(dateKey, exIndex, delta) {
         const day = getDay(dateKey);
         const exercise = day.exercises[exIndex];
         if (!exercise) return;
-        exercise.unit = 'reps';
-        if (delta > 0) exercise.sets.push(exercise.sets[exercise.sets.length - 1] || defaultSetValue(exercise.unit, exercise.name));
+        const unit = cleanExerciseUnit(exercise.unit);
+        exercise.unit = unit;
+        if (delta > 0) exercise.sets.push(exercise.sets[exercise.sets.length - 1] || defaultSetValue(unit, exercise.name));
         if (delta < 0 && exercise.sets.length > 1) {
           exercise.sets.pop();
           cleanupSessionForDay(dateKey);
@@ -3311,9 +3447,10 @@
         const setIndex = Number(target.dataset.set);
         const exercise = getDay(dateKey).exercises[exIndex];
         if (!exercise || !(setIndex in exercise.sets)) return;
-        exercise.unit = 'reps';
-        const current = String(exercise.sets[setIndex] || defaultSetValue(exercise.unit, exercise.name));
-        const next = prompt('Сколько повторений?', current);
+        const unit = cleanExerciseUnit(exercise.unit);
+        exercise.unit = unit;
+        const current = String(exercise.sets[setIndex] || defaultSetValue(unit, exercise.name));
+        const next = prompt(exerciseUnitPrompt(unit), current);
         if (next === null) return;
         setSetValue(dateKey, exIndex, setIndex, next);
       }
@@ -3448,6 +3585,7 @@
         if (action === 'delete-day') { closeSwipe(target.closest('[data-swipe]')); deleteDayWithUndo(target.dataset.date); return; }
         if (action === 'delete-exercise') { closeSwipe(target.closest('[data-swipe]')); deleteExerciseWithUndo(target.dataset.date, Number(target.dataset.ex)); return; }
         if (action === 'add-exercise') { addExercise(target.dataset.date); return; }
+        if (action === 'toggle-unit') { toggleExerciseUnit(target.dataset.date, Number(target.dataset.ex)); return; }
         if (action === 'toggle') { toggleSet(target.dataset.date, Number(target.dataset.ex), Number(target.dataset.set)); return; }
         if (action === 'add-set' || action === 'remove-set') {
           updateLineSetCount(target.dataset.date, Number(target.dataset.ex), action === 'add-set' ? 1 : -1);
@@ -3739,7 +3877,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.38', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.39', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
