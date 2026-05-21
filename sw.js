@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.35';
+const APP_VERSION = '1.0.36';
 const CACHE_PREFIX = 'sport-week-planner-';
 const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const APP_SHELL = [
