@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.36">
-  <link rel="icon" href="icon.svg?v=1.0.36" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.36" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.36">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.37">
+  <link rel="icon" href="icon.svg?v=1.0.37" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.37" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.37">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -195,6 +195,20 @@
       display: grid;
       gap: 10px;
       min-width: 0;
+      touch-action: pan-y;
+    }
+
+    .app.week-swiping .week-days {
+      transform: translateX(var(--week-swipe-x, 0px));
+      transition: none;
+      will-change: transform;
+    }
+
+    .app.week-swiping,
+    body.exercise-dragging {
+      cursor: grabbing;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .top {
@@ -833,6 +847,60 @@
     }
 
     .exercise.done > .swipe-content { background: linear-gradient(180deg, color-mix(in srgb, var(--done) 16%, var(--card)), color-mix(in srgb, var(--done) 10%, var(--card))); border-color: color-mix(in srgb, var(--done) 42%, var(--line)); }
+
+    .exercise-head {
+      flex-wrap: nowrap;
+      align-items: stretch;
+    }
+
+    .exercise-grip {
+      flex: 0 0 28px;
+      align-self: stretch;
+      display: grid;
+      place-items: center;
+      min-height: 32px;
+      border-radius: 10px;
+      color: color-mix(in srgb, var(--muted) 86%, white);
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.18em;
+      cursor: grab;
+      touch-action: none;
+      -webkit-touch-callout: none;
+    }
+
+    .exercise-grip::before {
+      content: '⋮⋮';
+    }
+
+    .exercise-grip:active { cursor: grabbing; }
+
+    .exercises.reordering { touch-action: none; }
+
+    .exercise.drag-source > .swipe-content {
+      opacity: 0.28;
+      transform: scale(0.98);
+    }
+
+    .exercise-placeholder {
+      min-height: 48px;
+      border: 1px dashed color-mix(in srgb, var(--accent) 70%, var(--line));
+      border-radius: 15px;
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 8%, transparent) inset;
+    }
+
+    .exercise.exercise-drag-ghost {
+      position: fixed;
+      z-index: 80;
+      margin: 0;
+      pointer-events: none;
+      opacity: 0.98;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+      transform: translate3d(0, 0, 0) scale(1.02);
+    }
+
+    .exercise.exercise-drag-ghost > .swipe-actions { display: none; }
 
     .exercise-name {
       flex: 1 1 160px;
@@ -1778,6 +1846,8 @@
       let longPressStartX = 0;
       let longPressStartY = 0;
       let swipeState = null;
+      let exerciseDragState = null;
+      let weekSwipeState = null;
       let ignoreNextClick = false;
 
       function uid() {
@@ -2482,7 +2552,7 @@
                   <div class="day-body-top">
                     <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><i style="--value:${progress.percent}%"></i></div>
                   </div>
-                  ${day.exercises.length ? `<div class="exercises">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
+                  ${day.exercises.length ? `<div class="exercises" data-date="${dateKey}">${day.exercises.map((ex, exIndex) => renderExercise(dateKey, ex, exIndex)).join('')}</div>` : '<div class="empty">День создан. Добавь первое упражнение.</div>'}
                   <button class="add-exercise" data-action="add-exercise" data-date="${dateKey}" type="button">+ Упражнение</button>
                 </div>
               ` : ''}
@@ -2502,6 +2572,7 @@
             </div>
             <div class="swipe-content">
               <div class="exercise-head">
+                <span class="exercise-grip" data-drag-handle="exercise" aria-label="Перетащить упражнение" role="button"></span>
                 <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
               </div>
               <div class="set-row">
@@ -3153,6 +3224,42 @@
         if (!Object.keys(session.done).length) delete state.sessions[dateKey];
       }
 
+      function exerciseIndexAfterMove(exIndex, fromIndex, toIndex) {
+        if (exIndex === fromIndex) return toIndex;
+        if (fromIndex < toIndex && exIndex > fromIndex && exIndex <= toIndex) return exIndex - 1;
+        if (fromIndex > toIndex && exIndex >= toIndex && exIndex < fromIndex) return exIndex + 1;
+        return exIndex;
+      }
+
+      function shiftSessionAfterExerciseMove(dateKey, fromIndex, toIndex) {
+        const session = state.sessions[dateKey];
+        if (!session?.done || fromIndex === toIndex) return;
+        const nextDone = {};
+        Object.entries(session.done).forEach(([key, value]) => {
+          const [exIndex, setIndex] = key.split(':').map(Number);
+          if (!Number.isInteger(exIndex) || !Number.isInteger(setIndex)) return;
+          nextDone[`${exerciseIndexAfterMove(exIndex, fromIndex, toIndex)}:${setIndex}`] = value;
+        });
+        session.done = nextDone;
+        session.updatedAt = new Date().toISOString();
+        if (!Object.keys(session.done).length) delete state.sessions[dateKey];
+      }
+
+      function reorderExercise(dateKey, fromIndex, toIndex) {
+        const day = getDay(dateKey);
+        if (!day.exercises[fromIndex]) return false;
+        const targetIndex = clamp(toIndex, 0, day.exercises.length - 1);
+        if (fromIndex === targetIndex) return false;
+        const [exercise] = day.exercises.splice(fromIndex, 1);
+        day.exercises.splice(targetIndex, 0, exercise);
+        shiftSessionAfterExerciseMove(dateKey, fromIndex, targetIndex);
+        openDateKey = dateKey;
+        touchWeek(dateKey);
+        saveNow();
+        render();
+        return true;
+      }
+
       function updateLineSetCount(dateKey, exIndex, delta) {
         const day = getDay(dateKey);
         const exercise = day.exercises[exIndex];
@@ -3622,7 +3729,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.36', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.37', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -3676,7 +3783,7 @@
           if (!event.target.closest('.toast')) closeSwipe();
           return;
         }
-        if (event.target.closest('.swipe-actions')) return;
+        if (event.target.closest('.swipe-actions, [data-drag-handle="exercise"]')) return;
         const focusedField = event.target.closest('input, textarea, select');
         if (event.target.closest('label') || (focusedField && focusedField === document.activeElement)) return;
         const point = swipePoint(event);
@@ -3704,6 +3811,10 @@
             return;
           }
           if (Math.abs(dx) < 10) return;
+          if (!swipeState.wasOpen && dx > 0) {
+            swipeState = null;
+            return;
+          }
           swipeState.swiping = true;
           clearLongPress();
           swipeState.node.classList.add('swiping');
@@ -3728,6 +3839,253 @@
         const shouldOpen = wasOpen ? dx <= width * 0.35 : dx < -width * 0.35;
         node.classList.toggle('swipe-open', shouldOpen);
         if (Math.abs(dx) > 12) ignoreNextClick = true;
+      }
+
+      function startExerciseDrag(event) {
+        if (event.button !== undefined && event.button !== 0) return false;
+        if (weekSwipeState) return false;
+        const handle = event.target.closest('[data-drag-handle="exercise"]');
+        if (!handle) return false;
+        const exercise = handle.closest('.exercise[data-date][data-ex]');
+        const container = exercise?.closest('.exercises[data-date]');
+        const dateKey = exercise?.dataset.date;
+        const fromIndex = Number(exercise?.dataset.ex);
+        const day = dateKey ? getDay(dateKey) : null;
+        if (!exercise || !container || !day?.exercises?.[fromIndex] || day.exercises.length < 2) return true;
+
+        event.preventDefault();
+        clearLongPress();
+        closeSwipe();
+        closeBottomMenus();
+
+        const point = swipePoint(event);
+        exerciseDragState = {
+          handle,
+          exercise,
+          container,
+          dateKey,
+          fromIndex,
+          targetIndex: fromIndex,
+          pointerId: event.pointerId,
+          startX: point.x,
+          startY: point.y,
+          currentX: point.x,
+          currentY: point.y,
+          offsetX: 0,
+          offsetY: 0,
+          timer: null,
+          dragging: false,
+          placeholder: null,
+          ghost: null
+        };
+        handle.setPointerCapture?.(event.pointerId);
+        exerciseDragState.timer = setTimeout(beginExerciseDrag, 280);
+        return true;
+      }
+
+      function clearExerciseDragTimer() {
+        if (!exerciseDragState?.timer) return;
+        clearTimeout(exerciseDragState.timer);
+        exerciseDragState.timer = null;
+      }
+
+      function beginExerciseDrag() {
+        const drag = exerciseDragState;
+        if (!drag || drag.dragging) return;
+        const rect = drag.exercise.getBoundingClientRect();
+        const placeholder = document.createElement('div');
+        const ghost = drag.exercise.cloneNode(true);
+
+        drag.offsetX = clamp(drag.currentX - rect.left, 0, rect.width);
+        drag.offsetY = clamp(drag.currentY - rect.top, 0, rect.height);
+        placeholder.className = 'exercise-placeholder';
+        placeholder.style.height = `${rect.height}px`;
+        drag.exercise.before(placeholder);
+        clearExerciseDragTimer();
+
+        ghost.classList.remove('swipe-open', 'swiping', 'drag-source');
+        ghost.classList.add('exercise-drag-ghost');
+        ghost.removeAttribute('title');
+        ghost.style.width = `${rect.width}px`;
+        ghost.style.height = `${rect.height}px`;
+        ghost.querySelectorAll('input, textarea, select, button').forEach(control => {
+          control.tabIndex = -1;
+          if ('readOnly' in control) control.readOnly = true;
+        });
+        document.body.appendChild(ghost);
+
+        drag.placeholder = placeholder;
+        drag.ghost = ghost;
+        drag.dragging = true;
+        drag.exercise.classList.add('drag-source');
+        drag.exercise.style.display = 'none';
+        drag.container.classList.add('reordering');
+        document.body.classList.add('exercise-dragging');
+        ignoreNextClick = true;
+        updateExerciseDragPosition();
+      }
+
+      function exerciseDropItems(drag) {
+        return Array.from(drag.container.children)
+          .filter(node => node.classList?.contains('exercise') && node !== drag.exercise && node.style.display !== 'none');
+      }
+
+      function updateExerciseDragPosition() {
+        const drag = exerciseDragState;
+        if (!drag?.dragging || !drag.ghost) return;
+        drag.ghost.style.left = `${drag.currentX - drag.offsetX}px`;
+        drag.ghost.style.top = `${drag.currentY - drag.offsetY}px`;
+      }
+
+      function updateExerciseDropTarget() {
+        const drag = exerciseDragState;
+        if (!drag?.dragging || !drag.placeholder) return;
+        const items = exerciseDropItems(drag);
+        let dropIndex = 0;
+        for (const item of items) {
+          const rect = item.getBoundingClientRect();
+          if (drag.currentY < rect.top + rect.height / 2) break;
+          dropIndex += 1;
+        }
+        drag.targetIndex = clamp(dropIndex, 0, items.length);
+        drag.container.insertBefore(drag.placeholder, items[drag.targetIndex] || null);
+      }
+
+      function moveExerciseDrag(event) {
+        const drag = exerciseDragState;
+        if (!drag || (event.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+        const point = swipePoint(event);
+        drag.currentX = point.x;
+        drag.currentY = point.y;
+        const dx = point.x - drag.startX;
+        const dy = point.y - drag.startY;
+
+        if (!drag.dragging) {
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) cancelExerciseDrag(event);
+          return;
+        }
+
+        event.preventDefault();
+        updateExerciseDragPosition();
+        updateExerciseDropTarget();
+      }
+
+      function cancelExerciseDrag(event = null) {
+        const drag = exerciseDragState;
+        if (!drag) return false;
+        clearExerciseDragTimer();
+        drag.handle.releasePointerCapture?.(drag.pointerId);
+        drag.ghost?.remove();
+        drag.placeholder?.remove();
+        drag.exercise.classList.remove('drag-source');
+        drag.exercise.style.removeProperty('display');
+        drag.container.classList.remove('reordering');
+        document.body.classList.remove('exercise-dragging');
+        exerciseDragState = null;
+        if (event?.cancelable) event.preventDefault();
+        return true;
+      }
+
+      function endExerciseDrag(event) {
+        const drag = exerciseDragState;
+        if (!drag || (event.pointerId !== undefined && event.pointerId !== drag.pointerId)) return false;
+        const shouldReorder = drag.dragging;
+        const dateKey = drag.dateKey;
+        const fromIndex = drag.fromIndex;
+        const targetIndex = drag.targetIndex;
+        cancelExerciseDrag(event);
+        if (shouldReorder && reorderExercise(dateKey, fromIndex, targetIndex)) {
+          ignoreNextClick = true;
+        }
+        return true;
+      }
+
+      function startWeekSwipe(event) {
+        if (view !== 'week' || exerciseDragState) return false;
+        if (event.button !== undefined && event.button !== 0) return false;
+        if (event.target.closest('.sheet.show, .toast, .bottom-menu, [data-drag-handle="exercise"], .swipe-actions')) return false;
+        const button = event.target.closest('button');
+        if (button && !button.classList.contains('week-picker-button')) return false;
+        if (event.target.closest('input, textarea, select, label, .set, .set-control')) return false;
+        const surface = event.target.closest('.week-days, .top-period');
+        if (!surface) return false;
+        if (event.target.closest('[data-swipe][data-date]')) return false;
+        const point = swipePoint(event);
+        weekSwipeState = {
+          surface,
+          pointerId: event.pointerId,
+          startX: point.x,
+          startY: point.y,
+          dx: 0,
+          dy: 0,
+          swiping: false
+        };
+        return true;
+      }
+
+      function appNode() {
+        return document.getElementById('app');
+      }
+
+      function clearWeekSwipeStyles() {
+        const app = appNode();
+        app?.classList.remove('week-swiping');
+        app?.style.removeProperty('--week-swipe-x');
+      }
+
+      function changeWeekBy(delta) {
+        weekOffset += delta;
+        openDateKey = null;
+        showAddDayForm = false;
+        closeSwipe();
+        closeBottomMenus();
+        render();
+        resetScrollPosition();
+      }
+
+      function moveWeekSwipe(event) {
+        if (!weekSwipeState || (event.pointerId !== undefined && event.pointerId !== weekSwipeState.pointerId)) return;
+        if (swipeState?.swiping || exerciseDragState?.dragging) {
+          weekSwipeState = null;
+          clearWeekSwipeStyles();
+          return;
+        }
+        const point = swipePoint(event);
+        const dx = point.x - weekSwipeState.startX;
+        const dy = point.y - weekSwipeState.startY;
+        weekSwipeState.dx = dx;
+        weekSwipeState.dy = dy;
+
+        if (!weekSwipeState.swiping) {
+          if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) {
+            weekSwipeState = null;
+            return;
+          }
+          if (Math.abs(dx) < 18) return;
+          weekSwipeState.swiping = true;
+          clearLongPress();
+          closeSwipe();
+          closeBottomMenus();
+          appNode()?.classList.add('week-swiping');
+          weekSwipeState.surface.setPointerCapture?.(weekSwipeState.pointerId);
+        }
+
+        event.preventDefault();
+        const visualDx = clamp(dx * 0.36, -96, 96);
+        appNode()?.style.setProperty('--week-swipe-x', `${visualDx}px`);
+      }
+
+      function endWeekSwipe(event) {
+        if (!weekSwipeState || (event.pointerId !== undefined && event.pointerId !== weekSwipeState.pointerId)) return;
+        const { dx, dy, swiping, surface, pointerId } = weekSwipeState;
+        weekSwipeState = null;
+        surface.releasePointerCapture?.(pointerId);
+        clearWeekSwipeStyles();
+        if (!swiping) return;
+        ignoreNextClick = true;
+        if (Math.abs(dx) > 86 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          changeWeekBy(dx < 0 ? 1 : -1);
+        }
       }
 
       function longPressAction(target) {
@@ -3770,10 +4128,36 @@
         if (Math.abs(x - longPressStartX) > 12 || Math.abs(y - longPressStartY) > 12) clearLongPress();
       }
 
-      document.addEventListener('pointerdown', event => { startSwipe(event); startLongPress(event); });
-      document.addEventListener('pointermove', event => { moveSwipe(event); moveLongPress(event); });
-      document.addEventListener('pointerup', event => { endSwipe(event); clearLongPress(); });
-      document.addEventListener('pointercancel', event => { endSwipe(event); clearLongPress(); });
+      document.addEventListener('pointerdown', event => {
+        if (startExerciseDrag(event)) return;
+        const weekSwipeStarted = startWeekSwipe(event);
+        if (!weekSwipeStarted) startSwipe(event);
+        startLongPress(event);
+      });
+      document.addEventListener('pointermove', event => {
+        if (exerciseDragState) {
+          moveExerciseDrag(event);
+          return;
+        }
+        moveSwipe(event);
+        moveWeekSwipe(event);
+        moveLongPress(event);
+      });
+      document.addEventListener('pointerup', event => {
+        if (endExerciseDrag(event)) {
+          clearLongPress();
+          return;
+        }
+        endWeekSwipe(event);
+        endSwipe(event);
+        clearLongPress();
+      });
+      document.addEventListener('pointercancel', event => {
+        cancelExerciseDrag(event);
+        endWeekSwipe(event);
+        endSwipe(event);
+        clearLongPress();
+      });
       document.addEventListener('contextmenu', event => {
         if (!event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]')) return;
         event.preventDefault();
