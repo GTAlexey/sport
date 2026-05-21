@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.37">
-  <link rel="icon" href="icon.svg?v=1.0.37" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.37" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.37">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.38">
+  <link rel="icon" href="icon.svg?v=1.0.38" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.38" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.38">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -195,6 +195,14 @@
       display: grid;
       gap: 10px;
       min-width: 0;
+      touch-action: pan-y;
+    }
+
+    .top,
+    .top-inner,
+    .top-period,
+    .week-picker-button,
+    .swipe-content {
       touch-action: pan-y;
     }
 
@@ -833,6 +841,7 @@
       overflow: hidden;
       border-radius: 15px;
       touch-action: pan-y;
+      -webkit-touch-callout: none;
     }
 
     .exercise > .swipe-content {
@@ -854,14 +863,15 @@
     }
 
     .exercise-grip {
-      flex: 0 0 28px;
+      flex: 0 0 44px;
       align-self: stretch;
       display: grid;
       place-items: center;
-      min-height: 32px;
-      border-radius: 10px;
+      min-height: 44px;
+      margin: -6px 0 -6px -6px;
+      border-radius: 12px;
       color: color-mix(in srgb, var(--muted) 86%, white);
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 800;
       letter-spacing: -0.18em;
       cursor: grab;
@@ -3729,7 +3739,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.37', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.38', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -3802,6 +3812,10 @@
 
       function moveSwipe(event) {
         if (!swipeState || (event.pointerId !== undefined && event.pointerId !== swipeState.pointerId)) return;
+        if (exerciseDragState?.dragging || weekSwipeState?.swiping) {
+          swipeState = null;
+          return;
+        }
         const point = swipePoint(event);
         const dx = point.x - swipeState.startX;
         const dy = point.y - swipeState.startY;
@@ -3830,10 +3844,10 @@
 
       function endSwipe(event) {
         if (!swipeState || (event.pointerId !== undefined && event.pointerId !== swipeState.pointerId)) return;
-        const { node, dx, width, swiping, wasOpen } = swipeState;
+        const { node, dx, width, swiping, wasOpen, pointerId } = swipeState;
         swipeState = null;
+        node.releasePointerCapture?.(pointerId);
         if (!swiping) return;
-        node.releasePointerCapture?.(event.pointerId);
         node.classList.remove('swiping');
         node.style.removeProperty('--swipe-x');
         const shouldOpen = wasOpen ? dx <= width * 0.35 : dx < -width * 0.35;
@@ -3845,22 +3859,23 @@
         if (event.button !== undefined && event.button !== 0) return false;
         if (weekSwipeState) return false;
         const handle = event.target.closest('[data-drag-handle="exercise"]');
-        if (!handle) return false;
-        const exercise = handle.closest('.exercise[data-date][data-ex]');
-        const container = exercise?.closest('.exercises[data-date]');
-        const dateKey = exercise?.dataset.date;
-        const fromIndex = Number(exercise?.dataset.ex);
+        const exercise = event.target.closest('.exercise[data-date][data-ex]');
+        if (!exercise) return false;
+        if (!handle && event.target.closest('input, textarea, select, button, label, .set, .set-control, .swipe-actions')) return false;
+        const container = exercise.closest('.exercises[data-date]');
+        const dateKey = exercise.dataset.date;
+        const fromIndex = Number(exercise.dataset.ex);
         const day = dateKey ? getDay(dateKey) : null;
-        if (!exercise || !container || !day?.exercises?.[fromIndex] || day.exercises.length < 2) return true;
+        if (!exercise || !container || !day?.exercises?.[fromIndex] || day.exercises.length < 2) return Boolean(handle);
 
-        event.preventDefault();
         clearLongPress();
         closeSwipe();
         closeBottomMenus();
+        if (handle && event.cancelable) event.preventDefault();
 
         const point = swipePoint(event);
         exerciseDragState = {
-          handle,
+          handle: handle || exercise,
           exercise,
           container,
           dateKey,
@@ -3874,13 +3889,18 @@
           offsetX: 0,
           offsetY: 0,
           timer: null,
+          armed: Boolean(handle),
           dragging: false,
           placeholder: null,
           ghost: null
         };
-        handle.setPointerCapture?.(event.pointerId);
-        exerciseDragState.timer = setTimeout(beginExerciseDrag, 280);
-        return true;
+        exerciseDragState.handle.setPointerCapture?.(event.pointerId);
+        exerciseDragState.timer = setTimeout(() => {
+          if (!exerciseDragState) return;
+          exerciseDragState.armed = true;
+          beginExerciseDrag();
+        }, handle ? 240 : 420);
+        return Boolean(handle);
       }
 
       function clearExerciseDragTimer() {
@@ -3891,7 +3911,8 @@
 
       function beginExerciseDrag() {
         const drag = exerciseDragState;
-        if (!drag || drag.dragging) return;
+        if (!drag || drag.dragging || !drag.armed) return;
+        clearLongPress();
         const rect = drag.exercise.getBoundingClientRect();
         const placeholder = document.createElement('div');
         const ghost = drag.exercise.cloneNode(true);
@@ -3961,7 +3982,16 @@
         const dy = point.y - drag.startY;
 
         if (!drag.dragging) {
-          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) cancelExerciseDrag(event);
+          const distance = Math.hypot(dx, dy);
+          if (!drag.armed && distance > 10) {
+            cancelExerciseDrag(event);
+            if (event.pointerId !== undefined && swipeState?.pointerId !== event.pointerId) startSwipe(event);
+            return;
+          }
+          if (drag.armed) {
+            event.preventDefault();
+            beginExerciseDrag();
+          }
           return;
         }
 
@@ -3973,6 +4003,7 @@
       function cancelExerciseDrag(event = null) {
         const drag = exerciseDragState;
         if (!drag) return false;
+        const wasDragging = drag.dragging;
         clearExerciseDragTimer();
         drag.handle.releasePointerCapture?.(drag.pointerId);
         drag.ghost?.remove();
@@ -3982,7 +4013,7 @@
         drag.container.classList.remove('reordering');
         document.body.classList.remove('exercise-dragging');
         exerciseDragState = null;
-        if (event?.cancelable) event.preventDefault();
+        if (wasDragging && event?.cancelable) event.preventDefault();
         return true;
       }
 
@@ -4005,14 +4036,20 @@
         if (event.button !== undefined && event.button !== 0) return false;
         if (event.target.closest('.sheet.show, .toast, .bottom-menu, [data-drag-handle="exercise"], .swipe-actions')) return false;
         const button = event.target.closest('button');
-        if (button && !button.classList.contains('week-picker-button')) return false;
+        const isWeekPicker = button?.classList.contains('week-picker-button');
+        if (button && !isWeekPicker && !button.classList.contains('day-open-button')) return false;
         if (event.target.closest('input, textarea, select, label, .set, .set-control')) return false;
-        const surface = event.target.closest('.week-days, .top-period');
-        if (!surface) return false;
-        if (event.target.closest('[data-swipe][data-date]')) return false;
+        const startedOnTop = Boolean(event.target.closest('.top-period'));
+        const startedOnDayHeader = Boolean(event.target.closest('.day-toggle'));
+        const startedOnScrollableWeek = Boolean(event.target.closest('.week-days'));
+        if (!startedOnTop && !startedOnDayHeader && !startedOnScrollableWeek) return false;
+        const swipeNode = event.target.closest('[data-swipe][data-date]');
         const point = swipePoint(event);
         weekSwipeState = {
-          surface,
+          captureNode: event.target.closest('.top-period, .day, .week-days') || appNode(),
+          startedOnTop,
+          startedOnDayHeader,
+          swipeNode,
           pointerId: event.pointerId,
           startX: point.x,
           startY: point.y,
@@ -4061,13 +4098,17 @@
             weekSwipeState = null;
             return;
           }
-          if (Math.abs(dx) < 18) return;
+          if (weekSwipeState.swipeNode && !weekSwipeState.startedOnTop && !weekSwipeState.startedOnDayHeader && dx < 0) {
+            weekSwipeState = null;
+            return;
+          }
+          if (Math.abs(dx) < 16 || Math.abs(dx) < Math.abs(dy) * 1.12) return;
           weekSwipeState.swiping = true;
           clearLongPress();
           closeSwipe();
           closeBottomMenus();
           appNode()?.classList.add('week-swiping');
-          weekSwipeState.surface.setPointerCapture?.(weekSwipeState.pointerId);
+          weekSwipeState.captureNode?.setPointerCapture?.(weekSwipeState.pointerId);
         }
 
         event.preventDefault();
@@ -4077,13 +4118,13 @@
 
       function endWeekSwipe(event) {
         if (!weekSwipeState || (event.pointerId !== undefined && event.pointerId !== weekSwipeState.pointerId)) return;
-        const { dx, dy, swiping, surface, pointerId } = weekSwipeState;
+        const { dx, dy, swiping, captureNode, pointerId } = weekSwipeState;
         weekSwipeState = null;
-        surface.releasePointerCapture?.(pointerId);
+        captureNode?.releasePointerCapture?.(pointerId);
         clearWeekSwipeStyles();
         if (!swiping) return;
         ignoreNextClick = true;
-        if (Math.abs(dx) > 86 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        if (Math.abs(dx) > 72 && Math.abs(dx) > Math.abs(dy) * 1.12) {
           changeWeekBy(dx < 0 ? 1 : -1);
         }
       }
@@ -4129,27 +4170,24 @@
       }
 
       document.addEventListener('pointerdown', event => {
-        if (startExerciseDrag(event)) return;
-        const weekSwipeStarted = startWeekSwipe(event);
-        if (!weekSwipeStarted) startSwipe(event);
-        startLongPress(event);
+        const exerciseDragStarted = startExerciseDrag(event);
+        const weekSwipeStarted = exerciseDragStarted ? false : startWeekSwipe(event);
+        if (!exerciseDragStarted) startSwipe(event);
+        if (!exerciseDragStarted && !weekSwipeStarted) startLongPress(event);
+        if (exerciseDragStarted || weekSwipeStarted) clearLongPress();
       });
       document.addEventListener('pointermove', event => {
-        if (exerciseDragState) {
-          moveExerciseDrag(event);
-          return;
-        }
+        if (exerciseDragState) moveExerciseDrag(event);
         moveSwipe(event);
         moveWeekSwipe(event);
         moveLongPress(event);
       });
       document.addEventListener('pointerup', event => {
-        if (endExerciseDrag(event)) {
-          clearLongPress();
-          return;
+        const exerciseEnded = endExerciseDrag(event);
+        if (!exerciseEnded) {
+          endWeekSwipe(event);
+          endSwipe(event);
         }
-        endWeekSwipe(event);
-        endSwipe(event);
         clearLongPress();
       });
       document.addEventListener('pointercancel', event => {
