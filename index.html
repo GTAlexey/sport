@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.41">
-  <link rel="icon" href="icon.svg?v=1.0.41" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.41" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.41">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.42">
+  <link rel="icon" href="icon.svg?v=1.0.42" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.42" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.42">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -1734,6 +1734,29 @@
       overflow: auto;
     }
 
+    .backup-panel {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--line) 88%, white);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--field) 56%, transparent);
+    }
+
+    .backup-panel strong {
+      color: var(--accent-ink);
+      font-size: 0.95rem;
+    }
+
+    .backup-panel .toolbar {
+      gap: 7px;
+    }
+
+    .backup-status {
+      display: grid;
+      gap: 2px;
+    }
+
     .toast {
       position: fixed;
       left: 14px;
@@ -1861,6 +1884,8 @@
       'use strict';
 
       const STORAGE_KEY = 'sport-notes.state.v6';
+      const BACKUP_META_KEY = 'sport-notes.backup-meta.v1';
+      const BACKUP_FILE_KIND = 'sport-notes.backup.v1';
       const INSTALL_PROMPT_SESSION_KEY = 'sport-notes.install-prompt.v1';
       const OLD_KEYS = [];
       const SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -2199,6 +2224,86 @@
       function saveNow() {
         state.updatedAt = new Date().toISOString();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function safeReadJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function readBackupMeta() {
+        const meta = safeReadJson(BACKUP_META_KEY);
+        return meta && typeof meta === 'object' && !Array.isArray(meta) ? meta : {};
+      }
+
+      function writeBackupMeta(meta) {
+        try { localStorage.setItem(BACKUP_META_KEY, JSON.stringify(meta)); } catch (_) {}
+      }
+
+      function backupWeekKey(dateKey = todayKey()) {
+        return weekStartKeyForDate(dateKey);
+      }
+
+      function backupDateLabel(dateKey) {
+        return isDateKey(dateKey) ? formatCompactDate(dateKey, true) : 'ещё не было';
+      }
+
+      function backupFileName(dateKey = todayKey()) {
+        return `sport-backup-${dateKey}.json`;
+      }
+
+      function backupPayload() {
+        flushSave();
+        return {
+          kind: BACKUP_FILE_KIND,
+          createdAt: new Date().toISOString(),
+          storageKey: STORAGE_KEY,
+          appVersion: 6,
+          state
+        };
+      }
+
+      function downloadJsonFile(fileName, payload) {
+        const text = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2);
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function extractBackupState(raw) {
+        if (!raw || typeof raw !== 'object') throw new Error('bad-backup');
+        const candidate = raw.kind === BACKUP_FILE_KIND && raw.state ? raw.state : raw;
+        if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) throw new Error('bad-state');
+        if (!candidate.weeks || typeof candidate.weeks !== 'object' || Array.isArray(candidate.weeks)) throw new Error('bad-weeks');
+        return normalize(candidate);
+      }
+
+      function markBackupDone(mode, dateKey = todayKey()) {
+        const meta = readBackupMeta();
+        writeBackupMeta({
+          ...meta,
+          lastBackupDate: dateKey,
+          lastBackupAt: new Date().toISOString(),
+          lastBackupWeek: backupWeekKey(dateKey),
+          lastBackupMode: mode
+        });
+      }
+
+      function shouldRunWeeklyBackup(date = new Date()) {
+        if (date.getDay() !== 0) return false;
+        const dateKey = toDateKey(date);
+        const meta = readBackupMeta();
+        return meta.lastBackupWeek !== backupWeekKey(dateKey);
       }
 
       function scheduleSave() {
@@ -3594,6 +3699,8 @@
         if (action === 'copy-json') { copyJson(); return; }
         if (action === 'export-json') { exportJson(); return; }
         if (action === 'import-json') { importJson(); return; }
+        if (action === 'backup-now') { createBackup('manual'); return; }
+        if (action === 'restore-backup') { restoreBackupFromFile(); return; }
         if (action === 'close-swipe') { closeSwipe(target.closest('[data-swipe]')); return; }
         if (action === 'delete-day') { closeSwipe(target.closest('[data-swipe]')); deleteDayWithUndo(target.dataset.date); return; }
         if (action === 'delete-exercise') { closeSwipe(target.closest('[data-swipe]')); deleteExerciseWithUndo(target.dataset.date, Number(target.dataset.ex)); return; }
@@ -3667,16 +3774,32 @@
       function openDataSheet() {
         flushSave();
         const sheet = document.getElementById('sheet');
+        const backupMeta = readBackupMeta();
+        const lastBackup = backupDateLabel(backupMeta.lastBackupDate);
+        const backupMode = backupMeta.lastBackupMode === 'weekly' ? 'авто' : backupMeta.lastBackupMode === 'manual' ? 'вручную' : '';
+        const restoreLabel = isStandaloneMode() ? 'Восстановить в приложении' : 'Открой из приложения';
         sheet.innerHTML = `
           <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
             <div class="title-row">
-              <h2 id="sheetTitle">JSON</h2>
+              <h2 id="sheetTitle">Данные</h2>
               <button data-action="close-sheet" type="button" aria-label="Закрыть настройки">Закрыть</button>
             </div>
+            <div class="backup-panel">
+              <strong>Бэкап приложения</strong>
+              <div class="backup-status tiny muted">
+                <span>Последний файл: ${escapeHtml(lastBackup)}${backupMode ? ` · ${escapeHtml(backupMode)}` : ''}</span>
+                <span>Автобэкап: каждое воскресенье при открытии приложения.</span>
+                <span>Восстановление пишет данные сюда, в установленное приложение.</span>
+              </div>
+              <div class="toolbar">
+                <button class="dark" data-action="backup-now" type="button">Сделать бэкап</button>
+                <button class="success" data-action="restore-backup" type="button">${escapeHtml(restoreLabel)}</button>
+              </div>
+            </div>
             <div class="toolbar">
-              <button class="dark" data-action="copy-json" type="button">Копировать</button>
-              <button data-action="export-json" type="button">Скачать</button>
-              <button data-action="import-json" type="button">Импорт</button>
+              <button class="dark" data-action="copy-json" type="button">Копировать JSON</button>
+              <button data-action="export-json" type="button">Скачать JSON</button>
+              <button data-action="import-json" type="button">Импорт JSON</button>
               <button class="danger" data-action="confirm-clear-app" type="button">Очистить приложение</button>
             </div>
             <textarea id="jsonBox" class="json-box">${escapeHtml(JSON.stringify(state, null, 2))}</textarea>
@@ -3736,7 +3859,7 @@
       function clearAppData() {
         clearTimeout(saveTimer);
         saveTimer = null;
-        [STORAGE_KEY, ...OLD_KEYS].forEach(key => {
+        [STORAGE_KEY, BACKUP_META_KEY, ...OLD_KEYS].forEach(key => {
           try { localStorage.removeItem(key); } catch (_) {}
         });
         state = defaultState();
@@ -3768,16 +3891,15 @@
 
       function exportJson() {
         flushSave();
-        const text = JSON.stringify(state, null, 2);
-        const blob = new Blob([text], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `sport-${todayKey()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        downloadJsonFile(`sport-${todayKey()}.json`, state);
+      }
+
+      function createBackup(mode = 'manual') {
+        const dateKey = todayKey();
+        downloadJsonFile(backupFileName(dateKey), backupPayload());
+        markBackupDone(mode, dateKey);
+        if (document.getElementById('sheet')?.classList.contains('show')) openDataSheet();
+        toast(mode === 'weekly' ? 'Автобэкап скачан' : 'Бэкап скачан');
       }
 
       function importJson() {
@@ -3792,6 +3914,55 @@
         } catch (_) {
           toast('JSON битый');
         }
+      }
+
+      function pickJsonFile() {
+        return new Promise((resolve, reject) => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'application/json,.json';
+          input.style.display = 'none';
+          document.body.appendChild(input);
+          input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            input.remove();
+            if (file) resolve(file);
+            else reject(new Error('no-file'));
+          }, { once: true });
+          input.click();
+        });
+      }
+
+      async function restoreBackupFromFile() {
+        if (!isStandaloneMode()) {
+          toast('Открой установленное приложение');
+          return;
+        }
+        try {
+          const file = await pickJsonFile();
+          const raw = JSON.parse(await file.text());
+          const restored = extractBackupState(raw);
+          state = restored;
+          applyTheme();
+          saveNow();
+          closeSheet();
+          view = 'week';
+          weekOffset = 0;
+          openDateKey = null;
+          showAddDayForm = false;
+          stopTimer();
+          render();
+          resetScrollPosition();
+          toast('Восстановлено в приложении');
+        } catch (error) {
+          if (error?.message === 'no-file') return;
+          toast('Файл бэкапа битый');
+        }
+      }
+
+      function runWeeklyBackupIfNeeded() {
+        if (!isStandaloneMode() || !shouldRunWeeklyBackup()) return;
+        setTimeout(() => createBackup('weekly'), 900);
       }
 
       function isStandaloneMode() {
@@ -3890,7 +4061,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.41', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.42', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -4395,6 +4566,7 @@
       applyTheme();
       saveNow();
       render();
+      runWeeklyBackupIfNeeded();
     })();
   </script>
 </body>
