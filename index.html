@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.42">
-  <link rel="icon" href="icon.svg?v=1.0.42" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.42" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.42">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.43">
+  <link rel="icon" href="icon.svg?v=1.0.43" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.43" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.43">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -1413,7 +1413,7 @@
 
     .stats-overview-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 9px;
       min-width: 0;
     }
@@ -1849,7 +1849,7 @@
 
     @media (max-width: 340px) {
       .bottom-menu-items { gap: 4px; }
-      .stats-overview-grid { grid-template-columns: 1fr; }
+      .stats-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats-overview-head,
       .chart-title { grid-template-columns: 1fr; }
       .stats-period { justify-self: start; max-width: 100%; text-align: left; }
@@ -2607,6 +2607,7 @@
             ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
             ${showAddDayForm ? `${renderInstallCard()}${renderAddDayForm(dates, week, isEmpty, canCopyPrevious)}` : renderWeekBottomRow()}
           </section>
+          ${renderExerciseNameSuggestions()}
         `;
       }
 
@@ -2748,7 +2749,7 @@
             <div class="swipe-content">
               <div class="exercise-head">
                 <span class="exercise-grip" data-drag-handle="exercise" aria-label="Перетащить упражнение" role="button"></span>
-                <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения">
+                <input class="exercise-name" data-field="exercise-name" data-date="${dateKey}" data-ex="${exIndex}" value="${escapeHtml(exercise.name)}" placeholder="Название упражнения" aria-label="Название упражнения" list="exerciseNameSuggestions">
                 <button class="exercise-unit-toggle ${unit === 'seconds' ? 'is-seconds' : ''}" data-action="toggle-unit" data-date="${dateKey}" data-ex="${exIndex}" type="button" aria-label="Переключить единицу: ${escapeHtml(exerciseUnitText(unit))}" title="${escapeHtml(exerciseUnitText(unit))}">${unitLabel}</button>
               </div>
               <div class="set-row">
@@ -2776,6 +2777,31 @@
         return String(label || defaultSetValue(exercise.unit, exercise.name));
       }
 
+      function renderExerciseNameSuggestions() {
+        const names = collectExerciseNames();
+        if (!names.length) return '';
+        return `
+                <datalist id="exerciseNameSuggestions">
+                  ${names.map(name => `<option value="${escapeHtml(name)}"></option>`).join('')}
+                </datalist>`;
+      }
+
+      function collectExerciseNames() {
+        const names = new Map();
+        Object.values(state.weeks || {}).forEach(week => {
+          (week?.days || []).forEach(day => {
+            if (!isManualDay(day)) return;
+            (day.exercises || []).forEach(exercise => {
+              const name = String(exercise?.name || '').trim();
+              if (!name) return;
+              const key = name.toLocaleLowerCase('ru');
+              if (!names.has(key)) names.set(key, name);
+            });
+          });
+        });
+        return Array.from(names.values()).sort((a, b) => a.localeCompare(b, 'ru'));
+      }
+
       function renderSummary() {
         const stats = buildSummaryStats();
         document.getElementById('app').innerHTML = `
@@ -2789,11 +2815,12 @@
       }
 
       function renderStatsDashboard(stats) {
+        const repsRows = stats.rows.filter(row => row.units['повт']);
         return `
           ${renderStatsOverview(stats)}
 
           <div class="chart-grid">
-            ${renderExerciseStats(stats.rows)}
+            ${renderExerciseStats(repsRows)}
             ${renderDurationStats(stats.durationRows, stats.seconds)}
             ${renderUnitList(stats.unitRows)}
             ${renderWeekdayBars(stats.weekdays)}
@@ -2833,7 +2860,7 @@
                 <span class="stats-score-badge">${formatNumber(stats.sets)}/${formatNumber(stats.plannedSets || stats.sets)}</span>
               </div>
               <strong>${formatNumber(averageSets)}</strong>
-              <span class="stats-score-status">${escapeHtml(formatCount(stats.workouts, ['тренировка', 'тренировки', 'тренировок']))} · ${escapeHtml(formatCount(stats.reps, ['повторение', 'повторения', 'повторений']))} · подходов за тренировку</span>
+              <span class="stats-score-status">${escapeHtml(formatCount(stats.workouts, ['тренировка', 'тренировки', 'тренировок']))} · ${formatNumber(stats.reps)} · подходов за тренировку</span>
               <div class="stats-progress">
                 <div class="stats-progress-top">
                   <span>Прогресс к цели</span>
@@ -2845,8 +2872,8 @@
             <div class="stats-overview-grid">
               ${renderNumberCard('Тренировки', formatNumber(stats.workouts), `${formatNumber(stats.activeDays)} ${plural(stats.activeDays, ['день', 'дня', 'дней'])} в плане`)}
               ${renderNumberCard('Подходы', formatNumber(stats.sets), `${formatNumber(stats.plannedSets)} запланировано`)}
-              ${renderNumberCard('Повторения', formatNumber(stats.reps), 'выполненный объём')}
-              ${stats.seconds ? renderNumberCard('Длительность', formatDuration(stats.seconds), 'время под нагрузкой') : ''}
+              ${renderNumberCard('Повторения', formatNumber(stats.reps), 'выполнено')}
+              ${renderNumberCard('Длительность', formatClockDuration(stats.seconds), 'время под нагрузкой')}
             </div>
           </article>
         `;
@@ -2893,7 +2920,7 @@
             <div class="chart-title">
               <div>
                 <span class="chart-label">Упражнения</span>
-                <h2>Лидеры по объёму</h2>
+                <h2>Лидеры по повторениям</h2>
               </div>
               <span class="bar-note">${escapeHtml(formatCount(rows.length, ['упражнение', 'упражнения', 'упражнений']))}</span>
             </div>
@@ -2945,7 +2972,7 @@
                 <span class="chart-label">Длительность</span>
                 <h2>Время под нагрузкой</h2>
               </div>
-              <span class="bar-note">${escapeHtml(formatDuration(seconds))}</span>
+              <span class="bar-note">${escapeHtml(formatClockDuration(seconds))}</span>
             </div>
             ${durationRows.length ? `
               <div class="exercise-stat-list">
@@ -2956,7 +2983,7 @@
                       <strong>${escapeHtml(row.name)}</strong>
                       <span class="exercise-stat-meta">${escapeHtml(formatCount(row.sets, ['подход', 'подхода', 'подходов']))}</span>
                     </div>
-                    <div class="exercise-stat-value">${escapeHtml(formatDuration(row.seconds))}</div>
+                    <div class="exercise-stat-value">${escapeHtml(formatClockDuration(row.seconds))}</div>
                   </div>
                 `).join('')}
               </div>
@@ -3134,8 +3161,8 @@
 
       function buildUnitRows(stats) {
         const rows = [];
-        if (stats.reps) rows.push({ label: 'Повторения', value: stats.reps, text: formatCount(stats.reps, ['повторение', 'повторения', 'повторений']) });
-        if (stats.seconds) rows.push({ label: 'Секунды', value: stats.seconds, valueLabel: formatDuration(stats.seconds), text: 'время под нагрузкой' });
+        if (stats.reps) rows.push({ label: 'Повторения', value: stats.reps, text: 'выполнено' });
+        if (stats.seconds) rows.push({ label: 'Секунды', value: stats.seconds, valueLabel: formatClockDuration(stats.seconds), text: 'время под нагрузкой' });
         rows.push({ label: 'Подходы', value: stats.sets, text: formatCount(stats.sets, ['подход', 'подхода', 'подходов']) });
         return rows;
       }
@@ -3160,15 +3187,12 @@
         return { name, sets: 0, seconds: 0 };
       }
 
-      function formatDuration(totalSeconds) {
-        const seconds = Math.max(0, Number(totalSeconds || 0));
-        if (seconds < 60) return `${formatNumber(seconds)} ${plural(seconds, ['секунда', 'секунды', 'секунд'])}`;
-        const minutes = seconds / 60;
-        if (minutes < 60) return `${formatNumber(minutes)} ${plural(Math.round(minutes), ['минута', 'минуты', 'минут'])}`;
-        const hours = minutes / 60;
-        if (hours < 24) return `${formatNumber(hours)} ${plural(Math.round(hours), ['час', 'часа', 'часов'])}`;
-        const days = hours / 24;
-        return `${formatNumber(days)} ${plural(Math.round(days), ['день', 'дня', 'дней'])}`;
+      function formatClockDuration(totalSeconds) {
+        const total = Math.max(0, Math.floor(Number(totalSeconds || 0)));
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        const seconds = total % 60;
+        return [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
       }
 
       function addMetric(units, metric) {
@@ -3181,12 +3205,7 @@
       }
 
       function formatUnits(units, fallbackSets = 0) {
-        return units['повт'] ? `${formatNumber(units['повт'])} ${unitName('повт', units['повт'])}` : formatCount(fallbackSets, ['подход', 'подхода', 'подходов']);
-      }
-
-      function unitName(unit, value) {
-        if (unit === 'повт') return plural(value, ['повторение', 'повторения', 'повторений']);
-        return unit;
+        return units['повт'] ? formatNumber(units['повт']) : formatCount(fallbackSets, ['подход', 'подхода', 'подходов']);
       }
 
       function groupExerciseName(name) {
@@ -4061,7 +4080,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.42', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.43', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
