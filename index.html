@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.43">
-  <link rel="icon" href="icon.svg?v=1.0.43" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.43" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.43">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.44">
+  <link rel="icon" href="icon.svg?v=1.0.44" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.44" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.44">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -1567,9 +1567,13 @@
 
     .exercise-stat-row {
       display: grid;
-      grid-template-columns: 42px minmax(0, 1fr) auto;
+      grid-template-columns: 42px minmax(0, 1fr) minmax(5.6rem, var(--leader-meter-width, 8rem));
+      grid-template-areas:
+        "rank text value"
+        "rank text meter";
       align-items: center;
-      gap: 10px;
+      column-gap: 10px;
+      row-gap: 6px;
       padding: 10px;
       border-radius: 18px;
     }
@@ -1582,6 +1586,7 @@
     }
 
     .exercise-rank {
+      grid-area: rank;
       width: 34px;
       height: 34px;
       display: grid;
@@ -1603,6 +1608,7 @@
     }
 
     .exercise-stat-text {
+      grid-area: text;
       display: grid;
       gap: 4px;
       min-width: 0;
@@ -1616,13 +1622,34 @@
     }
 
     .exercise-stat-value {
-      max-width: 38vw;
+      grid-area: value;
+      max-width: var(--leader-meter-width, 38vw);
       color: var(--ink);
       font-size: 1.08rem;
       font-weight: 800;
       text-align: right;
       overflow-wrap: anywhere;
       font-variant-numeric: tabular-nums;
+    }
+
+    .exercise-stat-meter {
+      grid-area: meter;
+      justify-self: stretch;
+      width: 100%;
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .exercise-stat-meter i {
+      display: block;
+      width: var(--value, 0%);
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #0a84ff 0%, #32d74b 100%);
+      box-shadow: 0 0 16px rgba(10, 132, 255, 0.22), 0 0 18px rgba(50, 215, 75, 0.18);
+      transition: width 0.22s ease;
     }
 
     .exercise-stat-meta,
@@ -1845,6 +1872,13 @@
       .unit-list { grid-template-columns: 1fr; }
       .weekday-stats { gap: 4px; }
       .weekday-chip { min-height: 58px; padding-inline: 2px; }
+      .exercise-stat-row {
+        grid-template-columns: 34px minmax(0, 1fr) minmax(4.6rem, var(--leader-meter-width, 6.6rem));
+        gap: 7px;
+        padding: 8px;
+      }
+      .exercise-rank { width: 30px; height: 30px; }
+      .exercise-stat-value { font-size: 1rem; }
     }
 
     @media (max-width: 340px) {
@@ -2915,8 +2949,10 @@
 
       function renderExerciseStats(rows) {
         if (!rows.length) return '';
+        const maxVolume = Math.max(...rows.map(row => primaryVolume(row)), 1);
+        const meterWidth = leaderMeterWidth(rows.map(row => row.name));
         return `
-          <article class="chart-card wide">
+          <article class="chart-card wide" style="--leader-meter-width:${meterWidth}ch">
             <div class="chart-title">
               <div>
                 <span class="chart-label">Упражнения</span>
@@ -2933,6 +2969,7 @@
                     <span class="exercise-stat-meta">${escapeHtml(formatCount(row.sets, ['подход', 'подхода', 'подходов']))}</span>
                   </div>
                   <div class="exercise-stat-value">${escapeHtml(formatUnits(row.units, row.sets))}</div>
+                  <div class="exercise-stat-meter" role="presentation"><i style="--value:${leaderPercent(primaryVolume(row), maxVolume)}%"></i></div>
                 </div>
               `).join('')}
             </div>
@@ -2965,8 +3002,10 @@
 
       function renderDurationStats(durationRows, seconds) {
         if (!seconds) return '';
+        const maxSeconds = Math.max(...durationRows.map(row => row.seconds), 1);
+        const meterWidth = leaderMeterWidth(durationRows.map(row => row.name));
         return `
-          <article class="chart-card wide">
+          <article class="chart-card wide" style="--leader-meter-width:${meterWidth}ch">
             <div class="chart-title">
               <div>
                 <span class="chart-label">Длительность</span>
@@ -2984,6 +3023,7 @@
                       <span class="exercise-stat-meta">${escapeHtml(formatCount(row.sets, ['подход', 'подхода', 'подходов']))}</span>
                     </div>
                     <div class="exercise-stat-value">${escapeHtml(formatClockDuration(row.seconds))}</div>
+                    <div class="exercise-stat-meter" role="presentation"><i style="--value:${leaderPercent(row.seconds, maxSeconds)}%"></i></div>
                   </div>
                 `).join('')}
               </div>
@@ -3168,16 +3208,18 @@
       }
 
       function setMetric(label, fallbackUnit = 'reps') {
-        const text = String(label || '').toLowerCase().replace(',', '.');
+        const text = String(label || '').toLowerCase().replace(/,/g, '.');
         const match = text.match(/\d+(?:\.\d+)?/);
         const value = match ? Number(match[0]) : 0;
         return { unit: cleanExerciseUnit(fallbackUnit) === 'seconds' ? 'сек' : 'повт', value };
       }
 
       function normalizeMetric(metric, fallbackUnit = 'reps') {
-        const value = Number(metric?.value || 0);
+        const metricObject = metric && typeof metric === 'object' ? metric : null;
+        const rawValue = metricObject ? metricObject.value : metric;
+        const value = typeof rawValue === 'string' ? Number(rawValue.replace(/,/g, '.')) : Number(rawValue ?? 0);
         const safeValue = Number.isFinite(value) ? value : 0;
-        const rawUnit = String(metric?.unit || '').trim().toLowerCase();
+        const rawUnit = String(metricObject?.unit || '').trim().toLowerCase();
         const fallback = cleanExerciseUnit(fallbackUnit) === 'seconds' ? 'сек' : 'повт';
         const unit = ['сек', 'сек.', 'seconds', 'second', 'sec', 'secs', 's'].includes(rawUnit) ? 'сек' : (rawUnit === 'повт' || rawUnit === 'reps' || rawUnit === 'rep' ? 'повт' : fallback);
         return { unit, value: safeValue };
@@ -3202,6 +3244,15 @@
 
       function primaryVolume(row) {
         return row.units['повт'] || row.sets;
+      }
+
+      function leaderPercent(value, maxValue) {
+        return Math.round(clamp((Number(value) || 0) / Math.max(Number(maxValue) || 1, 1) * 100, 0, 100));
+      }
+
+      function leaderMeterWidth(names) {
+        const longestName = Math.max(...names.map(name => String(name || '').length), 0);
+        return clamp(longestName + 1, 6, 13);
       }
 
       function formatUnits(units, fallbackSets = 0) {
@@ -4080,7 +4131,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.43', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.44', { updateViaCache: 'none' })
             .then(registration => {
               registration.update().catch(() => {});
               if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
