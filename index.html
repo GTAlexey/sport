@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.45">
-  <link rel="icon" href="icon.svg?v=1.0.45" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.45" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.45">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.46">
+  <link rel="icon" href="icon.svg?v=1.0.46" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.46" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.46">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -38,7 +38,8 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --top-safe: env(safe-area-inset-top, 0px);
       --top-clock-size: clamp(2.34rem, 10.4vw, 3.9rem);
-      --top-height: calc(var(--top-clock-size) * 0.92 + var(--top-safe) + 24px);
+      --top-gap: 10px;
+      --top-height: calc(var(--top-clock-size) * 0.92 + var(--top-safe) + 24px + var(--top-gap));
       --top-offset: 0px;
       --bottom-action-height: 44px;
       --bottom-menu-item-size: 42px;
@@ -85,6 +86,7 @@
     body {
       min-height: 100dvh;
       padding: var(--top-height) 10px calc(16px + var(--safe-bottom));
+      scroll-padding-top: var(--top-height);
     }
 
     button, textarea, input, select { font: inherit; }
@@ -1058,10 +1060,18 @@
       width: 50%;
       justify-self: end;
       margin-left: auto;
-      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), var(--accent-2));
-      color: var(--accent-ink);
-      border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-      box-shadow: 0 7px 18px var(--glow);
+      background: transparent;
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent) inset;
+    }
+
+    .add-exercise:hover,
+    .add-day-button:hover {
+      background: transparent;
+      color: #fff;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent) inset, 0 7px 18px color-mix(in srgb, var(--accent) 16%, transparent);
     }
 
     .add-exercise {
@@ -1836,7 +1846,7 @@
       .bottom-menu-toggle,
       .bottom-menu-items button { background: var(--field); }
       .add-exercise,
-      .add-day-button,
+      .add-day-button { border-color: var(--accent); }
       .bottom-menu-items button.dark { background: var(--accent); }
       .timer-bar strong { text-shadow: 0 0 22px rgba(52, 199, 89, 0.28); }
       .set { border: 1px solid var(--accent); }
@@ -2575,7 +2585,15 @@
       function render() {
         if (view === 'summary') renderSummary();
         else renderWeek();
+        updateTopHeight();
         updateTimerDisplay();
+      }
+
+      function updateTopHeight() {
+        const top = document.querySelector('.top');
+        if (!top) return;
+        const topHeight = Math.ceil(top.getBoundingClientRect().height + 10);
+        document.documentElement.style.setProperty('--top-height', `${topHeight}px`);
       }
 
       function resetScrollPosition() {
@@ -4147,10 +4165,14 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.45', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.46', { updateViaCache: 'none' })
             .then(registration => {
-              registration.update().catch(() => {});
-              if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              const activateWaitingWorker = () => {
+                if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              };
+              const checkForUpdate = () => registration.update().then(activateWaitingWorker).catch(() => {});
+              checkForUpdate();
+              activateWaitingWorker();
               registration.addEventListener('updatefound', () => {
                 const worker = registration.installing;
                 if (!worker) return;
@@ -4160,6 +4182,11 @@
                   }
                 });
               });
+              document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') checkForUpdate();
+              });
+              window.addEventListener('focus', checkForUpdate);
+              setInterval(checkForUpdate, 15 * 60 * 1000);
             })
             .catch(() => {});
         });
@@ -4642,9 +4669,13 @@
           flushSave();
           releaseWakeLock();
         } else {
+          updateTopHeight();
           requestWakeLock();
         }
       });
+
+      window.addEventListener('resize', updateTopHeight);
+      window.visualViewport?.addEventListener('resize', updateTopHeight);
 
       setupInstallPrompt();
       registerServiceWorker();
