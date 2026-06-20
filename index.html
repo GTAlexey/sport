@@ -10,10 +10,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="🏆 Спорт">
   <meta name="description" content="Спортивные недели, кнопки-подходы и статистика прогресса.">
-  <link rel="manifest" href="manifest.webmanifest?v=1.0.46">
-  <link rel="icon" href="icon.svg?v=1.0.46" type="image/svg+xml">
-  <link rel="icon" href="icon-192.png?v=1.0.46" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.46">
+  <link rel="manifest" href="manifest.webmanifest?v=1.0.47">
+  <link rel="icon" href="icon.svg?v=1.0.47" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png?v=1.0.47" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png?v=1.0.47">
   <title>🏆 Спорт</title>
   <style>
     :root {
@@ -485,7 +485,8 @@
       padding-inline: 12px;
     }
 
-    .day {
+    .day,
+    .rest-week {
       position: relative;
       display: grid;
       max-width: 100%;
@@ -697,6 +698,20 @@
       color: var(--done);
     }
 
+    .rest-week .day-date {
+      color: var(--done);
+      background: color-mix(in srgb, var(--done) 17%, var(--field));
+      border-color: color-mix(in srgb, var(--done) 42%, var(--line));
+    }
+
+    .rest-week .day-title h2 {
+      color: var(--done);
+    }
+
+    .rest-week .day-toggle {
+      min-height: 72px;
+    }
+
     .day-meta {
       color: var(--muted);
       font-size: 0.76rem;
@@ -780,6 +795,10 @@
 
     .add-day-actions.is-first-day {
       grid-template-columns: 1fr;
+    }
+
+    .add-day-actions.is-first-day button {
+      min-height: 48px;
     }
 
     .add-day-card > button {
@@ -1105,6 +1124,10 @@
       gap: 12px;
       max-width: 100%;
       min-width: 0;
+    }
+
+    .week-bottom-row.without-add-day {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .bottom-menu {
@@ -1915,7 +1938,8 @@
       body { padding-top: var(--top-height); }
       .day-body { padding: 0 15px 15px; }
       .week-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .day.open { grid-column: 1 / -1; }
+      .day.open,
+      .rest-week { grid-column: 1 / -1; }
       .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chart-card.wide { grid-column: 1 / -1; }
     }
@@ -2167,7 +2191,9 @@
         if (!rawWeeks || typeof rawWeeks !== 'object' || Array.isArray(rawWeeks)) return weeks;
         Object.entries(rawWeeks).forEach(([startKey, week]) => {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(startKey)) return;
-          weeks[startKey] = makeWeek(week?.days || emptyWeekDays());
+          const rest = Boolean(week?.rest);
+          weeks[startKey] = makeWeek(rest ? emptyWeekDays() : (week?.days || emptyWeekDays()));
+          weeks[startKey].rest = rest;
           weeks[startKey].createdAt = week?.createdAt || weeks[startKey].createdAt;
           weeks[startKey].updatedAt = week?.updatedAt || weeks[startKey].updatedAt;
         });
@@ -2177,6 +2203,7 @@
       function makeWeek(days) {
         return {
           days: cleanDays(days),
+          rest: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -2386,7 +2413,75 @@
       }
 
       function weekHasManualDays(week) {
+        if (isRestWeek(week)) return false;
         return Boolean(week?.days?.some(isManualDay));
+      }
+
+      function isRestWeek(week) {
+        return Boolean(week?.rest);
+      }
+
+      function clearWeekSessions(startKey) {
+        weekDates(startKey).forEach(dateKey => delete state.sessions[dateKey]);
+      }
+
+      function clearRestWeek(week) {
+        if (week) week.rest = false;
+      }
+
+      function createRestWeek(startKey = weekStartKeyForOffset(weekOffset)) {
+        if (!isDateKey(startKey)) return;
+        const existingWeek = getExistingWeek(startKey);
+        if (weekHasManualDays(existingWeek)) {
+          toast('В этой неделе уже есть дни');
+          render();
+          return;
+        }
+
+        const week = getWeek(startKey);
+        week.days = emptyWeekDays();
+        week.rest = true;
+        week.updatedAt = new Date().toISOString();
+        clearWeekSessions(startKey);
+        openDateKey = '';
+        showAddDayForm = false;
+        saveNow();
+        render();
+        toast('Неделя отдыха добавлена');
+      }
+
+      function deleteRestWeekWithUndo(startKey) {
+        if (!isDateKey(startKey)) return;
+        const week = getExistingWeek(startKey);
+        if (!isRestWeek(week)) return;
+        const snapshot = cloneData(week);
+        week.days = emptyWeekDays();
+        week.rest = false;
+        week.updatedAt = new Date().toISOString();
+        clearWeekSessions(startKey);
+        openDateKey = '';
+        showAddDayForm = true;
+        saveNow();
+        render();
+        toast('Неделя отдыха удалена', {
+          label: 'Вернуть',
+          onClick: () => restoreRestWeek(startKey, snapshot)
+        });
+      }
+
+      function restoreRestWeek(startKey, weekSnapshot) {
+        if (!isDateKey(startKey)) return;
+        const restored = makeWeek(weekSnapshot?.days || emptyWeekDays());
+        restored.rest = true;
+        restored.createdAt = weekSnapshot?.createdAt || restored.createdAt;
+        restored.updatedAt = new Date().toISOString();
+        state.weeks[startKey] = restored;
+        clearWeekSessions(startKey);
+        openDateKey = '';
+        weekOffset = weekOffsetForDate(startKey);
+        showAddDayForm = false;
+        saveNow();
+        render();
       }
 
       function previousWeekKey(startKey) {
@@ -2403,7 +2498,7 @@
 
       function copyPreviousWeek(startKey) {
         const currentWeek = getExistingWeek(startKey);
-        if (weekHasManualDays(currentWeek)) return null;
+        if (weekHasManualDays(currentWeek) || isRestWeek(currentWeek)) return null;
 
         const previousKey = previousWeekKey(startKey);
         const previousWeek = getExistingWeek(previousKey);
@@ -2432,7 +2527,7 @@
       function copyPreviousWeekIntoCurrent() {
         const weekKey = weekStartKeyForOffset(weekOffset);
         const existing = getExistingWeek(weekKey);
-        if (weekHasManualDays(existing)) {
+        if (weekHasManualDays(existing) || isRestWeek(existing)) {
           toast('В этой неделе уже есть дни');
           render();
           return;
@@ -2650,10 +2745,16 @@
         const weekKey = weekStartKeyForOffset(weekOffset);
         const week = getRenderableWeek(weekKey);
         const dates = weekDates(weekKey);
-        const visibleDates = dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
-        const isEmpty = visibleDates.length === 0;
+        const isRest = isRestWeek(week);
+        const visibleDates = isRest ? [] : dates.filter(dateKey => isManualDay(week.days[slotForDate(dateKey)]));
+        const isEmpty = !isRest && visibleDates.length === 0;
         const canCopyPrevious = isEmpty && canCopyPreviousWeek(weekKey);
-        if (isEmpty) showAddDayForm = true;
+        if (isRest) {
+          showAddDayForm = false;
+          openDateKey = '';
+        } else if (isEmpty) {
+          showAddDayForm = true;
+        }
 
         if (visibleDates.length) {
           const today = todayKey();
@@ -2668,8 +2769,8 @@
         document.getElementById('app').innerHTML = `
           ${renderTop('', formatWeekRange(weekKey), { weekPicker: true, weekStart: weekKey })}
           <section class="week-days">
-            ${isEmpty ? '' : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
-            ${showAddDayForm ? `${renderInstallCard()}${renderAddDayForm(dates, week, isEmpty, canCopyPrevious)}` : renderWeekBottomRow()}
+            ${isRest ? renderRestWeek(weekKey) : visibleDates.map(dateKey => renderDay(dateKey, week)).join('')}
+            ${isRest ? renderWeekBottomRow({ showAddDay: false }) : (showAddDayForm ? `${renderInstallCard()}${renderAddDayForm(dates, week, isEmpty, canCopyPrevious)}` : renderWeekBottomRow())}
           </section>
           ${renderExerciseNameSuggestions()}
         `;
@@ -2691,12 +2792,13 @@
         `;
       }
 
-      function renderWeekBottomRow() {
+      function renderWeekBottomRow(options = {}) {
+        const showAddDay = options.showAddDay !== false;
         return `
           ${renderInstallCard()}
-          <div class="week-bottom-row">
+          <div class="week-bottom-row ${showAddDay ? '' : 'without-add-day'}">
             ${renderBottomNav()}
-            ${renderAddDayButton()}
+            ${showAddDay ? renderAddDayButton() : ''}
           </div>
         `;
       }
@@ -2728,10 +2830,10 @@
 
         return `
           <article class="card add-day-card">
-            <div class="add-day-head">
-              <h2>${isFirstDay ? 'Пустая неделя' : 'Новый тренировочный день'}</h2>
-              <span class="muted tiny">${isFirstDay ? 'Неделя начинается пустой. Добавь день вручную или скопируй прошлую неделю.' : 'Выбери дату — название подставится по календарю. Никакие другие дни не появятся сами.'}</span>
-            </div>
+              <div class="add-day-head">
+                <h2>${isFirstDay ? 'Пустая неделя' : 'Новый тренировочный день'}</h2>
+                <span class="muted tiny">${isFirstDay ? 'Неделя начинается пустой. Добавь день вручную, скопируй прошлую неделю или отметь отдых.' : 'Выбери дату — название подставится по календарю. Никакие другие дни не появятся сами.'}</span>
+              </div>
             ${availableDates.length ? `
               <form class="add-day-form" data-form="add-day">
                 <div class="add-day-fields">
@@ -2740,13 +2842,35 @@
                 </div>
                 <div class="add-day-actions ${isFirstDay ? 'is-first-day' : ''}">
                   <button class="dark" type="submit">${isFirstDay ? 'Создать первый день' : 'Добавить день'}</button>
-                  ${isFirstDay ? copyPreviousButton : '<button data-action="hide-add-day" type="button">Отмена</button>'}
+                  ${isFirstDay ? `${copyPreviousButton}<button data-action="create-rest-week" type="button">Неделя отдыха</button>` : '<button data-action="hide-add-day" type="button">Отмена</button>'}
                 </div>
               </form>
             ` : `
               <div class="empty">Все семь ручных дней этой недели уже добавлены.</div>
               <button data-action="hide-add-day" type="button">Закрыть</button>
             `}
+          </article>
+        `;
+      }
+
+      function renderRestWeek(weekKey) {
+        return `
+          <article class="card rest-week" data-swipe="rest-week" data-week="${weekKey}" data-date="${weekKey}" title="Смахни влево, чтобы удалить">
+            <div class="swipe-actions">
+              <button class="swipe-action swipe-delete" data-action="delete-rest-week" data-week="${weekKey}" type="button" aria-label="Удалить неделю отдыха">${trashIcon()}</button>
+              <button class="swipe-action swipe-cancel" data-action="close-swipe" type="button" aria-label="Закрыть свайп">×</button>
+            </div>
+            <div class="swipe-content">
+              <div class="day-toggle" aria-label="Неделя отдыха">
+                <span class="day-head">
+                  <span class="day-date" aria-hidden="true"><strong>✓</strong></span>
+                  <span class="day-title">
+                    <h2>Неделя отдыха</h2>
+                    <span class="day-meta">Тренировочные дни скрыты. Смахни влево, чтобы удалить.</span>
+                  </span>
+                </span>
+              </div>
+            </div>
           </article>
         `;
       }
@@ -2853,6 +2977,7 @@
       function collectExerciseNames() {
         const names = new Map();
         Object.values(state.weeks || {}).forEach(week => {
+          if (isRestWeek(week)) return;
           (week?.days || []).forEach(day => {
             if (!isManualDay(day)) return;
             (day.exercises || []).forEach(exercise => {
@@ -3103,6 +3228,7 @@
         let lastDate = null;
 
         Object.entries(state.weeks || {}).forEach(([, week]) => {
+          if (isRestWeek(week)) return;
           (week?.days || []).forEach(day => {
             if (!isManualDay(day)) return;
             activeDays += 1;
@@ -3326,6 +3452,7 @@
 
       function touchWeek(dateKey) {
         const week = getWeek(weekStartKeyForDate(dateKey));
+        clearRestWeek(week);
         week.updatedAt = new Date().toISOString();
         return week;
       }
@@ -3371,6 +3498,8 @@
           return;
         }
 
+        const week = getWeek(weekKey);
+        clearRestWeek(week);
         const day = getDay(dateKey);
         day.active = true;
         day.manual = true;
@@ -3406,6 +3535,7 @@
         }
 
         const targetWeek = getWeek(weekStartKeyForDate(toDateKey));
+        clearRestWeek(targetWeek);
         const targetSlot = slotForDate(toDateKey);
         const targetDay = cloneDay(sourceDay);
         targetDay.label = customDayTitle(fromDateKey, sourceDay) || weekdayName(toDateKey);
@@ -3546,6 +3676,7 @@
 
       function restoreDay(dateKey, daySnapshot, sessionSnapshot) {
         const week = getWeek(weekStartKeyForDate(dateKey));
+        clearRestWeek(week);
         const slot = slotForDate(dateKey);
         week.days[slot] = cloneDay(daySnapshot);
         week.days[slot].active = true;
@@ -3783,6 +3914,7 @@
         if (action === 'open-week-picker') { openWeekPicker(); return; }
         if (action === 'open-day') { openDateKey = openDateKey === target.dataset.date ? '' : target.dataset.date; showAddDayForm = false; render(); return; }
         if (action === 'show-add-day') { showAddDayForm = true; openDateKey = ''; render(); return; }
+        if (action === 'create-rest-week') { createRestWeek(); return; }
         if (action === 'copy-previous-week') { copyPreviousWeekIntoCurrent(); return; }
         if (action === 'hide-add-day') {
           const weekKey = weekStartKeyForOffset(weekOffset);
@@ -3806,6 +3938,7 @@
         if (action === 'backup-now') { createBackup('manual'); return; }
         if (action === 'restore-backup') { restoreBackupFromFile(); return; }
         if (action === 'close-swipe') { closeSwipe(target.closest('[data-swipe]')); return; }
+        if (action === 'delete-rest-week') { closeSwipe(target.closest('[data-swipe]')); deleteRestWeekWithUndo(target.dataset.week); return; }
         if (action === 'delete-day') { closeSwipe(target.closest('[data-swipe]')); deleteDayWithUndo(target.dataset.date); return; }
         if (action === 'delete-exercise') { closeSwipe(target.closest('[data-swipe]')); deleteExerciseWithUndo(target.dataset.date, Number(target.dataset.ex)); return; }
         if (action === 'add-exercise') { addExercise(target.dataset.date); return; }
@@ -4165,7 +4298,7 @@
         });
 
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1.0.46', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('./sw.js?v=1.0.47', { updateViaCache: 'none' })
             .then(registration => {
               const activateWaitingWorker = () => {
                 if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -4467,6 +4600,7 @@
       }
 
       function startWeekSwipe(event) {
+        if (event.target.closest('[data-swipe="rest-week"]')) return false;
         if (view !== 'week' || exerciseDragState) return false;
         if (event.button !== undefined && event.button !== 0) return false;
         if (event.target.closest('.sheet.show, .toast, .bottom-menu, [data-drag-handle="exercise"], .swipe-actions')) return false;
@@ -4481,7 +4615,7 @@
         const swipeNode = event.target.closest('[data-swipe][data-date]');
         const point = swipePoint(event);
         weekSwipeState = {
-          captureNode: event.target.closest('.top-period, .day, .week-days') || appNode(),
+          captureNode: event.target.closest('.top-period, .day, .rest-week, .week-days') || appNode(),
           startedOnTop,
           startedOnDayHeader,
           swipeNode,
@@ -4573,16 +4707,20 @@
         if (target.matches('.day[data-date]')) {
           return () => deleteDayWithUndo(target.dataset.date);
         }
+        if (target.matches('.rest-week[data-week]')) {
+          return () => deleteRestWeekWithUndo(target.dataset.week);
+        }
         return null;
       }
 
       function startLongPress(event) {
         if (event.button !== undefined && event.button !== 0) return;
-        const target = event.target.closest('.set[data-action="toggle"], [data-day-title][data-date], .exercise[data-date][data-ex], .day[data-date]');
+        const target = event.target.closest('.set[data-action="toggle"], [data-day-title][data-date], .exercise[data-date][data-ex], .day[data-date], .rest-week[data-week]');
         if (!target) return;
         if (target.matches('[data-day-title][data-date]') && event.target.closest('input, textarea, select, label')) return;
         if (target.classList.contains('exercise') && event.target.closest('.set, .set-control, input, button, textarea, select, label')) return;
         if (target.classList.contains('day') && event.target.closest('.exercise, .day-date-wrap, [data-action="add-exercise"], input, textarea, select, button, label')) return;
+        if (target.classList.contains('rest-week') && event.target.closest('.swipe-actions, button, input, textarea, select, label')) return;
         clearLongPress();
         longPressTarget = target;
         longPressStartX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
@@ -4632,7 +4770,7 @@
         clearLongPress();
       });
       document.addEventListener('contextmenu', event => {
-        if (!event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date]')) return;
+        if (!event.target.closest('.set[data-action="toggle"], .exercise[data-date][data-ex], .day[data-date], .rest-week[data-week]')) return;
         event.preventDefault();
       });
 
